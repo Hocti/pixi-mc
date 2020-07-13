@@ -1,0 +1,55 @@
+{
+	"name": "pixi-movieclip",
+	"version": "1.0.0",
+	"description": "read Texture Atlas(as MovieClip) export from adobe animate in pixi.js",
+	"main": "dist/PIXIMC.js",
+	"module": "dist/PIXIMC.esm.js",
+	"types": "types/PIXIMC.d.ts",
+	"typings": "types/PIXIMC.d.ts",
+	"directories": {
+		"example": "examples"
+	},
+	"scripts": {
+		"build": "rollup -c",
+		"watch": "rollup -c --environment DEV --watch"
+	},
+	"repository": {
+		"type": "git",
+		"url": ""
+	},
+	"files": [
+		"dist/"
+	],
+	"keywords": [
+		"pixi",
+		"movieclip",
+		"flash",
+		"animate",
+		"adobe",
+		"Texture Atlas"
+	],
+	"author": "hocti",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^14.0.22",
+		"@types/pixi.js": "^5.0.0",
+		"@types/requirejs": "^2.1.32",
+		"@wessberg/rollup-plugin-ts": "^1.2.28",
+		"jquery": "^3.5.1",
+		"pixi-filters": "^3.1.1",
+		"pixi-sound": "^3.0.5",
+		"pixi.js": "^5.3.0",
+		"rollup": "^1.11.3",
+		"rollup-plugin-commonjs": "^9.3.4",
+		"rollup-plugin-dts": "^1.4.8",
+		"rollup-plugin-node-resolve": "^4.2.3",
+		"rollup-plugin-terser": "^6.1.0",
+		"rollup-plugin-typescript": "^1.0.1",
+		"tslib": "^2.0.0",
+		"typescript": "^3.9.6"
+	},
+	"peerDependencies": {},
+	"dependencies": {
+		"rollup-plugin-minify-es": "^1.1.1"
+	}
+}
