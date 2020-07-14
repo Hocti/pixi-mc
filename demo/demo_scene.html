@@ -169,6 +169,10 @@
 		$("input[value=prev_scene]").click(function (e) {
 			scenemc.prevScene();
 		});
+		
+		$("input[value=stopAllSound]").click(function (e) {
+			PIXIMC.TSound.stopAllSound();
+		});
 
 		$("#select_scene").change(function (e) {
 			scenemc.changeScene($(this).val());

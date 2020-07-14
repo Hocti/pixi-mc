@@ -1,7 +1,6 @@
 //import typescript from "rollup-plugin-typescript";
 import ts from "@wessberg/rollup-plugin-ts";
 //import { terser } from "rollup-plugin-terser";
-//import dts from "rollup-plugin-dts";
 //import minify  from "rollup-plugin-minify-es";
 //import resolve from "rollup-plugin-node-resolve";
 //import commonjs from "rollup-plugin-commonjs";
@@ -16,8 +15,7 @@ const plugins = [
         namedExports: {
             "resource-loader": ["Resource"],
 		},
-    }),*/
-	//dts()
+    })*/
 ];
 
 // Disabling minification makes faster
@@ -46,10 +44,6 @@ const banner = `/*!
  * http://www.opensource.org/licenses/mit-license
  */`;
 
-/**
- * This configuration is designed for building the browser version
- * of the library, ideally included using the <script> element
- */
 export default {
     input: "src/index.ts",
     external: Object.keys(pkg.peerDependencies),

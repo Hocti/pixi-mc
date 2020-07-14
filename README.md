@@ -2,24 +2,22 @@
 
 Play Adobe Animate(Flash) MovieClip in PIXI, using "generate texture atlas ..." file format.
 
-Here is the demo result, converted from my friend's flash animation from long long time ago:
+Here is the demo result, converted from my friend's flash animation from 2002:  
 https://piximc.s3.amazonaws.com/demo/demo_scene.html  
 (Only scene 5 has sounds and scripts.)
 
+And Here is the original flash version (you need to allow display flash)  
+https://piximc.s3.amazonaws.com/demo/demo_swf.html  
+It's a fan make animation of Hong Kong indie game "Little Fighter 2" (http://lf2.net)  
+(And we're from Hong Kong too)
+
+
 Using PIXI Sprite and Container implementation, you can control each child in the MovieClip as an ordinary DisplayObject.
-Also, you can add script and sound on designated frame, changing scene, set the alpha, tint, brightness and filter in Adobe Animate, and export to pixi
+Also, you can add script and sound on designated frame, changing scene, change frame to change status, set the alpha, tint, brightness and filter in Adobe Animate, and export to pixi
 Or just Use the origin export file as a library, attach MC's children to stage manually.
 
 You can create graphics and animations in Adobe Animate and export them, adding script in javascript
 (So why don't use Spine? Because Spine doesn’t have pencil and brush. I like drawing and making animation at the same place, exspecially Stickman animation.)
-
-## How to Use
-
-	npm install
-	npm run build
-
-Then you will get PIXIMC.js in "./dist/".  
-Load it in html after loaded 'pixi' , 'pixi-sound' , 'pixi-filter'.
 
 ## Code example
 

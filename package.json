@@ -11,7 +11,8 @@
 	},
 	"scripts": {
 		"build": "rollup -c",
-		"watch": "rollup -c --environment DEV --watch"
+		"watch": "rollup -c --environment DEV --watch",
+		"build:prod": "rollup -c --environment production"
 	},
 	"repository": {
 		"type": "git",
