@@ -1,4 +1,6 @@
-files.txt	800
+FilterDemo/Animation.json	2922
+FilterDemo/spritemap1.json	265
+FilterDemo/spritemap1.png	31121
 FirenScene/031.wav	49652
 FirenScene/047.wav	27608
 FirenScene/Animation.json	390966

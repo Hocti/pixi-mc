@@ -1,4 +1,4 @@
-///<reference path="../type_alias.d.ts"/>
+///
 import MCSymbolModel from './MCSymbolModel';
 import MCTimeline from './MCTimeline';
 import {LoopState} from './Timeline';
@@ -14,9 +14,9 @@ import MCDisplayObject from './MCDisplayObject';
 export default class MC extends MCDisplayObject {
 
 	//for debug
-	public static totalMC:number=0;
-	public static REMOVEMC:number=0;
-	public static countChildren(s:PIXI.Sprite):number{
+	public static totalMC:uint=0;
+	public static REMOVEMC:uint=0;
+	public static countChildren(s:PIXI.Sprite):uint{
 		let t=s.children.length;
 		for(let l of s.children){
 			t+=MC.countChildren(<PIXI.Sprite>l)
@@ -24,7 +24,7 @@ export default class MC extends MCDisplayObject {
 		return t
 	}
 	
-	public static MAX_SAME:number=100;
+	public static MAX_SAME:uint=100;
 
 	//*public get only
 	public symbolModel:MCSymbolModel;
@@ -36,7 +36,7 @@ export default class MC extends MCDisplayObject {
 
 	public removePasted:boolean=false;
 	private maskList:Dictionary<PIXI.Container>={};
-	private maskListRaw:Dictionary<ASI>={};
+	private asiMaskList:Dictionary<ASI>={};
 	private currShowing:number=0;
 	protected mcChildren:Dictionary<MCDisplayObject>={};
 	protected mcChildrenUsed:Dictionary<boolean>={};
@@ -64,6 +64,8 @@ export default class MC extends MCDisplayObject {
 		this.stopAtEnd=model.defaultStopAtEnd;
 		//for debug
 		++MC.totalMC;
+
+		this.showFrame(1)
 	}
 
 	/*
@@ -101,7 +103,20 @@ export default class MC extends MCDisplayObject {
 	}
 	*/
 
-	public showFrame(frame:number):void{
+	public destroy(_option:any=null){
+		for(const k in this.asiMaskList){
+			this.asiMaskList[k].destroy(this.destroyOption)
+		}
+		for(const k in this.maskList){
+			this.maskList[k].destroy(this.destroyOption)
+		}
+		for(const k in this.mcChildren){
+			this.mcChildren[k].destroy(this.destroyOption)
+		}
+		super.destroy(_option)
+	}
+
+	public showFrame(frame:uint):void{
 		if(!this.visible || this.alpha===0)return;
 		frame=TMath.clamp(frame,1,this.timeline.totalFrames)
 		if(this.currShowing == frame)return;
@@ -119,7 +134,7 @@ export default class MC extends MCDisplayObject {
 		*/
 		let ly!:any;
 		let ch:MCDisplayObject;
-		let z:number=0;
+		let z:uint=0;
 
 		let setMaskList:{child:MCDisplayObject,mask:string}[]=[];
 		for(let c of currFrameData.child){
@@ -140,7 +155,7 @@ export default class MC extends MCDisplayObject {
 			//get mask info
 			if(ly.isMask){
 				if(ch instanceof ASI){
-					this.maskListRaw[ly.name]=<ASI>ch
+					this.asiMaskList[ly.name]=<ASI>ch
 				}
 				this.getMask(ly.name,ch.zIndex).addChild(ch);
 			}else if(ly.maskBy){
@@ -149,8 +164,8 @@ export default class MC extends MCDisplayObject {
 		}
 		//set mask
 		for(let m of setMaskList){
-			if(m.child instanceof ASI && this.maskListRaw[m.mask]){
-				m.child.mask=this.maskListRaw[m.mask]
+			if(m.child instanceof ASI && this.asiMaskList[m.mask]){
+				m.child.mask=this.asiMaskList[m.mask]
 			}else{
 				m.child.mask=this.maskList[m.mask];
 			}
@@ -183,7 +198,7 @@ export default class MC extends MCDisplayObject {
 		}
 	}
 
-	protected getMask(_name:string,_z:number):PIXI.Container{
+	protected getMask(_name:string,_z:uint):PIXI.Container{
 		if(!this.maskList[_name]){
 			this.maskList[_name]=new PIXI.Container();
 			this.maskList[_name].name='mask_'+_name;
@@ -208,7 +223,7 @@ export default class MC extends MCDisplayObject {
 		return this._type
 	}
 
-	protected showChild(obj:childData,frame:number):MCDisplayObject{
+	protected showChild(obj:childData,frame:uint):MCDisplayObject{
 		const m2d:PIXI.Matrix=TMath.m3dto2d(obj.data.M3D)
 		let name:string='';
 		let layerNum=obj.layer;
@@ -216,7 +231,7 @@ export default class MC extends MCDisplayObject {
 		let m2d2:PIXI.Matrix;
 		if(obj.data.SN){
 			[name,child,m2d2]=this.showMC(obj.data,layerNum);
-			child.transform.setFromMatrix(m2d)
+			//child.transform.setFromMatrix(m2d)
 		}else{
 			[name,child,m2d2]=this.showSprite(obj.data,layerNum);
 		}
@@ -234,7 +249,7 @@ export default class MC extends MCDisplayObject {
 		return child;
 	}
 
-	protected showMC(obj:any,layerNum:number):[string,MCDisplayObject,PIXI.Matrix]{
+	protected showMC(obj:any,layerNum:uint):[string,MCDisplayObject,PIXI.Matrix]{
 		let newmatrix=new PIXI.Matrix();
 		let name:string=this.getUniName(`L${layerNum}|${obj.SN}|${obj.IN}|${obj.ST}`);
 		let mc=<MCDisplayObject>this.search(name)
@@ -249,25 +264,8 @@ export default class MC extends MCDisplayObject {
 			mc.name=obj.IN;
 		}
 		if(isASI){//set asi matrix
-			let m2:PIXI.Matrix=this.symbolModel.mcModel.symbolList[obj.SN].specialAsimatrix!;
-			let part:AsiModel=(<ASI>mc).model
-			newmatrix=newmatrix.append(m2)
-			if(part.rotated){
-				newmatrix.a=part.rect.height/part.rect.width;
-				newmatrix.d=part.rect.width/part.rect.height;
-			}
-		}
-
-		/*
-		replacement by empty container
-		if(mc skin changed && change mc exsit){
-			
-		}
-		*/
-
-
-		//Graphic Frame
-		if(mc instanceof MC){
+			newmatrix=newmatrix.append(this.symbolModel.mcModel.symbolList[obj.SN].specialAsimatrix!).append((<ASI>mc).model.matrix)
+		}else if(mc instanceof MC){//Graphic Frame
 			if(mc.type==MCType.Graphic){
 				if(obj.FF!=undefined){
 					mc.firstFrame=Number(obj.FF)+1
@@ -278,13 +276,20 @@ export default class MC extends MCDisplayObject {
 			}
 		}
 
+		/*
+		replacement by empty container
+		if(mc skin changed && change mc exsit){
+			
+		}
+		*/
+
 		//filter
 		MCEffect.setEffect(obj.C,obj.F,mc)
 
 		return [name,mc,newmatrix]
 	}
 
-	protected showSprite(obj:any,layerNum:number):[string,ASI,PIXI.Matrix]{
+	protected showSprite(obj:any,layerNum:uint):[string,ASI,PIXI.Matrix]{
 		const partname:string=obj.N
 
 		const part=this.symbolModel.mcModel.partList[partname];
@@ -296,14 +301,7 @@ export default class MC extends MCDisplayObject {
 		//*clear unsed skin?
 		*/
 		//set asi matrix
-		let newmatrix=new PIXI.Matrix();
-		if(part.rotated){
-			newmatrix.a=part.rect.height/part.rect.width;
-			newmatrix.d=part.rect.width/part.rect.height;
-		}
-		if(part.matrix){
-			newmatrix=newmatrix.append(part.matrix);
-		}
+		let newmatrix=part.matrix;
 
 		let name:string=this.getUniName(`L${layerNum}|${partname}`);//*skin
 		let child:ASI=<ASI>this.search(name)

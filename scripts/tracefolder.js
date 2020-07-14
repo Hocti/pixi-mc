@@ -1,8 +1,8 @@
-const fs=require('fs')
+const fs=require('fs');
+const ignoreList=['files.txt','.fla','.DS_Store','thumb.db'];
 function traceFolder(_path){
-	console.log(_path)
 	if(_path.substr(-1)!='/'){
-		_path+='/'
+		_path+='/';
 	}
 	let full_arr=[];
 	let arr=fs.readdirSync(_path,{withFileTypes:true})
@@ -10,13 +10,16 @@ function traceFolder(_path){
 		if(v.isDirectory()){
 			full_arr.push(...traceFolder(_path+v.name))
 		}else{
+			if(ignoreList.indexOf(v.name)>=0){
+				continue;
+			}
 			full_arr.push(_path+v.name)
 		}
 	}
 	return full_arr;
 }
 function filesText(_path){
-	let l=_path.length+1
+	let l=_path.length+1;
 	let arr=traceFolder(_path)
 	let content='';
 	for(let k of arr){
@@ -25,9 +28,7 @@ function filesText(_path){
 	}
 	return content;
 }
-
 if(process.argv[2]){
-	console.log(process.argv[2])
 	let content=filesText(process.argv[2]);
 
 	//let filename=process.argv[2].replace(/[^\w\s]/gi, '')+'.list'

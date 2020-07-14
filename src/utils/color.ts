@@ -1,4 +1,4 @@
-///<reference path="../type_alias.d.ts"/>
+///
 
 export type rgb={
 	r:uint,

@@ -1,4 +1,4 @@
-///<reference path="../type_alias.d.ts"/>
+///
 export default abstract class MCDisplayObject extends PIXI.Sprite{
 	
 	public filtercache:Dictionary<PIXI.Filter>={};
@@ -15,5 +15,9 @@ export default abstract class MCDisplayObject extends PIXI.Sprite{
 			}
 		}
 		return child;
+	}
+
+	protected destroyOption={
+		children:true,texture:false
 	}
 }

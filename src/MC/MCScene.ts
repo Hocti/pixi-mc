@@ -4,7 +4,8 @@ import MCSymbolModel from './MCSymbolModel';
 import MCTimeline from './MCTimeline';
 //import MCDisplayObject from './MCDisplayObject';
 import MCDisplayObject from './MCDisplayObject';
-///<reference path="../type_alias.d.ts"/>
+import {timelineEventType} from './MCEvent';
+///
 
 export default class MCScene extends MCDisplayObject {
 
@@ -48,22 +49,29 @@ export default class MCScene extends MCDisplayObject {
 					return
 				}
 			}
-			this.showScene(1)
+			this.changeScene(1)
 			this.sceneTimeline.play()
 		}else{
 			console.error('not a MCscene')
 		}
 	}
 
+	public destroy(){
+		this.sceneMCList.forEach(scene => {
+			scene.destroy()
+		});
+		super.destroy(this.destroyOption)
+	}
+
 	private getSceneNum(_scene:number|string):number{
-		if(typeof _scene === "number"){
-			return _scene;
+		if(Number(_scene)>0){
+			return Number(_scene);
 		}else{
 			return this.sceneName.indexOf(<string>_scene);
 		}
 	}
 
-	public showScene(_scene:number|string){
+	public changeScene(_scene:number|string){
 		this.currSceneNum=this.getSceneNum(_scene);
 		let isPlaying:boolean=true;
 		if(this.children.indexOf(this.currSceneMC)>=0){
@@ -81,7 +89,12 @@ export default class MCScene extends MCDisplayObject {
 		this.sceneTimeline.goto(1)
 		this.currSceneMC.showFrame(1)
 
-		//*change scene event
+		this.emit(timelineEventType.sceneChange, {
+			scene:this.currSceneNum,
+			sceneName:this._sceneName[this.currSceneNum],
+			mc:this.currSceneMC
+		});
+		
 		if(isPlaying){
 			this.sceneTimeline.play()
 		}
@@ -97,7 +110,7 @@ export default class MCScene extends MCDisplayObject {
 
 	private addScene(_add:number){
 		if(this.currSceneNum+_add<this.sceneName.length && this.currSceneNum+_add>0){
-			this.showScene(this.currSceneNum+_add)
+			this.changeScene(this.currSceneNum+_add)
 		}
 	}
 
@@ -110,12 +123,12 @@ export default class MCScene extends MCDisplayObject {
 	}
 
 	public gotoSceneAndPlay(_scene:string|number,_target:string|number):void{
-		this.showScene(_scene)
+		this.changeScene(_scene)
 		this.sceneTimeline.gotoAndPlay(_target)
 	}
 
 	public gotoSceneAndStop(_scene:string|number,_target:string|number):void{
-		this.showScene(_scene)
+		this.changeScene(_scene)
 		this.sceneTimeline.gotoAndStop(_target)
 	}
 

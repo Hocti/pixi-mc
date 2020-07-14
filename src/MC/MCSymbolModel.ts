@@ -1,4 +1,4 @@
-///<reference path="../type_alias.d.ts"/>
+///
 import {action,remark,childData,frameData,FrameLabels} from './MCStructure';
 import MCModel from './MCModel';
 import {MCType} from './MCType';
@@ -79,7 +79,8 @@ export default class MCSymbolModel {
 				image:'solid',
 				rotated:false,
 				zoom:1,
-				texture:PIXI.Texture.from(canvas)
+				texture:PIXI.Texture.from(canvas),
+				matrix:new PIXI.Matrix()
 			};
 			this.specialAsimatrix=new PIXI.Matrix();
 			this._isSpecialASI=true;
@@ -118,7 +119,7 @@ export default class MCSymbolModel {
 	public scriptRemarks:Dictionary<scriptRemark>={};
 	public actionList:Dictionary<action>={};
 
-	public defaultBlendMode:number=0;//PIXI.BLEND_MODES.NORMAL
+	public defaultBlendMode:uint=0;//PIXI.BLEND_MODES.NORMAL
 	public defaultStopAtEnd:boolean=false;
 
 	 static readonly BLENDLIST=('NORMAL,ADD,MULTIPLY,SCREEN,OVERLAY,DARKEN,LIGHTEN,COLOR_DODGE,COLOR_BURN,HARD_LIGHT,SOFT_LIGHT,DIFFERENCE,EXCLUSION,HUE,SATURATION,COLOR,LUMINOSITY,NORMAL_NPM,ADD_NPM,SCREEN_NPM,NONE,SRC_IN,SRC_OUT,SRC_ATOP,DST_OVER,DST_IN,DST_OUT,DST_ATOP,SUBTRACT,SRC_OVER,ERASE,XOR').split(',');
@@ -137,7 +138,7 @@ export default class MCSymbolModel {
 		return this._isSpecialASI;
 	}
 
-	private processRemark(type:string,args:string[],frame_begin:number,frame_end:number){
+	private processRemark(type:string,args:string[],frame_begin:uint,frame_end:uint){
 		if(type=='sound' || type=='stopAllSound'){
 			if(!this.soundRemark[frame_begin]){
 				this.soundRemark[frame_begin]=[]
@@ -167,13 +168,13 @@ export default class MCSymbolModel {
 	private frameDataCache:frameData[]=[]
 	private childDataCache:any=[];
 
-	public getFrame(frame:number):frameData{
+	public getFrame(frame:uint):frameData{
 		if(this.frameDataCache[frame]){
 			return this.frameDataCache[frame];
 		}
 		let FrameData:frameData={child:[],sound:[],script:[],timeline:[],layer:[]};
 
-		for(let layer_num:number=this._data.TL.L.length-1;layer_num>=0;layer_num--){
+		for(let layer_num:uint=this._data.TL.L.length-1;layer_num>=0;layer_num--){
 			let layer_name=<string>this._data.TL.L[layer_num].LN;
 			if(layer_name.substr(7)=='remark_'){
 				//* remark special layer
@@ -249,7 +250,7 @@ export default class MCSymbolModel {
 		return this._LabelList;
 	}
 
-	public get totalFrames():number{
+	public get totalFrames():uint{
 		return this._totalFrame;
 	}
 }

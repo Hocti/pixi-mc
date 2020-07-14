@@ -1,5 +1,3 @@
-import { sound } from "pixi.js";
-
 enum SoundType {
     SoundEffect='se',
     BackgroundMusic='bgm',
@@ -8,8 +6,8 @@ enum SoundType {
 
 
 export default class TSound{
-	static seVolume:number=1;
-	static bgmVolume:number=1;
+	static seVolume:float=1;
+	static bgmVolume:float=1;
 	static fileType=['.mp3','.wav'];
 
     static SoundType = SoundType;
@@ -25,14 +23,7 @@ export default class TSound{
 			let filepath=_basepath+_args[1]+ft
 			if(PIXI.Loader.shared.resources[filepath]){
 				if(_args[0]==SoundType.SoundEffect){
-					let s=PIXI.sound.Sound.from(filepath);
-					s.play();
-					s.volume=TSound.seVolume
-					if(TSound.reuseKey.length>0){
-						TSound.seList[TSound.reuseKey.shift()!]=s;
-					}else{
-						TSound.seList.push(s);
-					}
+					TSound.playSE(filepath)
 				}else if(_args[0]==SoundType.BackgroundMusic){
 					TSound.playBGM(filepath)
 				}
@@ -43,14 +34,51 @@ export default class TSound{
 
 	static reuseKey:int[]=[];
 	static clearTimer:float=0;
-	static soundTicker(delta:number){
-		TSound.clearTimer+=delta
-		if(TSound.clearTimer>60*5){
-			TSound.destroyEnded()
-			TSound.clearTimer=0;
+	static initTicker(ticker:PIXI.Ticker){
+		ticker.add((delta:float)=>{
+			TSound.clearTimer+=delta
+			if(TSound.clearTimer>60*5){
+				TSound.destroyEnded()
+				TSound.clearTimer=0;
+			}
+			//*fadein/out sound
+			//bgmFadeAcc
+		})
+	}
+
+	//bgm
+
+	
+
+	static playBGM(filepath:string){
+		TSound.stopBGM()
+		TSound.currBgm=PIXI.sound.Sound.from(filepath);
+		TSound.currBgm.volume=TSound.bgmVolume;
+		TSound.currBgm.loop=true;
+		TSound.currBgm.play()
+		//*fade in/out
+	}
+
+	static stopBGM(){
+		if(TSound.currBgm){
+			TSound.currBgm.stop();
+			TSound.currBgm.destroy();
+			TSound.currBgm=undefined;
 		}
-		//*fadein/out sound
-		//bgmFadeAcc
+	}
+
+	//se
+
+	static playSE(filepath:string):PIXI.sound.Sound{
+		let s=PIXI.sound.Sound.from(filepath);
+		if(TSound.reuseKey.length>0){
+			TSound.seList[TSound.reuseKey.shift()!]=s;
+		}else{
+			TSound.seList.push(s);
+		}
+		s.play();
+		s.volume=TSound.seVolume
+		return s;
 	}
 
 	static destroyEnded(){
@@ -74,22 +102,7 @@ export default class TSound{
 		TSound.seList=[];
 	}
 
-	static playBGM(filepath:string){
-		TSound.stopBGM()
-		TSound.currBgm=PIXI.sound.Sound.from(filepath);
-		TSound.currBgm.volume=TSound.bgmVolume;
-		TSound.currBgm.loop=true;
-		TSound.currBgm.play()
-		//*fade in/out
-	}
-
-	static stopBGM(){
-		if(TSound.currBgm){
-			TSound.currBgm.stop();
-			TSound.currBgm.destroy();
-			TSound.currBgm=undefined;
-		}
-	}
+	//all sound
 
 	static stopAllSound(){
 		TSound.stopAllSE()
@@ -110,14 +123,21 @@ export default class TSound{
 		}
 	}
 
-	static continueAll(){
+	static resumeAll(){
 		for(let k of TSound.seList){
 			if(k && k.paused){
 				k.play();
 			}
 		}
 		if(TSound.currBgm){
-			TSound.currBgm.play();
+			TSound.currBgm.resume();
 		}
 	}
 }
+
+/**
+ * to do:
+ * background se
+ * face in/out next bgm
+ * left right,volume
+*/

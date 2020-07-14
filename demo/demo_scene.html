@@ -50,9 +50,10 @@
 		<input type="button" value="stopAllSound">
 		<br/>
 		
-		<input type="text" id="jump_ip" value="457"><input type="button" value="goto">
+		<input type="text" id="jump_ip" value="448"><input type="button" value="goto">
 		<br/>
-		<input type="text" id="fps_ip" value="10"><input type="button" value="fps">
+		<input type="text" id="fps_ip" value="60"><input type="button" value="fps">
+		<select id="select_scene"></select>
 	</div>
 	<script>
 
@@ -67,22 +68,28 @@
 			transparent: true
 		});
 		PIXIMC.MCPlayer.initTicker(app.ticker);
-		app.ticker.add(PIXIMC.TSound.soundTicker);
+		PIXIMC.TSound.initTicker(app.ticker);
 		PIXIMC.MCPlayer.getInstance().fps = 12;
 
 		var scenemc;
 		PIXIMC.FileList.getfolderInfoFromText('media/files.txt','media/', function (_data) {
 			var myFolderList = PIXIMC.FileList.getInstance().getFolderInfoFromPath(path);
 			var myMcLoader = new PIXIMC.MCLoader(myFolderList, function (event) {
+				
 				scenemc = (event.model).makeInstance();
 				app.stage.addChild(scenemc);
 				scenemc.x = mcrect.x;
 				scenemc.y = mcrect.y;
 
+				//click to play
 				scenemc.getChildByName('scene1$init').getChildByName('btn_play').on('mousedown', ()=>{
 					scenemc.gotoSceneAndPlay(2,1)
 				});
+				scenemc.getChildByName('scene1$init').getChildByName('btn_play').on('touchstart', ()=>{
+					scenemc.gotoSceneAndPlay(2,1)
+				});
 
+				//add script
 				scenemc.getScene(5).timeline.addScript(5,function(){//frame number
 					console.log('at 5',this.timeline.currentFrame)
 				})
@@ -94,8 +101,13 @@
 					console.log('at bomb',this.timeline.currentFrame)
 					//scenemc.gotoSceneAndPlay(2,1)
 				})
+
+				//list scene
+				for(var k in scenemc.sceneName){
+					$("#select_scene").append(`<option value='${k}'>${scenemc.sceneName[k]}</option>`)
+				}
 				
-				//mc.player.fps = 12;
+				
 				app.ticker.add(function (delta) {
 					$("#text").html(`
 					frame:${scenemc.sceneTimeline.currentFrame}
@@ -103,8 +115,8 @@
 					countChildren:${PIXIMC.MC.countChildren(scenemc)}	children:${scenemc.currSceneMC.children.length}
 					fps:${app.ticker.FPS.toFixed(2)}`);
 					if (scenemc.sceneTimeline.isPlaying) {
-						$("#input_f").val(scenemc.sceneTimeline.currentFrame);
 						$("#input_f").attr("max", scenemc.sceneTimeline.totalFrames);
+						$("#input_f").val(scenemc.sceneTimeline.currentFrame);
 					}
 				});
 			}, false);
@@ -154,9 +166,12 @@
 		$("input[value=prev_scene]").click(function (e) {
 			scenemc.prevScene();
 		});
+		$("input[value=prev_scene]").click(function (e) {
+			scenemc.prevScene();
+		});
 
-		$("input[value=stopAllSound]").click(function (e) {
-			PIXIMC.TSound.stopAllSound();
+		$("#select_scene").change(function (e) {
+			scenemc.changeScene($(this).val());
 		});
 
 	</script>

@@ -1,4 +1,4 @@
-import {timelineEvent} from './MCEvent';
+import {timelineEventType} from './MCEvent';
 import {FrameLabels} from './MCStructure';;
 import * as TMath from '../utils/TMath';
 
@@ -20,22 +20,22 @@ export enum playDirection{
 
 export default class Timeline extends PIXI.utils.EventEmitter{
 
-	protected _currentFrame:number=1;
+	protected _currentFrame:uint=1;
 	protected _playStatus:playStatus=playStatus.playing
 	protected _active:boolean=true;
 
 	protected _labels:FrameLabels;
-	protected _totalFrames:number;
+	protected _totalFrames:uint;
 
-	constructor(_totalFrames:number=1,_labels:FrameLabels={}) {
+	constructor(_totalFrames:uint=1,_labels:FrameLabels={}) {
 		super();
 		this._labels=_labels;
 		this._totalFrames=_totalFrames;
 	}
 
-	public processFrame(_framepass:number=1){
+	public processFrame(_framepass:uint=1){
 		for(let f=0;f<_framepass;f++){
-			this.emit(timelineEvent.enterframe,{type:timelineEvent.enterframe,target:this});
+			this.emit(timelineEventType.enterframe,{type:timelineEventType.enterframe,target:this});
 		}
 		if(this.totalFrames>1){
 			for(let f=0;f<_framepass;f++){
@@ -43,7 +43,7 @@ export default class Timeline extends PIXI.utils.EventEmitter{
 			}
 		}
 		for(let f=0;f<_framepass;f++){
-			this.emit(timelineEvent.exitframe,{type:timelineEvent.exitframe,target:this});
+			this.emit(timelineEventType.exitframe,{type:timelineEventType.exitframe,target:this});
 		}
 	}
 
@@ -83,11 +83,11 @@ export default class Timeline extends PIXI.utils.EventEmitter{
 		return this._labels;
 	}
 
-	get totalFrames():number{
+	get totalFrames():uint{
 		return this._totalFrames;
 	}
 
-	get currentFrame():number{
+	get currentFrame():uint{
 		return this._currentFrame;
 	}
 
@@ -95,11 +95,11 @@ export default class Timeline extends PIXI.utils.EventEmitter{
 		return this._playStatus==playStatus.playing;
 	}
 
-	protected setCurrentFrame(_frame:number):void{
+	protected setCurrentFrame(_frame:uint):void{
 		this._currentFrame=TMath.clamp(_frame,1,this.totalFrames)
 	}
 
-	public goto(target:number | string){
+	public goto(target:uint | string){
 		if(Number(target)>0){
 			this.setCurrentFrame(Number(target));
 		}else{
@@ -108,12 +108,12 @@ export default class Timeline extends PIXI.utils.EventEmitter{
 		}
 	}
 
-	public gotoAndPlay(target:number | string){
+	public gotoAndPlay(target:uint | string){
 		this.goto(target)
 		this.play()
 	}
 
-	public gotoAndStop(target:number | string){
+	public gotoAndStop(target:uint | string){
 		this.goto(target)
 		this.stop()
 	}

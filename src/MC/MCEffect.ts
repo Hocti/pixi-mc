@@ -11,7 +11,7 @@ export default class MCEffect {
 			}else{
 				obj.alpha=1
 			}
-			let cmatrix:number[]=[];
+			let cmatrix:float[]=[];
 			if(_cData.BRT!=undefined){
 				let b=Number(_cData.BRT);
 				if(b>0){
@@ -67,7 +67,6 @@ export default class MCEffect {
 					//f.quality=_fData[filter].Q/200;
 					//f.distance=_fData[filter].BLX;
 					f.color=Color.hashHexToNum(_fData[filter].C);
-					console.log('GF',f.color,_fData[filter].C)
 					f.knockout=_fData[filter].KK;
 					f.outerStrength=_fData[filter].IN?0:_fData[filter].STR;
 					f.innerStrength=_fData[filter].IN?_fData[filter].STR:0;
@@ -118,7 +117,7 @@ export default class MCEffect {
 		return obj.filtercache[_key];
 	}
 
-	static to05(_num:number):number{
+	static to05(_num:int):float{
 		if(_num<0){
 			return 1+_num/100
 		}else if(_num>0){

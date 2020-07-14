@@ -3,7 +3,7 @@ import * as MCType from './MC/MCType';
 import * as MCStructure from './MC/MCStructure';
 import MCDisplayObject from './MC/MCDisplayObject';
 
-import {timelineEvent} from './MC/MCEvent';
+import {timelineEventType} from './MC/MCEvent';
 import ASI from './MC/ASI';
 import {FileList,fileInfo,folderInfo} from './utils/FileList';
 import MCLibrary from './MC/MCLibrary';
@@ -16,11 +16,12 @@ import MCPlayer from './MC/MCPlayer';
 import MCTimeline from './MC/Timeline';
 import Timeline from './MC/MCTimeline';
 import TSound from './utils/TSound';
+import {getTimer} from './utils/utils';
 
 export {
 	FileList,MCLoader,MCLibrary,
 	MCSymbolModel,MCModel,
 	MC,ASI,MCScene,
-	Timeline,MCTimeline,MCPlayer,timelineEvent,
-	TSound
+	Timeline,MCTimeline,MCPlayer,timelineEventType,
+	TSound,getTimer
 }

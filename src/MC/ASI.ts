@@ -1,11 +1,11 @@
-///<reference path="../type_alias.d.ts"/>
+///
 import {AsiModel} from './MCStructure';
 import MCDisplayObject from './MCDisplayObject';
 
 export default class ASI extends MCDisplayObject {
 
-	public static MAX_SIDE:number=2048;
-	public static totalASI:number=0;
+	public static MAX_SIDE:uint=2048;
+	public static totalASI:uint=0;
 	public model:AsiModel;
 
 	constructor(_model:AsiModel,name?:string) {

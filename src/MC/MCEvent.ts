@@ -1,11 +1,12 @@
-﻿export enum timelineEvent{
+﻿export enum timelineEventType{
 	complete = 'complete',
-	frameChange = 'frameChange',
 	loop = 'loop',
+	frameChange = 'frameChange',
 	enterframe = 'enterframe',
 	exitframe = 'exitframe',
 	ActionComplete = 'ActionComplete',
 	ActionCcancel = 'ActionCcancel',
 	labelComplete = 'labelComplete',
-	labelCancel = 'labelCancel'
+	labelCancel = 'labelCancel',
+	sceneChange = 'sceneChange'
 }

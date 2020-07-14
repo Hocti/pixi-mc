@@ -1,5 +1,5 @@
 import {MCType} from './MCType';
-import {timelineEvent} from './MCEvent';
+import {timelineEventType} from './MCEvent';
 import {FrameLabels} from './MCStructure';
 import MCScene from './MCScene';
 import MC from './MC';
@@ -13,31 +13,29 @@ export default class MCTimeline extends Timeline{
 	public mc:MC;
 
 	public _halfFrame:boolean=false;
-	protected _speed=1;
+	protected _speed:float=1;
 	protected _direction=playDirection.obverse;
-	protected _currentFrameFloat:number=0;
+	protected _currentFrameFloat:float=0;
 	
 	constructor(_mc:MC) {
 		super();
 		this.mc=_mc;
 	}
 
-
-	
-
-	public onFrameChange(){
+	public onFrameChange(_oldFrame:uint=1){
 		this.remarkSound(this._currentFrame)
 		if(this.mc.type==MCType.MovieClip){
 			this.remarkPlay(this._currentFrame)
 			this.remarkScript(this._currentFrame)
 		}
+		this.emit(timelineEventType.frameChange,{mc:this.mc,oldFrame:_oldFrame,newFrame:this.currentFrame});
 	}
 
 	
 
 	private scriptList:Function[][]=[];
 
-	private getFrame(_target:number|string):number{
+	private getFrame(_target:uint|string):uint{
 		if(typeof(_target)  === "string"){
 			if(this.labels[_target]){
 				return this.labels[_target]
@@ -48,19 +46,19 @@ export default class MCTimeline extends Timeline{
 				console.error('cannot get frame:',_target,this.mc.symbolModel.scriptRemarks)
 			}
 		}
-		return <number>_target;
+		return <uint>_target;
 	}
-	public addScript(_target:number|string,_fn:Function):void{
-		let frame:number=this.getFrame(_target);
+	public addScript(_target:uint|string,_fn:Function):void{
+		let frame:uint=this.getFrame(_target);
 		if(!this.scriptList[frame]){
 			this.scriptList[frame]=[];
 		}
 		this.scriptList[frame].push(_fn)
 	}
-	public clearScript(_target:number):void{
+	public clearScript(_target:uint):void{
 		this.scriptList[this.getFrame(_target)]=[];
 	}
-	private remarkScript(_f:number):void{
+	private remarkScript(_f:uint):void{
 		if(this.scriptList[_f]){
 			for(const fn of this.scriptList[_f]){
 				fn.call(this.mc);
@@ -70,7 +68,7 @@ export default class MCTimeline extends Timeline{
 
 
 
-	private remarkPlay(_f:number):void{
+	private remarkPlay(_f:uint):void{
 		if(this.mc.symbolModel.playRemark[_f]){
 			let type:string=this.mc.symbolModel.playRemark[_f].type;
 			let content:any=this.mc.symbolModel.playRemark[_f].content;
@@ -92,7 +90,7 @@ export default class MCTimeline extends Timeline{
 		}
 	}
 
-	private remarkSound(_f:number):void{
+	private remarkSound(_f:uint):void{
 		if(this.mc.symbolModel.soundRemark[_f]){
 			for(let s of this.mc.symbolModel.soundRemark[_f]){
 				if(s.type=='stopAllSound'){
@@ -106,11 +104,6 @@ export default class MCTimeline extends Timeline{
 
 
 
-
-	public processB(){
-		this._playStatus=playStatus.stop
-		this.goto(1)//*who cares button?
-	}
 
 	public processMC(){
 		if(this._playStatus==playStatus.playing){
@@ -140,11 +133,17 @@ export default class MCTimeline extends Timeline{
 			*/
 			intFrame=TMath.clamp(Math.round(this._currentFrameFloat),1,this.totalFrames)
 			if(intFrame!=this._currentFrame){//confirm change frame
+				let old_frame=this._currentFrame;
 				this._currentFrame=intFrame;
-				this.onFrameChange()
+				this.onFrameChange(old_frame)
 				//*bug? when speed more then 1, will skip script/sound?
 			}
 		}
+	}
+
+	public processB(){
+		this._playStatus=playStatus.stop
+		this.goto(1)//*who cares button?
 	}
 	
 	public processG(){
@@ -156,16 +155,17 @@ export default class MCTimeline extends Timeline{
 			this._currentFrame=Math.min(this.mc.firstFrame+this.mc.graphic_start,this.totalFrames);
 		}*/
 		if(this._currentFrame!=this.mc.firstFrame){
+			let old_frame=this._currentFrame;
 			this._currentFrame=this.mc.firstFrame;
-			this.onFrameChange()
+			this.onFrameChange(old_frame)
 		}
 	}
 
-	get speed():number{
+	get speed():float{
 		return this._speed;
 	}
 
-	set speed(_n:number){
+	set speed(_n:float){
 		this._speed=TMath.clamp(Math.abs(_n),0.01,32)
 	}
 
@@ -184,11 +184,11 @@ export default class MCTimeline extends Timeline{
 		}
 	}
 
-	protected setCurrentFrame(_frame:number):void{
+	protected setCurrentFrame(_frame:uint):void{
 		let old_frame=this.currentFrame;
 		super.setCurrentFrame(_frame)
 		if(this.currentFrame!=old_frame){
-			this.onFrameChange()
+			this.onFrameChange(old_frame)
 		}
 		this._currentFrameFloat=this.currentFrame-0.9999;
 	}
@@ -197,7 +197,7 @@ export default class MCTimeline extends Timeline{
 		return this.mc.symbolModel.LabelList;
 	}
 
-	get totalFrames():number{
+	get totalFrames():uint{
 		return this.mc.symbolModel.totalFrames;
 	}
 }

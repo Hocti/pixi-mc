@@ -5,17 +5,38 @@ export enum MCEvent{
 
 import {fileInfo,folderInfo,FileList} from '../utils/FileList';
 import MCModel from './MCModel';
+import MCDisplayObject from './MCDisplayObject';
+import { getTimer } from '../utils/utils';
+import {MC} from '..';
 
 export default class MCLoader extends PIXI.utils.EventEmitter{
 	
-	constructor(_mc_folder?:folderInfo | string[],_loadcall?:Function,_instance:boolean=false) {
+	constructor(_mc_folder?:folderInfo | string[],_loadcall?:Function) {
 		super()
 		if(_mc_folder){
-			this.load(_mc_folder,_loadcall,_instance)
+			this.load(_mc_folder,_loadcall)
 		}
 	}
 
-	public load(_args:folderInfo | string[],_loadcall?:Function,_instance:boolean=false) {//* in node: rootPath only, or zip
+	public static loadContainer(_args:folderInfo | string[],_loadcall?:Function):PIXI.Container{
+		const container=new PIXI.Container();
+		const loader=new MCLoader(_args);
+		loader.on(MCEvent.LoadDone,(event:any)=>{
+			const instance:MC=<MC>(<MCModel>event.model).makeInstance()
+			container.addChild(instance)
+			if(_loadcall){
+				_loadcall.call(this,{
+					type:'loadDone',
+					content:instance,
+					loader:container
+				})
+
+			}
+		});
+		return container
+	}
+
+	public load(_args:folderInfo | string[],_loadcall?:Function) {//* in node: rootPath only, or zip
 		let _mc_folder!:folderInfo;
 		let fileList:string[]=[];
 		let rootPath:string='';
@@ -37,13 +58,10 @@ export default class MCLoader extends PIXI.utils.EventEmitter{
 
 		let myloader=new PIXI.Loader();
 		
-		let aniDataPath=rootPath+'Animation.json';
-		let frameDataPath=rootPath+'Frame.json';
-		let skinDataPath=rootPath+'Skin.json';
 		let sheet_count=0;
 
 		for(let v of fileList){
-			//if(v.type=='json' || v.type=='png' || v.type=='wav' || v.type=='png'){
+			//if(v.type=='json' || v.type=='png' || v.type=='wav' || v.type=='mp3' || v.type=='jpg'){
 			if(!PIXI.Loader.shared.resources[v]){
 				myloader.add(v);
 			}
@@ -53,11 +71,15 @@ export default class MCLoader extends PIXI.utils.EventEmitter{
 			}
 		}
 		myloader.load((loader:PIXI.Loader, resources: Partial<Record<string, PIXI.LoaderResource>>)=>{//*to a new functiom, use bind?
+			const aniDataPath=rootPath+'Animation.json';
+			const frameDataPath=rootPath+'Frame.json';
+			const skinDataPath=rootPath+'Skin.json';
+
 			for(let k in resources){//cache in global
 				if(resources[k]!.error){
 					console.error(`load file error:${k}`)
 				}else if(!PIXI.Loader.shared.resources[k]){
-					PIXI.Loader.shared.resources[k]=resources[k]!; //* may be fail!
+					PIXI.Loader.shared.resources[k]=resources[k]!; //* may be fail?
 				}
 			}
 			if(!PIXI.Loader.shared.resources[aniDataPath]){
@@ -82,16 +104,9 @@ export default class MCLoader extends PIXI.utils.EventEmitter{
 				//image.push(rootPath+d.meta.image)
 			}
 			let mainModel:MCModel=new MCModel(PIXI.Loader.shared.resources[aniDataPath].data,spritemaps,rootPath);
-			if(_instance){
-				this.emit(MCEvent.LoadDone,{
-					content:mainModel.makeInstance(),
-					model:mainModel
-				});
-			}else{
-				this.emit(MCEvent.LoadDone,{
-					model:mainModel
-				});
-			}
+			this.emit(MCEvent.LoadDone,{
+				model:mainModel
+			});
 		});
 	}
 }

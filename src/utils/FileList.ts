@@ -3,7 +3,7 @@ export type fileInfo={
 	name:string;
 	type:string;
 	folder:string;
-	size:number;
+	size:uint;
 }
 
 export type folderInfo={
@@ -93,22 +93,8 @@ export class FileList {
 		}
 	}
 
-	//get
-	/*
-	public List(_path:string):string[] { //*未用過
-		let l:number=_path.length;
-		let arr:string[]=[];
-		for(let v of this.farr){
-			if(v.folder==_path){
-				arr.push(v.path)
-			}
-		}
-		return [...new Set(arr)];
-	}
-	*/
-
 	public getFolderInfoFromPath(_path:string,_subfolder:boolean=false):folderInfo {
-		let l:number=_path.length;
+		let l:uint=_path.length;
 		let arr:fileInfo[]=[];
 		for(let v of this.farr){
 			if(v.path.substr(0,l)==_path){

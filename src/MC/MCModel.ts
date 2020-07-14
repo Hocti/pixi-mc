@@ -1,4 +1,4 @@
-///<reference path="../type_alias.d.ts"/>
+///
 import {AsiModel} from './MCStructure';
 import MCSymbolModel from './MCSymbolModel';
 import MC from './MC';
@@ -14,7 +14,7 @@ export default class MCModel{
 	public partList:Dictionary<AsiModel>={};
 	public basepath:string;
 
-	public fps:number;
+	public fps:float;
 	public sceneList:string[]=[];
 	public withScene:boolean=false;
 	protected _name:string;
@@ -72,8 +72,15 @@ export default class MCModel{
 					rect:new PIXI.Rectangle(s.SPRITE.x,s.SPRITE.y,s.SPRITE.w,s.SPRITE.h),
 					image:basepath+v.meta.image,
 					rotated:s.SPRITE.rotated,
-					zoom:v.meta.resolution
+					zoom:v.meta.resolution,
+					matrix:new PIXI.Matrix()
 				}
+				
+				if(part.rotated){
+					part.matrix.a=part.rect.height/part.rect.width;
+					part.matrix.d=part.rect.width/part.rect.height;
+				}
+
 				ASI.makeTexture(part)
 				partList[s.SPRITE.name]=part;
 			}

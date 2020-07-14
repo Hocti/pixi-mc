@@ -1,4 +1,4 @@
-///<reference path="../type_alias.d.ts"/>
+///
 import {MCType} from './MCType'
 import MCModel from './MCModel'
 
@@ -37,8 +37,8 @@ export type AsiModel={
 	image:string,
 	rotated:boolean,
 	zoom:float,
-	texture?:PIXI.Texture,
-	matrix?:PIXI.Matrix
+	matrix:PIXI.Matrix,
+	texture?:PIXI.Texture
 }
 
 export type remark={
