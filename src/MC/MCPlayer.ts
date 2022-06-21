@@ -1,3 +1,5 @@
+import {Ticker} from "@pixi/ticker"
+
 import MC from './MC';
 import MCScene from './MCScene';
 export default class MCPlayer {
@@ -18,8 +20,8 @@ export default class MCPlayer {
 		return MCPlayer.instance;
 	}
 	//static init
-	static ticker:PIXI.Ticker;
-	public static initTicker(_ticker:PIXI.Ticker){
+	static ticker:Ticker;
+	public static initTicker(_ticker:Ticker){
 		MCPlayer.ticker=_ticker;
 	}
 
@@ -27,7 +29,7 @@ export default class MCPlayer {
 	private currf=1;
 	private realf=1;
 	private mcList:MC[]=[];
-	private enterTick(delta:number) {//* delta=f in 60fps
+	private enterTick(delta:float) {//* delta=f in 60fps
 		//console.log(MCPlayer.ticker.deltaMS,MCPlayer.ticker.elapsedMS )
 		this.realf+=delta*this.fps*(1/60)
 		const realFloor=Math.floor(this.realf);

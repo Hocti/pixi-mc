@@ -1,3 +1,7 @@
+import { sound,Sound } from '@pixi/sound';
+import {Ticker} from "@pixi/ticker"
+import {Loader} from "@pixi/loaders"
+
 enum SoundType {
     SoundEffect='se',
     BackgroundMusic='bgm',
@@ -11,17 +15,17 @@ export default class TSound{
 	static fileType=['.mp3','.wav'];
 
     static SoundType = SoundType;
-
-	static seList:PIXI.sound.Sound[]=[];
-	static currBgm?:PIXI.sound.Sound;
-	static lastBgm?:PIXI.sound.Sound;
+	
+	static seList:Sound[]=[];
+	static currBgm?:Sound;
+	static lastBgm?:Sound;
 	static bgmFadeAcc:float=1;
 	static bgmFadeTarget:float=1;
 
 	static play(type:string,_args:string[],_basepath:string){
 		for(const ft of TSound.fileType){
-			let filepath=_basepath+_args[1]+ft
-			if(PIXI.Loader.shared.resources[filepath]){
+			let filepath=_basepath+_args[1]+ft;
+			if(Loader.shared.resources[filepath]){
 				if(_args[0]==SoundType.SoundEffect){
 					TSound.playSE(filepath)
 				}else if(_args[0]==SoundType.BackgroundMusic){
@@ -34,7 +38,7 @@ export default class TSound{
 
 	static reuseKey:int[]=[];
 	static clearTimer:float=0;
-	static initTicker(ticker:PIXI.Ticker){
+	static initTicker(ticker:Ticker){
 		ticker.add((delta:float)=>{
 			TSound.clearTimer+=delta
 			if(TSound.clearTimer>60*5){
@@ -52,7 +56,7 @@ export default class TSound{
 
 	static playBGM(filepath:string){
 		TSound.stopBGM()
-		TSound.currBgm=PIXI.sound.Sound.from(filepath);
+		TSound.currBgm=Sound.from(filepath);
 		TSound.currBgm.volume=TSound.bgmVolume;
 		TSound.currBgm.loop=true;
 		TSound.currBgm.play()
@@ -69,8 +73,8 @@ export default class TSound{
 
 	//se
 
-	static playSE(filepath:string):PIXI.sound.Sound{
-		let s=PIXI.sound.Sound.from(filepath);
+	static playSE(filepath:string):Sound{
+		let s=Sound.from(filepath);
 		if(TSound.reuseKey.length>0){
 			TSound.seList[TSound.reuseKey.shift()!]=s;
 		}else{
@@ -108,8 +112,8 @@ export default class TSound{
 		TSound.stopAllSE()
 		TSound.stopBGM()
 
-		PIXI.sound.stopAll();
-		PIXI.sound.removeAll();
+		sound.stopAll();
+		sound.removeAll();
 	}
 
 	static pauseAll(){

@@ -5,7 +5,6 @@ import MCTimeline from './MCTimeline';
 //import MCDisplayObject from './MCDisplayObject';
 import MCDisplayObject from './MCDisplayObject';
 import {timelineEventType} from './MCEvent';
-///
 
 export default class MCScene extends MCDisplayObject {
 

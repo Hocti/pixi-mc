@@ -1,3 +1,6 @@
+import * as PIXI from 'pixi.js'
+import {EventEmitter} from "@pixi/utils"
+
 import {timelineEventType} from './MCEvent';
 import {FrameLabels} from './MCStructure';;
 import * as TMath from '../utils/TMath';

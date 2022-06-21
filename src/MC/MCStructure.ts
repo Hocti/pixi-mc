@@ -1,4 +1,7 @@
-///
+import {Matrix,Rectangle} from "@pixi/math";
+import {Texture} from '@pixi/core';
+import { DisplayObject } from '@pixi/display';
+
 import {MCType} from './MCType'
 import MCModel from './MCModel'
 
@@ -33,12 +36,12 @@ export type layerData={
 }
 
 export type AsiModel={
-	rect:PIXI.Rectangle,
+	rect:Rectangle,
 	image:string,
 	rotated:boolean,
 	zoom:float,
-	matrix:PIXI.Matrix,
-	texture?:PIXI.Texture
+	matrix:Matrix,
+	texture?:Texture
 }
 
 export type remark={
@@ -55,12 +58,12 @@ export type action={
 	name:string,
 	begin:uint,
 	end:uint,
-	phase:Dictionary<uint>
+	keys:Dictionary<uint>
 }
 
 export type MCLoadedEvent={
 	model:MCModel,
-	content?:PIXI.DisplayObject
+	content?:DisplayObject
 }
 
 

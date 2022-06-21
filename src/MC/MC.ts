@@ -1,14 +1,18 @@
-///
+import {Matrix,Point} from "@pixi/math"
+import { Container } from '@pixi/display';
+import { Sprite } from "@pixi/sprite";
+
 import MCSymbolModel from './MCSymbolModel';
 import MCTimeline from './MCTimeline';
 import {LoopState} from './Timeline';
 import MCPlayer from './MCPlayer';
-import MCEffect from './MCEffect';
+import {ColorMatrixAction,MCEffect} from './MCEffect';
 import ASI from './ASI';
-import {childData, AsiModel} from './MCStructure';
+import {childData, AsiModel,layerData} from './MCStructure';
 import {MCType} from './MCType';
 import * as TMath from '../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
+
 
 
 export default class MC extends MCDisplayObject {
@@ -16,10 +20,10 @@ export default class MC extends MCDisplayObject {
 	//for debug
 	public static totalMC:uint=0;
 	public static REMOVEMC:uint=0;
-	public static countChildren(s:PIXI.Sprite):uint{
+	public static countChildren(s:Sprite):uint{
 		let t=s.children.length;
 		for(let l of s.children){
-			t+=MC.countChildren(<PIXI.Sprite>l)
+			t+=MC.countChildren(<Sprite>l)
 		}
 		return t
 	}
@@ -32,19 +36,19 @@ export default class MC extends MCDisplayObject {
 	public player:MCPlayer;
 
 	private _type:MCType=MCType.MovieClip;
-	//public trPoint:PIXI.Point=new PIXI.Point();
+	//public trPoint:Point=new Point();
 
 	public removePasted:boolean=false;
-	private maskList:Dictionary<PIXI.Container>={};
+	private maskList:Dictionary<Container>={};
 	private asiMaskList:Dictionary<ASI>={};
-	private currShowing:number=0;
+	private currShowing:uint=0;
 	protected mcChildren:Dictionary<MCDisplayObject>={};
 	protected mcChildrenUsed:Dictionary<boolean>={};
 	
 	//graphic
-	public firstFrame:number=1;
+	public firstFrame:uint=1;
 	public loop:LoopState=LoopState.Loop;
-	public graphic_start:number=0;
+	public graphic_start:uint=0;
 
 	//movieclip
 	public stopAtEnd:boolean=false;
@@ -56,16 +60,19 @@ export default class MC extends MCDisplayObject {
 		
 		this.symbolModel=model;
 		this._timeline=new MCTimeline(this);
-		//this.pluginName='t'
+		
 		this.player=_player;
 		this.player.addMC(this);
 
 		this.blendMode=model.defaultBlendMode;
 		this.stopAtEnd=model.defaultStopAtEnd;
+
+		this.on('added',(_mc)=>{
+			this.showFrame(1)
+		})
+		
 		//for debug
 		++MC.totalMC;
-
-		this.showFrame(1)
 	}
 
 	/*
@@ -83,6 +90,7 @@ export default class MC extends MCDisplayObject {
 		}
 	}
 
+	/*
 	public searchChildBySymbolName(_name:string){
 		for(const c of this.children){
 			if(c instanceof MC){
@@ -92,16 +100,11 @@ export default class MC extends MCDisplayObject {
 			}
 		}
 	}
+	*/
 
 	get timeline():MCTimeline{
 		return this._timeline;
 	}
-	
-	/*
-	public dispose(){
-		super.destroy({children:true})
-	}
-	*/
 
 	public destroy(_option:any=null){
 		for(const k in this.asiMaskList){
@@ -114,6 +117,22 @@ export default class MC extends MCDisplayObject {
 			this.mcChildren[k].destroy(this.destroyOption)
 		}
 		super.destroy(_option)
+	}
+
+	public set type(_type:MCType){
+		if(this._type!=_type){
+			this._type=_type;
+			if(_type==MCType.Button){
+				this.buttonMode=true;
+				this.interactive = true;
+			}else{
+				this.buttonMode=false;  
+			}
+		}
+	}
+
+	public get type():MCType{
+		return this._type
 	}
 
 	public showFrame(frame:uint):void{
@@ -132,7 +151,7 @@ export default class MC extends MCDisplayObject {
 			console.log('should br ASI!',this.symbolModel.name)
 		}
 		*/
-		let ly!:any;
+		let ly!:layerData;
 		let ch:MCDisplayObject;
 		let z:uint=0;
 
@@ -149,6 +168,24 @@ export default class MC extends MCDisplayObject {
 			if(!ch.parent){
 				this.addChild(ch)
 			}
+			
+			if(ly.name=='outline'){
+				MCEffect.setColorMatcix(ch,ColorMatrixAction.brightness(1))
+				//ch.tint=0x0000ff
+			}
+			if(ly.name=='color'){
+				ch.tint=0xffcc00
+			}
+			if(ly.name=='effect'){
+				(<any>window).topch=ch
+				MCEffect.setColorMatcix(ch,ColorMatrixAction.tint('ffff00',1))
+
+				//MCEffect.setColorMatcix(ch,ColorMatrixAction.hue(90))
+				//MCEffect.setColorMatcix(ch,ColorMatrixAction.saturation(-50))
+				//MCEffect.setColorMatcix(ch,ColorMatrixAction.contrast(-100))
+			}
+			
+			// C=Color, F=Filter
 			if(ly.C || ly.F){
 				MCEffect.setEffect(ly.C,ly.F,ch)
 			}
@@ -188,7 +225,7 @@ export default class MC extends MCDisplayObject {
 		if(this.removePasted){
 			for(const k in this.mcChildrenUsed){//remove unuse
 				if(!this.mcChildrenUsed[k] && this.mcChildren[k]){
-					//(<PIXI.Sprite>(this.mcChildren[k])).destroy({children:true});//*
+					//(<Sprite>(this.mcChildren[k])).destroy({children:true});//*
 					this.removeChild(this.mcChildren[k])
 					delete this.mcChildren[k]
 					delete this.mcChildrenUsed[k]
@@ -198,37 +235,21 @@ export default class MC extends MCDisplayObject {
 		}
 	}
 
-	protected getMask(_name:string,_z:uint):PIXI.Container{
+	protected getMask(_name:string,_z:uint):Container{
 		if(!this.maskList[_name]){
-			this.maskList[_name]=new PIXI.Container();
+			this.maskList[_name]=new Container();
 			this.maskList[_name].name='mask_'+_name;
 			this.addChildAt(this.maskList[_name],_z);
 		}
 		return this.maskList[_name];
 	}
 
-	public set type(_type:MCType){
-		if(this._type!=_type){
-			this._type=_type;
-			if(_type==MCType.Button){
-				this.buttonMode=true;
-				this.interactive = true;
-			}else{
-				this.buttonMode=false;
-			}
-		}
-	}
-
-	public get type():MCType{
-		return this._type
-	}
-
 	protected showChild(obj:childData,frame:uint):MCDisplayObject{
-		const m2d:PIXI.Matrix=TMath.m3dto2d(obj.data.M3D)
+		const m2d:Matrix=TMath.m3dto2d(obj.data.M3D)
 		let name:string='';
 		let layerNum=obj.layer;
 		let child:MCDisplayObject;
-		let m2d2:PIXI.Matrix;
+		let m2d2:Matrix;
 		if(obj.data.SN){
 			[name,child,m2d2]=this.showMC(obj.data,layerNum);
 			//child.transform.setFromMatrix(m2d)
@@ -236,7 +257,7 @@ export default class MC extends MCDisplayObject {
 			[name,child,m2d2]=this.showSprite(obj.data,layerNum);
 		}
 		if(this.blendMode!=0){
-			(<PIXI.Sprite>child).blendMode=this.blendMode
+			(<Sprite>child).blendMode=this.blendMode
 		}
 		
 		child.transform.setFromMatrix(m2d.append(m2d2))
@@ -249,8 +270,8 @@ export default class MC extends MCDisplayObject {
 		return child;
 	}
 
-	protected showMC(obj:any,layerNum:uint):[string,MCDisplayObject,PIXI.Matrix]{
-		let newmatrix=new PIXI.Matrix();
+	protected showMC(obj:any,layerNum:uint):[string,MCDisplayObject,Matrix]{
+		let newmatrix=new Matrix();
 		let name:string=this.getUniName(`L${layerNum}|${obj.SN}|${obj.IN}|${obj.ST}`);
 		let mc=<MCDisplayObject>this.search(name)
 		let isASI=this.symbolModel.mcModel.symbolList[obj.SN].isSpecialASI;
@@ -289,7 +310,7 @@ export default class MC extends MCDisplayObject {
 		return [name,mc,newmatrix]
 	}
 
-	protected showSprite(obj:any,layerNum:uint):[string,ASI,PIXI.Matrix]{
+	protected showSprite(obj:any,layerNum:uint):[string,ASI,Matrix]{
 		const partname:string=obj.N
 
 		const part=this.symbolModel.mcModel.partList[partname];

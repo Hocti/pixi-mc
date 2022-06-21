@@ -1,4 +1,6 @@
-///
+import {Matrix,Rectangle} from "@pixi/math"
+import {Texture} from '@pixi/core'
+
 import {action,remark,childData,frameData,FrameLabels} from './MCStructure';
 import MCModel from './MCModel';
 import {MCType} from './MCType';
@@ -28,7 +30,7 @@ export default class MCSymbolModel {
 		if(data.SN.substr(0,14)=='remark/remark_')return
 
 		let totalFrame=1;
-		let phaseMarker:string[]=[]
+		let keyMarker:string[]=[]
 		let asiCount=0;
 		let mcCount=0;
 		let remarkCount=0;
@@ -47,8 +49,8 @@ export default class MCSymbolModel {
 					//if(e.SI && e.SI.SN)console.log(e.SI.SN)
 					if(e.SI && e.SI.SN.substr(0,14)=='remark/remark_'){
 						let type:string=e.SI.SN.substr(14);
-						if(type.substr(0,5)=='phase'){
-							phaseMarker[f.I]=e.SI.IN==""?type.substr(6):e.SI.IN;
+						if(type.substr(0,5)=='key'){
+							keyMarker[f.I]=e.SI.IN==""?type.substr(6):e.SI.IN;
 							continue;
 						}
 						this.processRemark(type,String(e.SI.IN).split('$'),f.I+1,f.I+f.DU);
@@ -75,16 +77,16 @@ export default class MCSymbolModel {
 			ctx.fillStyle = "#"+data.SN.substr(14);
 			ctx.fillRect(0, 0, 1, 1);
 			this.specialAsiModel=<AsiModel>{
-				rect:new PIXI.Rectangle(0,0,1,1),
+				rect:new Rectangle(0,0,1,1),
 				image:'solid',
 				rotated:false,
 				zoom:1,
-				texture:PIXI.Texture.from(canvas),
-				matrix:new PIXI.Matrix()
+				texture:Texture.from(canvas),
+				matrix:new Matrix()
 			};
-			this.specialAsimatrix=new PIXI.Matrix();
+			this.specialAsimatrix=new Matrix();
 			this._isSpecialASI=true;
-			this.specialAsimatrix=new PIXI.Matrix();
+			this.specialAsimatrix=new Matrix();
 			this.specialAsimatrix.d=this.mcModel.partList[onlyAsi.N].rect.width
 			this.specialAsimatrix.a=this.mcModel.partList[onlyAsi.N].rect.height
 			return
@@ -98,14 +100,14 @@ export default class MCSymbolModel {
 			return
 		}
 
-		//process phase inn action
-		if(phaseMarker.length>0){
+		//process key inn action
+		if(keyMarker.length>0){
 			for(let k in this.actionList){
-				let phasenum=0;
+				let keynum=0;
 				for(let i=this.actionList[k].begin;i<=this.actionList[k].end;i++){
-					if(phaseMarker[i]){
-						const phasename=phaseMarker[i]=='auto'?`p${++phasenum}`:phaseMarker[i];
-						this.actionList[k].phase[phasename]=i
+					if(keyMarker[i]){
+						const keyname=keyMarker[i]=='auto'?`p${++keynum}`:keyMarker[i];
+						this.actionList[k].keys[keyname]=i
 					}
 				}
 			}
@@ -119,15 +121,16 @@ export default class MCSymbolModel {
 	public scriptRemarks:Dictionary<scriptRemark>={};
 	public actionList:Dictionary<action>={};
 
-	public defaultBlendMode:uint=0;//PIXI.BLEND_MODES.NORMAL
+	public defaultBlendMode:uint=0;//BLEND_MODES.NORMAL
 	public defaultStopAtEnd:boolean=false;
 
 	 static readonly BLENDLIST=('NORMAL,ADD,MULTIPLY,SCREEN,OVERLAY,DARKEN,LIGHTEN,COLOR_DODGE,COLOR_BURN,HARD_LIGHT,SOFT_LIGHT,DIFFERENCE,EXCLUSION,HUE,SATURATION,COLOR,LUMINOSITY,NORMAL_NPM,ADD_NPM,SCREEN_NPM,NONE,SRC_IN,SRC_OUT,SRC_ATOP,DST_OVER,DST_IN,DST_OUT,DST_ATOP,SUBTRACT,SRC_OVER,ERASE,XOR').split(',');
+	 //*有更好地方放？
 
 
 	 private _isSpecialASI:boolean=false;
 	 private specialAsiModel?:AsiModel;
-	 public specialAsimatrix?:PIXI.Matrix;
+	 public specialAsimatrix?:Matrix;
 	 public makeASI():ASI{
 		 let a=new ASI(this.specialAsiModel!,this.name);
 		 //a.blendMode=this.defaultBlendMode;
@@ -160,7 +163,7 @@ export default class MCSymbolModel {
 				name:args[0],
 				begin:frame_begin,
 				end:frame_end,
-				phase:{}
+				keys:{}
 			}
 		}
 	}

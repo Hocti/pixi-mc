@@ -4,8 +4,8 @@
 	frameChange = 'frameChange',
 	enterframe = 'enterframe',
 	exitframe = 'exitframe',
-	ActionComplete = 'ActionComplete',
-	ActionCcancel = 'ActionCcancel',
+	actionComplete = 'actionComplete',
+	actionCancel = 'actionCancel',
 	labelComplete = 'labelComplete',
 	labelCancel = 'labelCancel',
 	sceneChange = 'sceneChange'

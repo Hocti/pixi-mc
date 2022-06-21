@@ -1,20 +1,26 @@
-///
-export default abstract class MCDisplayObject extends PIXI.Sprite{
-	
-	public filtercache:Dictionary<PIXI.Filter>={};
+import { Filter } from '@pixi/core';
+import { Container,DisplayObject } from '@pixi/display';
+import { Sprite } from "@pixi/sprite";
+import {effect,MCEffect} from './MCEffect'
 
-	public getSonSon(_str:string):PIXI.DisplayObject | undefined{
+export default abstract class MCDisplayObject extends Sprite{
+	
+	public filtercache:Dictionary<Filter>={};
+
+	public timelineEffect:effect=MCEffect.defaultEffect();
+
+	public getSonSon(_str:string):DisplayObject | undefined{
 		let arr=_str.split('.');
-		let child:PIXI.DisplayObject=this;
+		let currDO:DisplayObject=this as DisplayObject;
 		for(let a of arr){
-			if(child instanceof PIXI.Container){
-				child=(child as PIXI.Container).getChildByName(a);
-				if(!child){
+			if(currDO instanceof Container){
+				currDO=(currDO as Container).getChildByName(a);
+				if(!currDO){
 					return undefined;
 				}
 			}
 		}
-		return child;
+		return currDO;
 	}
 
 	protected destroyOption={

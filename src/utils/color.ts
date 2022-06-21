@@ -1,4 +1,3 @@
-///
 
 export type rgb={
 	r:uint,

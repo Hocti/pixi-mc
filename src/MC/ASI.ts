@@ -1,4 +1,4 @@
-///
+import {Texture,BaseTexture} from '@pixi/core'
 import {AsiModel} from './MCStructure';
 import MCDisplayObject from './MCDisplayObject';
 
@@ -9,7 +9,7 @@ export default class ASI extends MCDisplayObject {
 	public model:AsiModel;
 
 	constructor(_model:AsiModel,name?:string) {
-		super(<PIXI.Texture>_model.texture);
+		super(<Texture>_model.texture);
 		ASI.makeTexture(_model)
 		this.model=_model;
 		if(name){
@@ -21,9 +21,9 @@ export default class ASI extends MCDisplayObject {
 	public static makeTexture(_model:AsiModel){
 		if(!_model.texture){
 			if(_model.rect.width>ASI.MAX_SIDE || _model.rect.height>ASI.MAX_SIDE){
-				_model.texture=PIXI.Texture.WHITE;
+				_model.texture=Texture.WHITE;
 			}else{
-				_model.texture=new PIXI.Texture(new PIXI.BaseTexture(_model.image),_model.rect)
+				_model.texture=new Texture(new BaseTexture(_model.image),_model.rect)
 			}
 			if(_model.rotated){
 				_model.texture.rotate=2;

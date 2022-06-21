@@ -1,3 +1,5 @@
+import {Loader,LoaderResource} from "@pixi/loaders"
+
 export type fileInfo={
 	path:string;
 	name:string;
@@ -61,8 +63,8 @@ export class FileList {
 	*/
 
 	public static getfolderInfoFromText(_listpath:string,_basepath:string='./',_call:Function){
-		let loader=new PIXI.Loader()
-		loader.add(_listpath).load(function(loader:PIXI.Loader, resources: Partial<Record<string, PIXI.LoaderResource>>){
+		let loader=new Loader()
+		loader.add(_listpath).load(function(loader:Loader, resources: Partial<Record<string, LoaderResource>>){
 			let arr:string[]=(<string>((<any>resources[_listpath]).data)).split("\n");
 			let farr:fileInfo[]=[];
 			for(let v of arr){
@@ -82,7 +84,7 @@ export class FileList {
 		})
 	}
 
-	public static pathToInfo(_filepath:string,_basepath:string):fileInfo{
+	public static pathToInfo(_filepath:string,_basepath:string = ""):fileInfo{
 		let fname=<string>_filepath.split('/').pop()
 		return {
 			path:	_basepath+_filepath,

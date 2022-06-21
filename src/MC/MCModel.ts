@@ -1,4 +1,5 @@
-///
+import {Matrix,Rectangle} from "@pixi/math"
+
 import {AsiModel} from './MCStructure';
 import MCSymbolModel from './MCSymbolModel';
 import MC from './MC';
@@ -35,7 +36,7 @@ export default class MCModel{
 		if(this.mainSymbolModel.totalFrames==1){
 			this.withScene=true;
 			for(let c of this.mainSymbolModel.getFrame(1).child){
-				if(c.data.IN.substr(0,5)=='scene'){
+				if(c.data.IN && c.data.IN.substr(0,5)=='scene'){
 					this.sceneList[Number(c.data.IN.substr(5))]=c.data.SN;
 				}else{
 					this.withScene=false;
@@ -69,11 +70,11 @@ export default class MCModel{
 		for(let v of spritemap){
 			for(let s of v.ATLAS.SPRITES){
 				let part:AsiModel={
-					rect:new PIXI.Rectangle(s.SPRITE.x,s.SPRITE.y,s.SPRITE.w,s.SPRITE.h),
+					rect:new Rectangle(s.SPRITE.x,s.SPRITE.y,s.SPRITE.w,s.SPRITE.h),
 					image:basepath+v.meta.image,
 					rotated:s.SPRITE.rotated,
 					zoom:v.meta.resolution,
-					matrix:new PIXI.Matrix()
+					matrix:new Matrix()
 				}
 				
 				if(part.rotated){
