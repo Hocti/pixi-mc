@@ -8,7 +8,7 @@ https://piximc.s3.amazonaws.com/demo/demo_scene.html
 
 And Here is the original flash version (you need to allow display flash)  
 https://piximc.s3.amazonaws.com/demo/demo_swf.html  
-It's a fan make animation of Hong Kong indie game "Little Fighter 2" (http://lf2.net)  
+It's a fan make animation of Hong Kong indie game "Little Fighter 2" (https://lf2.net)  
 (And we're from Hong Kong too)
 
 
@@ -57,9 +57,9 @@ How to load texture atlas files and make a MC instance in pixi?
 		var catMC3 = new PIXIMC.MC(catModel);
 	})
 
-You can use run '.\scripts\tracefolder.js' with nodejs, to generate folder listing file of '.\media\':
+You can use run '.\tools\tracefolder.js' with nodejs, to generate folder listing file of '.\media\':
 
-	node .\scripts\tracefolder.js .\media\
+	node .\tools\tracefolder.js .\media\
 
 Then you will get a '.\media\files.txt', contains all files paths in the folder with file sizes:
 
@@ -139,7 +139,7 @@ Some fields in Adobe Animate filter not supported in pixi:
 |glow filter|BlueY|
 |drop shadow Filter|BlurY, Inner shadow, knockout|
 |Bevel Filter|BlurX&Y(fixed 0), Type(fixed inner), knockout,Strength(fixed 100%)|
-|Adjust color filter|Hue,Brightness (please use 'brightness' in 'color effect' instead)|
+|Adjust color filter||
 |Gradient Bevel Filter|not supported|
 |Gradient glow filter|not supported|
 
@@ -157,10 +157,11 @@ Here are some functions you can't export from Adobe Animate, but I have some rep
 - play sound on designated frame
 - change scene
 - blendmode
+- visible (tick the "Hide Object" in Animate CC's Properties panel)
 
 
 ### Remark object:
-I made a "demo/remark.fla" containing some "remark object" in "_remark/" folder (don't change the folder name!), just put them in the timeline and you can get the result.
+I made a "tools/remark.fla" containing some "remark object" in "_remark/" folder (don't change the folder name!), just put them in the timeline and you can get the result.
 - You can set the arguments in instance name.
 - The remark object will hide automatically in the runtime. (just like guide layer's object in Adobe Animate)
 - Most of remark objects will only be active in their first key frame.
@@ -185,9 +186,9 @@ Arguments:
 ### Timeline script:  
 There are three ways to add script on timeline.
 
-	myMC.timeline.addSCript(7,(_mc)=>{...}) // call on frame 7
-	myMC.timeline.addSCript('meet_first_boss',(_mc)=>{...}) // call on frame label
-	myMC.timeline.addSCript('meet_final_boss',(_mc)=>{...}) // call on with the fist frame "remark_script" instance with instance name "meet_final_boss" appear
+	myMC.timeline.addScript(7,(_mc)=>{...}) // call on frame 7
+	myMC.timeline.addScript('meet_first_boss',(_mc)=>{...}) // call on frame label
+	myMC.timeline.addScript('meet_second_boss',(_mc)=>{...}) // call on with the first frame "remark_script" instance with instance name "meet_second_boss" appear
 
 ### Scene:  
 if you export a MovieClip with:

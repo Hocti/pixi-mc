@@ -3,3 +3,6 @@
 node_modules
 .DS_Store
 todo.txt
+package-lock.json
+yarn-error.log
+yarn.lock
