@@ -131,9 +131,10 @@ dist
 
 
 
+**/RECOVER_*.fla
 .DS_Store
+test/
 todo.txt
 
 package-lock.json
 yarn.lock
-**/RECOVER_*.fla

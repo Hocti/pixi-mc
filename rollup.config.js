@@ -29,12 +29,6 @@ if (process.env.NODE_ENV === "production") {
                 return comment.line === 1;
             },
             globals: {
-                'PIXI': 'pixi.js',
-
-                '@pixi/display': 'PIXI',
-                '@pixi/sprite': 'PIXI',
-
-                '@pixi/sound':'@pixi/sound'
             }
         },
         compress: {
@@ -42,16 +36,6 @@ if (process.env.NODE_ENV === "production") {
         },
     }));
 }
-/*
-
-                '@pixi/core': 'PIXI',
-                '@pixi/math': 'PIXI',
-                '@pixi/settings': 'PIXI',
-                '@pixi/constants': 'PIXI',
-                '@pixi/utils': 'PIXI.utils',
-                '@pixi/filter-blur': 'PIXI.filters',
-                '@pixi/filter-color-matrix': 'PIXI.filters',
-*/
 
 const sourcemap = true;
 const compiled = (new Date()).toUTCString().replace(/GMT/g, "UTC");
@@ -85,8 +69,9 @@ export default {
                 '@pixi/sprite': 'PIXI',
                 '@pixi/ticker': 'PIXI',
                 '@pixi/display': 'PIXI',
-                '@pixi/utils': 'PIXI',
                 '@pixi/loaders': 'PIXI',
+                
+                '@pixi/utils': 'PIXI.utils',
                 
                 '@pixi/filter-blur':'PIXI.filters',
                 '@pixi/filter-color-matrix':'PIXI.filters',

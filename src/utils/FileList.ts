@@ -36,7 +36,7 @@ export class FileList {
 	/*node only
 	const fs=require('fs');
 	private static traceFolder(_path:string){
-		if(_path.substr(-1)!='/'){
+		if(_path.substring(-1)!='/'){
 			_path+='/'
 		}
 		let full_arr=[];
@@ -65,7 +65,8 @@ export class FileList {
 	public static getfolderInfoFromText(_listpath:string,_basepath:string='./',_call:Function){
 		let loader=new Loader()
 		loader.add(_listpath).load(function(loader:Loader, resources: Partial<Record<string, LoaderResource>>){
-			let arr:string[]=(<string>((<any>resources[_listpath]).data)).split("\n");
+			
+			let arr:string[]=(<string>((<LoaderResource>resources[_listpath]).data)).split("\n");
 			let farr:fileInfo[]=[];
 			for(let v of arr){
 				let arr2:string[]=(<string>v).split("\t");
@@ -99,8 +100,8 @@ export class FileList {
 		let l:uint=_path.length;
 		let arr:fileInfo[]=[];
 		for(let v of this.farr){
-			if(v.path.substr(0,l)==_path){
-				if(!_subfolder && v.path.substr(l+1).indexOf('/')>0){
+			if(v.path.substring(0,l)==_path){
+				if(!_subfolder && v.path.substring(l+1).indexOf('/')>0){
 					continue
 				}
 				arr.push(v)

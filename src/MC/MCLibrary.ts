@@ -17,6 +17,9 @@ export default class MCLibrary {
 	}
 
 	public get(key:string):MCModel {
+		if(!this.mcList[key]){
+			throw `MC Model ${key} not find!`;
+		}
 		return this.mcList[key];
 	}
 }

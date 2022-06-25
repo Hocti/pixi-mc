@@ -24,10 +24,10 @@ export default class MCScene extends MCDisplayObject {
 			allSceneMC.showFrame(1);
 			for(let c of allSceneMC.children ){
 				let nameArr=(<MC>c).name.split('$');
-				if(nameArr[0].substr(0,5)!='scene'){
+				if(nameArr[0].substring(0,5)!='scene'){
 					continue;
 				}
-				let scene_num=Number(nameArr[0].substr(5));
+				let scene_num=Number(nameArr[0].substring(5));
 				this.max_scene=Math.max(this.max_scene,scene_num);
 				if(nameArr[1]){
 					this._sceneName[scene_num]=nameArr[1]

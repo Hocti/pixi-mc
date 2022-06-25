@@ -15,8 +15,8 @@ export function getRGBA(num:uint):rgb{
 }
 
 export function hashHexToNum(_s:string):uint{
-	if(_s.substr(0,1)=='#'){
-		return Number('0x'+_s.substr(1))
+	if(_s.substring(0,1)=='#'){
+		return Number('0x'+_s.substring(1))
 	}
 	return Number('0x'+_s)
 }

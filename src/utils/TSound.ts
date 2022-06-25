@@ -22,13 +22,13 @@ export default class TSound{
 	static bgmFadeAcc:float=1;
 	static bgmFadeTarget:float=1;
 
-	static play(type:string,_args:string[],_basepath:string){
+	static play(type:string,_type:string,_fileName:string,_basepath:string){
 		for(const ft of TSound.fileType){
-			let filepath=_basepath+_args[1]+ft;
+			let filepath=_basepath+_fileName+ft;
 			if(Loader.shared.resources[filepath]){
-				if(_args[0]==SoundType.SoundEffect){
+				if(_type===SoundType.SoundEffect){
 					TSound.playSE(filepath)
-				}else if(_args[0]==SoundType.BackgroundMusic){
+				}else if(_type==SoundType.BackgroundMusic){
 					TSound.playBGM(filepath)
 				}
 				//*remove after played?

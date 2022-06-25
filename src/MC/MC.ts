@@ -1,14 +1,13 @@
 import {Matrix,Point} from "@pixi/math"
-import { Container } from '@pixi/display';
+import { Container,IDestroyOptions } from '@pixi/display';
 import { Sprite } from "@pixi/sprite";
 
 import MCSymbolModel from './MCSymbolModel';
 import MCTimeline from './MCTimeline';
-import {LoopState} from './Timeline';
 import MCPlayer from './MCPlayer';
 import {ColorMatrixAction,MCEffect} from './MCEffect';
 import ASI from './ASI';
-import {childData, AsiModel,layerData} from './MCStructure';
+import {childData, LoopState,layerData,rawInstenceData, rawAsiData} from './MCStructure';
 import {MCType} from './MCType';
 import * as TMath from '../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
@@ -106,7 +105,7 @@ export default class MC extends MCDisplayObject {
 		return this._timeline;
 	}
 
-	public destroy(_option:any=null){
+	public destroy(options?: IDestroyOptions | boolean){
 		for(const k in this.asiMaskList){
 			this.asiMaskList[k].destroy(this.destroyOption)
 		}
@@ -116,7 +115,7 @@ export default class MC extends MCDisplayObject {
 		for(const k in this.mcChildren){
 			this.mcChildren[k].destroy(this.destroyOption)
 		}
-		super.destroy(_option)
+		super.destroy(options)
 	}
 
 	public set type(_type:MCType){
@@ -169,25 +168,30 @@ export default class MC extends MCDisplayObject {
 				this.addChild(ch)
 			}
 			
+			/*
+			//*TODO Temp effect change??
 			if(ly.name=='outline'){
 				MCEffect.setColorMatcix(ch,ColorMatrixAction.brightness(1))
 				//ch.tint=0x0000ff
 			}
-			if(ly.name=='color'){
-				ch.tint=0xffcc00
-			}
 			if(ly.name=='effect'){
-				(<any>window).topch=ch
-				MCEffect.setColorMatcix(ch,ColorMatrixAction.tint('ffff00',1))
+				MCEffect.setColorMatcix(ch,ColorMatrixAction.tint('ff0000',1))
 
 				//MCEffect.setColorMatcix(ch,ColorMatrixAction.hue(90))
 				//MCEffect.setColorMatcix(ch,ColorMatrixAction.saturation(-50))
 				//MCEffect.setColorMatcix(ch,ColorMatrixAction.contrast(-100))
 			}
+			if(ly.name=='color2'){
+				ch.tint=0xff0000
+			}
+			if(ly.name=='color3'){
+				ch.tint=0x00ff00
+			}
+			*/
 			
 			// C=Color, F=Filter
 			if(ly.C || ly.F){
-				MCEffect.setEffect(ly.C,ly.F,ch)
+				MCEffect.setEffect(ch,ly.C,ly.F)
 			}
 			//get mask info
 			if(ly.isMask){
@@ -245,16 +249,16 @@ export default class MC extends MCDisplayObject {
 	}
 
 	protected showChild(obj:childData,frame:uint):MCDisplayObject{
-		const m2d:Matrix=TMath.m3dto2d(obj.data.M3D)
+		const m2d:Matrix=TMath.m3dto2d(obj.data!.M3D)
 		let name:string='';
 		let layerNum=obj.layer;
 		let child:MCDisplayObject;
 		let m2d2:Matrix;
-		if(obj.data.SN){
-			[name,child,m2d2]=this.showMC(obj.data,layerNum);
+		if((<rawInstenceData>obj.data).SN !== undefined){
+			[name,child,m2d2]=this.showMC(obj.data! as rawInstenceData,layerNum);
 			//child.transform.setFromMatrix(m2d)
 		}else{
-			[name,child,m2d2]=this.showSprite(obj.data,layerNum);
+			[name,child,m2d2]=this.showSprite(obj.data! as rawAsiData,layerNum);
 		}
 		if(this.blendMode!=0){
 			(<Sprite>child).blendMode=this.blendMode
@@ -270,7 +274,7 @@ export default class MC extends MCDisplayObject {
 		return child;
 	}
 
-	protected showMC(obj:any,layerNum:uint):[string,MCDisplayObject,Matrix]{
+	protected showMC(obj:rawInstenceData,layerNum:uint):[string,MCDisplayObject,Matrix]{
 		let newmatrix=new Matrix();
 		let name:string=this.getUniName(`L${layerNum}|${obj.SN}|${obj.IN}|${obj.ST}`);
 		let mc=<MCDisplayObject>this.search(name)
@@ -305,12 +309,12 @@ export default class MC extends MCDisplayObject {
 		*/
 
 		//filter
-		MCEffect.setEffect(obj.C,obj.F,mc)
+		MCEffect.setEffect(mc,obj.C,obj.F)
 
 		return [name,mc,newmatrix]
 	}
 
-	protected showSprite(obj:any,layerNum:uint):[string,ASI,Matrix]{
+	protected showSprite(obj:rawAsiData,layerNum:uint):[string,ASI,Matrix]{
 		const partname:string=obj.N
 
 		const part=this.symbolModel.mcModel.partList[partname];

@@ -42,12 +42,21 @@
 
 		let fmc
 		
+		PIXIMC.FileList.getfolderInfoFromText('media/files.txt','media/', function (_data) {
+			var myFolderList = PIXIMC.FileList.getInstance().getFolderInfoFromPath('media/FilterDemo/');
+			var myMcLoader = new PIXIMC.MCLoader(myFolderList, function (event) {
+				let mc = (event.model).makeInstance();
+				mc.y=800;
+				mc.x=400;
+				app.stage.addChild(mc);
+			})
+		})
 		//1
 		var myMcLoader = new PIXIMC.MCLoader(['media/FilterDemo/Animation.json','media/FilterDemo/spritemap1.json','media/FilterDemo/spritemap1.png'], function (event) {
 			fmc = (event.model).makeInstance();
 			app.stage.addChild(fmc);
 		});
-		
+		/*
 		//2
 		var myMcLoader2 = new PIXIMC.MCLoader()
 		myMcLoader2.load(['media/FilterDemo/Animation.json','media/FilterDemo/spritemap1.json','media/FilterDemo/spritemap1.png'], function (event) {
@@ -75,6 +84,7 @@
 				app.stage.addChild(mc);
 			})
 		})
+		*/
 	</script>
 </body>
 </html>

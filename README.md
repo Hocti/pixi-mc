@@ -172,7 +172,7 @@ Arguments:
 |-|-|-|
 |remark_gotoAndPlay|$123|gotoAndPlay(123)|
 |remark_gotoAndStop|$label_init|gotoAndStop('label_init')|
-|remark_blendMode|multiply|setting blend mode for the MC and all children in it (will auto cahnge to uppercase in runtime, see pixi's blendmode.).  Don't care which frame you place them , active in full timeline|
+|remark_blendMode|multiply|setting blend mode for the MC and all children in it (will auto change to uppercase in runtime, see pixi's blendmode.).  Don't care which frame you place them , active in full timeline|
 |remark_sound|se$047|play sound "047.mp3" in the exported MC folder(auto replace to .mp3 to .wav if mp3 file is missing)|
 |remark_sound|bgm$boss1|play sound "boss1.mp3" with looping, auto stop if start play another "bgm"|
 |remark_stopAllSound||don't have arguments |

@@ -1,9 +1,9 @@
 import {MCType} from './MCType';
 import {timelineEventType} from './MCEvent';
-import {FrameLabels} from './MCStructure';
+import {FrameLabels,LoopState} from './MCStructure';
 import MCScene from './MCScene';
 import MC from './MC';
-import {playStatus,playDirection,LoopState} from './Timeline';
+import {playStatus,playDirection} from './Timeline';
 import Timeline from './Timeline';
 import TSound from '../utils/TSound';
 import * as TMath from '../utils/TMath';
@@ -71,20 +71,18 @@ export default class MCTimeline extends Timeline{
 	private remarkPlay(_f:uint):void{
 		if(this.mc.symbolModel.playRemark[_f]){
 			let type:string=this.mc.symbolModel.playRemark[_f].type;
-			let content:any=this.mc.symbolModel.playRemark[_f].content;
-			if(!content){
-				if(type=='play'){
-					this.play();
-				}else if(type=='stop'){
-					this.stop();
-				}
+			if(type=='play'){
+				this.play();
+			}else if(type=='stop'){
+				this.stop();
 			}else{
+				let content=<uint | string>this.mc.symbolModel.playRemark[_f].content;
 				if(type=='gotoAndPlay'){
-					this.gotoAndPlay(content[1])
+					this.gotoAndPlay(content)
 				}else if(type=='gotoAndStop'){
-					this.gotoAndStop(content[1])
+					this.gotoAndStop(content)
 				}else if(type=='goto'){
-					this.goto(content[1])
+					this.goto(content)
 				}
 			}
 		}
@@ -97,7 +95,7 @@ export default class MCTimeline extends Timeline{
 					TSound.stopAllSound();
 					return;
 				}
-				TSound.play(s.type,<string[]>s.content,this.mc.symbolModel.mcModel.basepath);
+				TSound.play(s.type,(<string[]>s.content)[0],(<string[]>s.content)[1],this.mc.symbolModel.mcModel.basepath);
 			}
 		}
 	}

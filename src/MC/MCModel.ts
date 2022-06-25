@@ -1,6 +1,6 @@
 import {Matrix,Rectangle} from "@pixi/math"
 
-import {AsiModel} from './MCStructure';
+import {AsiModel,spriteData,symbolModelData,fullmodelData,rawInstenceData} from './MCStructure';
 import MCSymbolModel from './MCSymbolModel';
 import MC from './MC';
 import ASI from './ASI';
@@ -18,11 +18,10 @@ export default class MCModel{
 	public fps:float;
 	public sceneList:string[]=[];
 	public withScene:boolean=false;
-	protected _name:string;
 
-	constructor(animation:any,spritemaps:any[],basepath:string) {
+	constructor(animation:fullmodelData,spritemaps:spriteData[],basepath:string) {
 		this.fps=Number(animation.MD.FRT);
-		this._name=<string>animation.AN.N;
+		this._name=<string>animation.AN.N!;
 
 		this.partList=MCModel.processSpritemap(spritemaps,basepath)
 
@@ -36,8 +35,10 @@ export default class MCModel{
 		if(this.mainSymbolModel.totalFrames==1){
 			this.withScene=true;
 			for(let c of this.mainSymbolModel.getFrame(1).child){
-				if(c.data.IN && c.data.IN.substr(0,5)=='scene'){
-					this.sceneList[Number(c.data.IN.substr(5))]=c.data.SN;
+				const inName:string=(<rawInstenceData>c.data!).IN;
+				const snName:string=(<rawInstenceData>c.data!).SN;
+				if(inName && inName.substring(0,5)=='scene'){
+					this.sceneList[Number(inName.substring(5))]=snName;
 				}else{
 					this.withScene=false;
 				}
@@ -59,13 +60,13 @@ export default class MCModel{
 		return new MC(this.mainSymbolModel);
 	}
 
-	public processAnimationData(data:any,isMAster:boolean=false):MCSymbolModel{
-		let syb=new MCSymbolModel(data,this,isMAster);
+	public processAnimationData(data:symbolModelData,isMaster:boolean=false):MCSymbolModel{
+		let syb=new MCSymbolModel(data,this,isMaster);
 		this.symbolList[syb.name]=syb
 		return syb;
 	}
 
-	public static processSpritemap(spritemap:any,basepath:string=''){
+	public static processSpritemap(spritemap:spriteData[],basepath:string=''){
 		let partList:{ [id: string] : AsiModel }={}
 		for(let v of spritemap){
 			for(let s of v.ATLAS.SPRITES){
@@ -73,7 +74,7 @@ export default class MCModel{
 					rect:new Rectangle(s.SPRITE.x,s.SPRITE.y,s.SPRITE.w,s.SPRITE.h),
 					image:basepath+v.meta.image,
 					rotated:s.SPRITE.rotated,
-					zoom:v.meta.resolution,
+					zoom:parseFloat(v.meta.resolution),
 					matrix:new Matrix()
 				}
 				
@@ -88,6 +89,10 @@ export default class MCModel{
 		}
 		return partList;
 	}
+
+	
+
+	protected _name:string;
 
 	get name():string{
 		return this._name;

@@ -26,25 +26,42 @@ export default class MCPlayer {
 	}
 
 	//private
-	private currf=1;
-	private realf=1;
+	private currFrame:uint=1;
+	private realFloatFrame=1;
 	private mcList:MC[]=[];
 	private enterTick(delta:float) {//* delta=f in 60fps
-		//console.log(MCPlayer.ticker.deltaMS,MCPlayer.ticker.elapsedMS )
-		this.realf+=delta*this.fps*(1/60)
-		const realFloor=Math.floor(this.realf);
-		if(realFloor==this.currf){
+		/*
+		if(this.realFloatFrame<100){
+			console.log(MCPlayer.ticker.deltaMS,MCPlayer.ticker.elapsedMS,delta )
+			
+		}
+		*/
+		
+		this.realFloatFrame+=delta*this.fps*(1/MCPlayer.ticker.FPS )
+		const realFloor:uint=Math.floor(this.realFloatFrame);
+		if(realFloor==this.currFrame){
 			//*or do half frame
 			return
 		}
-		let lastFrame=this.currf
-		this.currf=realFloor
+		let lastFrame:uint=this.currFrame
+		this.currFrame=realFloor
+
+		let removed=0;
 		for(let mc of this.mcList){
-			if(!mc)continue
+			if(!mc){
+				removed++;
+				continue
+			}
+			//*remove from list
+
 			if(!mc.timeline.active)continue
 			if(!mc.worldVisible )continue
 			mc.timeline.processFrame();
 			mc.showFrame(mc.timeline.currentFrame);
+		}
+		if(removed>50){
+			//*GC
+
 		}
 	}
 	//public

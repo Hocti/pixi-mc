@@ -1,11 +1,14 @@
-import {MCEffect,effect,ColorChange,ColorMatrixAction} from './MC/MCEffect';
-import * as MCType from './MC/MCType';
-import * as MCStructure from './MC/MCStructure';
-import MCDisplayObject from './MC/MCDisplayObject';
+export * as MCType from './MC/MCType';
+export * as MCStructure from './MC/MCStructure';
+export {timelineEventType} from './MC/MCEvent';
 
-import {timelineEventType} from './MC/MCEvent';
+export {MCEffect,effect,ColorMatrixAction} from './MC/MCEffect';
+export {getTimer} from './utils/utils';
+export {FileList,fileInfo,folderInfo} from './utils/FileList';
+export * as TMath from './utils/TMath';
+
+import MCDisplayObject from './MC/MCDisplayObject';
 import ASI from './MC/ASI';
-import {FileList,fileInfo,folderInfo} from './utils/FileList';
 import MCLibrary from './MC/MCLibrary';
 import MCLoader from './MC/MCLoader';
 import MCModel from './MC/MCModel';
@@ -17,17 +20,14 @@ import MCTimeline from './MC/Timeline';
 import Timeline from './MC/MCTimeline';
 
 import TSound from './utils/TSound';
-import {getTimer} from './utils/utils';
-import * as TMath from './utils/TMath';
 
 export {
-	FileList,MCLoader,MCLibrary,
+	MCDisplayObject,
+	MCLoader,MCLibrary,
 	MCSymbolModel,MCModel,
 	MC,ASI,MCScene,
-	Timeline,MCTimeline,MCPlayer,timelineEventType,
-	TSound,getTimer,TMath,
-	MCEffect,ColorMatrixAction,ColorChange,effect,
-	MCDisplayObject
+	Timeline,MCTimeline,MCPlayer,
+	TSound,
 }
 
 /*

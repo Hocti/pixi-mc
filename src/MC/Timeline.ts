@@ -1,15 +1,8 @@
-import * as PIXI from 'pixi.js'
 import {EventEmitter} from "@pixi/utils"
 
 import {timelineEventType} from './MCEvent';
-import {FrameLabels} from './MCStructure';;
+import {LoopState,FrameLabels} from './MCStructure';
 import * as TMath from '../utils/TMath';
-
-export enum LoopState{
-	Loop='LP',
-	Once='PO',
-	Stop='SF'
-}
 
 export enum playStatus{
 	playing,
@@ -21,7 +14,7 @@ export enum playDirection{
 	reverse=-1
 }
 
-export default class Timeline extends PIXI.utils.EventEmitter{
+export default class Timeline extends EventEmitter{
 
 	protected _currentFrame:uint=1;
 	protected _playStatus:playStatus=playStatus.playing
