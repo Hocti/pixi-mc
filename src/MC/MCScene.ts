@@ -55,6 +55,10 @@ export default class MCScene extends MCDisplayObject {
 		}
 	}
 
+	protected destroyOption={
+		children:true,texture:false
+	}
+	
 	public destroy(){
 		this.sceneMCList.forEach(scene => {
 			scene.destroy()
@@ -114,7 +118,7 @@ export default class MCScene extends MCDisplayObject {
 	}
 
 	get sceneTimeline():MCTimeline{
-		return this.currSceneMC._timeline;
+		return this.currSceneMC.timeline;
 	}
 
 	get sceneName():string[]{

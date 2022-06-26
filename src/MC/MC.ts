@@ -1,6 +1,6 @@
-import {Matrix,Point} from "@pixi/math"
+import {Matrix,Point} from '@pixi/math';
 import { Container,IDestroyOptions } from '@pixi/display';
-import { Sprite } from "@pixi/sprite";
+import { Sprite } from '@pixi/sprite';
 
 import MCSymbolModel from './MCSymbolModel';
 import MCTimeline from './MCTimeline';
@@ -30,9 +30,23 @@ export default class MC extends MCDisplayObject {
 	public static MAX_SAME:uint=100;
 
 	//*public get only
-	public symbolModel:MCSymbolModel;
-	public _timeline:MCTimeline;
-	public player:MCPlayer;
+	protected _symbolModel:MCSymbolModel;
+	protected _timeline:MCTimeline;
+	protected _player:MCPlayer;
+
+	
+
+	public get timeline():MCTimeline{
+		return this._timeline
+	}
+	
+	public get symbolModel():MCSymbolModel{
+		return this._symbolModel
+	}
+
+	public get player():MCPlayer{
+		return this._player
+	}
 
 	private _type:MCType=MCType.MovieClip;
 	//public trPoint:Point=new Point();
@@ -57,21 +71,24 @@ export default class MC extends MCDisplayObject {
 	constructor(model:MCSymbolModel,_player:MCPlayer=MCPlayer.getInstance()) {
 		super();
 		
-		this.symbolModel=model;
-		this._timeline=new MCTimeline(this);
-		
-		this.player=_player;
-		this.player.addMC(this);
-
+		this._symbolModel=model;
 		this.blendMode=model.defaultBlendMode;
 		this.stopAtEnd=model.defaultStopAtEnd;
 
-		this.on('added',(_mc)=>{
-			this.showFrame(1)
-		})
+		this._player=_player;
+		this._player.addMC(this);
+
+		this._timeline=this.initTimeline()
 		
 		//for debug
 		++MC.totalMC;
+	}
+
+	protected initTimeline():MCTimeline{
+		this.on('added',(_mc)=>{
+			this.showFrame(1)
+		})
+		return new MCTimeline(this);
 	}
 
 	/*
@@ -79,6 +96,11 @@ export default class MC extends MCDisplayObject {
 		//*
 	}
 	*/
+    
+    public containLabel(_label:string):boolean
+    {
+        return this.symbolModel.LabelList[_label]!==undefined;
+    }
 
 	public stopAll():void{
 		this.timeline.stop();
@@ -100,9 +122,9 @@ export default class MC extends MCDisplayObject {
 		}
 	}
 	*/
-
-	get timeline():MCTimeline{
-		return this._timeline;
+	
+	protected destroyOption={
+		children:true,texture:false
 	}
 
 	public destroy(options?: IDestroyOptions | boolean){

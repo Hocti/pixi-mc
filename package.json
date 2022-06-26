@@ -9,11 +9,10 @@
 	"author": "hocti",
 	"license": "MIT",
 	"keywords": [
-		"pixi",
+		"pixi.js",
 		"movieclip",
 		"flash",
-		"animate",
-		"adobe",
+		"adobe animate",
 		"Texture Atlas"
 	],
 	"scripts": {

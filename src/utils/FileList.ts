@@ -1,4 +1,4 @@
-import {Loader,LoaderResource} from "@pixi/loaders"
+import {Loader,LoaderResource} from '@pixi/loaders';
 
 export type fileInfo={
 	path:string;

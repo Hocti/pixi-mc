@@ -1,4 +1,4 @@
-import {Matrix,Rectangle} from "@pixi/math"
+import {Matrix,Rectangle} from '@pixi/math';
 
 import {AsiModel,spriteData,symbolModelData,fullmodelData,rawInstenceData} from './MCStructure';
 import MCSymbolModel from './MCSymbolModel';

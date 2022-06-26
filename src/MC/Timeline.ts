@@ -1,7 +1,7 @@
-import {EventEmitter} from "@pixi/utils"
+import {EventEmitter} from '@pixi/utils';//eventemitter3
 
 import {timelineEventType} from './MCEvent';
-import {LoopState,FrameLabels} from './MCStructure';
+import {LoopState,FrameLabels,playTarget} from './MCStructure';
 import * as TMath from '../utils/TMath';
 
 export enum playStatus{
@@ -66,13 +66,17 @@ export default class Timeline extends EventEmitter{
 		this._active=_b;
 	}
 
-	get currentLabel():string | undefined{
+	public getLabel(_frame:uint):string | undefined{
 		for(let k in this.labels){
-			if(this.labels[k]==this._currentFrame){
+			if(this.labels[k]==_frame){
 				return k;
 			}
 		}
 		return undefined;
+	}
+
+	get currentLabel():string | undefined{
+		return this.getLabel(this._currentFrame);
 	}
 
 	get labels():FrameLabels{
@@ -95,7 +99,7 @@ export default class Timeline extends EventEmitter{
 		this._currentFrame=TMath.clamp(_frame,1,this.totalFrames)
 	}
 
-	public goto(target:uint | string){
+	public goto(target:playTarget){
 		if(Number(target)>0){
 			this.setCurrentFrame(Number(target));
 		}else{
@@ -104,12 +108,12 @@ export default class Timeline extends EventEmitter{
 		}
 	}
 
-	public gotoAndPlay(target:uint | string){
+	public gotoAndPlay(target:playTarget){
 		this.goto(target)
 		this.play()
 	}
 
-	public gotoAndStop(target:uint | string){
+	public gotoAndStop(target:playTarget){
 		this.goto(target)
 		this.stop()
 	}

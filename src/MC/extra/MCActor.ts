@@ -1,5 +1,19 @@
 import { MCDisplayObject, MCSymbolModel,TMath, MC } from "../..";
-import { action } from "../MCStructure";
+//import { action } from '../MCStructure';
+
+export type action={
+	name:string,
+	begin:uint,
+	end:uint,
+	keys:Dictionary<uint>
+}
+export type actionMC={
+	mcModel:MCSymbolModel,
+	scale:float,
+	position:uint,
+	keys:Dictionary<uint>
+}
+
 export class MCActor extends MCDisplayObject{
 
 
@@ -11,13 +25,8 @@ export class MCActor extends MCDisplayObject{
 	}
 
 	public addMC(_mcs:MCSymbolModel):void{
-		if(this.mcList[_mcs.name]){
-			//*skin?
-			return
-		}
-		if(this.mcList[_mcs.name]){
+		if(!this.mcList[_mcs.name]){
 			
-			return
 		}
 	}
 

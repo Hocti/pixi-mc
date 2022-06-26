@@ -1,5 +1,5 @@
-import {EventEmitter} from "@pixi/utils"
-import {Loader,LoaderResource} from "@pixi/loaders"
+import {EventEmitter} from '@pixi/utils';
+import {Loader,LoaderResource} from '@pixi/loaders';
 import {Container} from '@pixi/display'
 
 import {spriteData} from './MCStructure';
@@ -119,6 +119,8 @@ export default class MCLoader extends EventEmitter{
 			this.emit(MCEvent.LoadDone,<loadDoneEvent>{
 				model:mainModel
 			});
+
+			myloader.destroy();
 		});
 	}
 }

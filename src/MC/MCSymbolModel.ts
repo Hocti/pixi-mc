@@ -1,14 +1,13 @@
-import {Matrix,Rectangle} from "@pixi/math"
+import {Matrix,Rectangle} from '@pixi/math';
 import {Texture} from '@pixi/core'
 import {BLEND_MODES} from '@pixi/constants';
 
-import {action,remark,childData,frameData,FrameLabels} from './MCStructure';
+import {childData,frameData,FrameLabels, PlayRemark,SoundRemark,SoundType} from './MCStructure';//action,
 import MCModel from './MCModel';
 import {MCType} from './MCType';
 import ASI from './ASI';
-import {AsiModel,scriptRemark,rawAsiData,symbolModelData} from './MCStructure';
+import {AsiModel,ScriptRemark,rawAsiData,symbolModelData} from './MCStructure';
 import * as TMath from '../utils/TMath';
-import TSound from '../utils/TSound';
 
 export default class MCSymbolModel {
 
@@ -103,6 +102,7 @@ export default class MCSymbolModel {
 			}
 		}
 
+		/*
 		//process key inn action
 		if(keyMarker.length>0){
 			for(let k in this.actionList){
@@ -117,24 +117,24 @@ export default class MCSymbolModel {
 			console.log(this.actionList)
 			//*process actions
 		}
+		*/
 	}
 
-	public soundRemark:remark[][]=[];
-	public playRemark:remark[]=[];
-	public scriptRemarks:Dictionary<scriptRemark>={};
-	public actionList:Dictionary<action>={};
+	public soundRemark:SoundRemark[][]=[];
+	public playRemark:PlayRemark[]=[];
+	public scriptRemarks:Dictionary<ScriptRemark>={};
+	//public actionList:Dictionary<action>={};
 
 	public defaultBlendMode:BLEND_MODES=BLEND_MODES.NORMAL;
 	public defaultStopAtEnd:boolean=false;
 
-
+	//special Asi: all child just contain one asi
 	 private _isSpecialASI:boolean=false;
 	 private specialAsiModel?:AsiModel;
 	 public specialAsimatrix?:Matrix;
 	 public makeASI():ASI{
-		 let a=new ASI(this.specialAsiModel!,this.name);
 		 //a.blendMode=this.defaultBlendMode;
-		return a;
+		return new ASI(this.specialAsiModel!,this.name);
 	}
 
 	 public get isSpecialASI():boolean{
@@ -142,18 +142,22 @@ export default class MCSymbolModel {
 	}
 
 	private processRemark(type:string,args:string[],frame_begin:uint,frame_end:uint){
-		if(type=='sound' || type=='stopAllSound'){
+		if(type==="sound" || type==="stopAllSound"){
 			if(!this.soundRemark[frame_begin]){
 				this.soundRemark[frame_begin]=[]
 			}
-			this.soundRemark[frame_begin].push({type,content:args});
+			this.soundRemark[frame_begin].push({type:args[0] as SoundType,soundFile:args[1]});
 		}else if(type=='play' || type=='stop'){
 			this.playRemark[frame_begin]={type};
 		}else if(type=='gotoAndPlay' || type=='gotoAndStop' || type=='jump'){
-			this.playRemark[frame_begin]={type,content:args[0]};
+			if(parseInt(args[1])>0){
+				this.playRemark[frame_begin]={type,frame:parseInt(args[1]),frameNumber:parseInt(args[1])};
+			}else{
+				this.playRemark[frame_begin]={type,frame:args[1],frameLabel:args[1]};
+			}
 		}else if(type=='script'){
-			let name=args.shift();
-			this.scriptRemarks[name!]={frame:frame_begin,args:args};
+			const scriptName=args.shift();
+			this.scriptRemarks[scriptName!]={frame:frame_begin,args:args};
 		}else if(type=='blendMode'){
 
 			const bName:string=(args[0].toUpperCase());
@@ -164,14 +168,14 @@ export default class MCSymbolModel {
 			}
 		}else if(type=='stopAtEnd'){
 			this.defaultStopAtEnd=true;
-		}else if(type=='action'){
+		}/*else if(type=='action'){
 			this.actionList[args[0]]={
 				name:args[0],
 				begin:frame_begin,
 				end:frame_end,
 				keys:{}
 			}
-		}
+		}*/
 	}
 
 	private frameDataCache:frameData[]=[]

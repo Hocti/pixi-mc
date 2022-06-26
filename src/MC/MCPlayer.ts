@@ -1,4 +1,4 @@
-import {Ticker} from "@pixi/ticker"
+import {Ticker} from '@pixi/ticker';
 
 import MC from './MC';
 import MCScene from './MCScene';
@@ -27,7 +27,7 @@ export default class MCPlayer {
 
 	//private
 	private currFrame:uint=1;
-	private realFloatFrame=1;
+	private realFloatFrame:float=1;
 	private mcList:MC[]=[];
 	private enterTick(delta:float) {//* delta=f in 60fps
 		/*
@@ -38,13 +38,13 @@ export default class MCPlayer {
 		*/
 		
 		this.realFloatFrame+=delta*this.fps*(1/MCPlayer.ticker.FPS )
-		const realFloor:uint=Math.floor(this.realFloatFrame);
-		if(realFloor==this.currFrame){
+		const realIntFrame:uint=Math.round(this.realFloatFrame);
+		if(realIntFrame==this.currFrame){
 			//*or do half frame
 			return
 		}
 		let lastFrame:uint=this.currFrame
-		this.currFrame=realFloor
+		this.currFrame=realIntFrame
 
 		let removed=0;
 		for(let mc of this.mcList){
@@ -65,7 +65,7 @@ export default class MCPlayer {
 		}
 	}
 	//public
-	public fps=60;
+	public fps:float=60;
 	public addMC(mc:MC){
 		this.mcList.push(mc)
 	}

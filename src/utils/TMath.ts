@@ -1,4 +1,4 @@
-import {Matrix} from "@pixi/math"
+import {Matrix} from '@pixi/math';
 
 
 export function m3dto2d(a:float[]):Matrix{

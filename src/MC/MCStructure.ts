@@ -1,13 +1,9 @@
-import {Matrix,Rectangle} from "@pixi/math";
+import {Matrix,Rectangle} from '@pixi/math';;
 import {Texture} from '@pixi/core';
 import { DisplayObject } from '@pixi/display';
 
 import {MCType} from './MCType'
 import MCModel from './MCModel'
-
-type int=number;
-type uint=number;
-type float=number;
 
 //structure
 
@@ -28,28 +24,41 @@ export type AsiModel={
 	texture?:Texture
 }
 
-export type remark={
-	type:string,
-	content?:string | string[] | number
+//remark
+
+export enum SoundType {
+    SoundEffect='se',
+    BackgroundMusic='bgm',
+    BackgroundEffect='bge',
+	stopAllSound='stopAllSound'
 }
 
-export type scriptRemark={
+export type SoundRemark={
+	type:SoundType,
+	soundFile:string
+}
+
+export type PlayRemark={
+	type:string,
+	frame?:playTarget,
+	frameLabel?:string,
+	frameNumber?:number
+}
+export type playTarget=string | number
+
+
+export type ScriptRemark={
 	frame:uint,
 	args:string[]
 }
 
-export type action={
-	name:string,
-	begin:uint,
-	end:uint,
-	keys:Dictionary<uint>
-}
+//
+
 
 export type MCLoadedEvent={
 	model:MCModel,
 	content?:DisplayObject
 }
-
 
 export type FrameLabels=Dictionary<uint>;
 export type FrameAction=string[];
@@ -60,6 +69,9 @@ export type FrameAction=string[];
 
 export type frameData={
 	child:childData[],
+	/*
+	sound:any[],
+	*/
 	layer:layerData[]
 }
 

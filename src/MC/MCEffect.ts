@@ -1,17 +1,12 @@
 import { Filter } from '@pixi/core';
-import {BevelFilter,DropShadowFilter,GlowFilter,GlowFilterOptions,AdjustmentFilter} from 'pixi-filters';
-//import * as extraFilters from 'pixi-filters';
 import { BlurFilter } from '@pixi/filter-blur';
 import { ColorMatrixFilter,ColorMatrix} from '@pixi/filter-color-matrix';
+import {BevelFilter,DropShadowFilter,GlowFilter,GlowFilterOptions} from 'pixi-filters';
+
 import * as Color from '../utils/color';
-import MCDisplayObject from './MCDisplayObject';
 import * as TMath from '../utils/TMath';
-
+import MCDisplayObject from './MCDisplayObject';
 import {colorData,filterData} from './MCStructure'
-
-
-//type ColorMatrix = float[];//[float, ...Array<float>] & {length: 25};;//float[];
-
 
 enum tintType{
 	none,
@@ -357,27 +352,6 @@ export class MCEffect {
 		return obj.filtercache[_key];
 	}
 }
-		/*
-		if(_key=="ColorMatrixFilter" || _key=="BlurFilter"){
-			obj.filtercache[_key]=new allFilters[_key]()
-		}
-		if(_key=="DropShadowFilter" || _key=="GlowFilter" || _key=="BevelFilter" || _key=="AdjustmentFilter"){
-			obj.filtercache[_key]=new allFilters[_key](_option)
-		}
-		*/
-/*
-interface Dictionary<T> {[id: string]: T;}
-const allFilters:<{[id: string]: Filter}>={
-    'BlurFilter': typeof BlurFilter,
-    'ColorMatrixFilter': typeof ColorMatrixFilter,
-    'BevelFilter': typeof BevelFilter,
-    'DropShadowFilter': typeof DropShadowFilter,
-    'GlowFilter': typeof GlowFilter,
-    'AdjustmentFilter': typeof AdjustmentFilter
-};
-*/
-
-
 
 
 

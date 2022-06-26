@@ -18,8 +18,10 @@ import MCScene from './MC/MCScene';
 import MCPlayer from './MC/MCPlayer';
 import MCTimeline from './MC/Timeline';
 import Timeline from './MC/MCTimeline';
+import MCSound from './MC/MCSound';
 
-import TSound from './utils/TSound';
+
+import LabelMC,{LabelTimeline} from './MC/extra/LabelMC';
 
 export {
 	MCDisplayObject,
@@ -27,7 +29,8 @@ export {
 	MCSymbolModel,MCModel,
 	MC,ASI,MCScene,
 	Timeline,MCTimeline,MCPlayer,
-	TSound,
+	MCSound,
+	LabelMC,LabelTimeline
 }
 
 /*
@@ -52,7 +55,7 @@ export * from './MC/MCTimeline';
 
 
 export {FileList,fileInfo,folderInfo} from './utils/FileList';
-export * from './utils/TSound';
+export * from './utils/MCSound';
 export {getTimer} from './utils/utils';
 export * as TMath from './utils/TMath';
 
