@@ -19,11 +19,16 @@ export default class MCModel{
 	public sceneList:string[]=[];
 	public withScene:boolean=false;
 
+	public static preloadAllTexture:boolean=true;
+
 	constructor(animation:fullmodelData,spritemaps:spriteData[],basepath:string) {
 		this.fps=Number(animation.MD.FRT);
 		this._name=<string>animation.AN.N!;
 
 		this.partList=MCModel.processSpritemap(spritemaps,basepath)
+		if(MCModel.preloadAllTexture){
+			this.preloadTexture();
+		}
 
 		this.mainSymbolModel=this.processAnimationData(animation.AN,true)
 		if(animation.SD){
@@ -50,6 +55,12 @@ export default class MCModel{
 		MCLibrary.getInstance().push(this,basepath)
 	}
 
+	public preloadTexture(){
+		for(let partName in this.partList){
+			ASI.makeTexture(this.partList[partName])
+		}
+	}
+
 	public makeInstance(_symbolname?:string):MCDisplayObject{
 		if(this.withScene){
 			return new MCScene(this.mainSymbolModel);
@@ -67,7 +78,7 @@ export default class MCModel{
 	}
 
 	public static processSpritemap(spritemap:spriteData[],basepath:string=''){
-		let partList:{ [id: string] : AsiModel }={}
+		let partList:Dictionary<AsiModel>={}
 		for(let v of spritemap){
 			for(let s of v.ATLAS.SPRITES){
 				let part:AsiModel={
@@ -77,13 +88,10 @@ export default class MCModel{
 					zoom:parseFloat(v.meta.resolution),
 					matrix:new Matrix()
 				}
-				
 				if(part.rotated){
 					part.matrix.a=part.rect.height/part.rect.width;
 					part.matrix.d=part.rect.width/part.rect.height;
 				}
-
-				ASI.makeTexture(part)
 				partList[s.SPRITE.name]=part;
 			}
 		}

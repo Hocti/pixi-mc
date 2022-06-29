@@ -9,13 +9,25 @@ export default class ASI extends MCDisplayObject {
 	public model:AsiModel;
 
 	constructor(_model:AsiModel,name?:string) {
-		super(<Texture>_model.texture);
-		ASI.makeTexture(_model)
+		super();
 		this.model=_model;
 		if(name){
 			this.name=name
 		}
+		if(this.model.texture!==undefined){
+			this.texture=<Texture>this.model.texture;
+		}else{
+			//this.prepareTexture()
+			this.on('added',this.prepareTexture)
+		}
 		ASI.totalASI++;
+	}
+
+	public prepareTexture(){
+		if(this.model.texture===undefined){
+			ASI.makeTexture(this.model)
+			this.texture=<Texture>this.model.texture!;
+		}
 	}
 
 	private static textureCache:Dictionary<Texture>={};

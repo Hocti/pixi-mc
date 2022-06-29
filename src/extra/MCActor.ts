@@ -1,4 +1,6 @@
-import { MCDisplayObject, MCSymbolModel,TMath, MC } from "../..";
+import { Point } from "@pixi/math";
+import { MCDisplayObject, MCSymbolModel,TMath, MC } from "..";
+import MCPlayer from '../MC/MCPlayer';
 //import { action } from '../MCStructure';
 
 export type action={
@@ -7,11 +9,11 @@ export type action={
 	end:uint,
 	keys:Dictionary<uint>
 }
-export type actionMC={
+export type actorInfo={
 	mcModel:MCSymbolModel,
 	scale:float,
-	position:uint,
-	keys:Dictionary<uint>
+	position:Point,
+	color:ColorChange
 }
 
 export class MCActor extends MCDisplayObject{
@@ -20,13 +22,16 @@ export class MCActor extends MCDisplayObject{
 	private mcList:Dictionary<MC>={};
 	private actionList:Dictionary<action>={};
 
-	constructor(){
+	constructor(_player:MCPlayer=MCPlayer.getInstance()){
 		super();
 	}
 
-	public addMC(_mcs:MCSymbolModel):void{
+	public addMC(_mc:MC,_info:actorInfo):void{
 		if(!this.mcList[_mcs.name]){
+			const mc=new MC(_mcs);
 			
+			this.addChild(mc);
+			this.mcList[_mcs.name]=mc;
 		}
 	}
 

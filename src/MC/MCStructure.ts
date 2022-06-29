@@ -51,6 +51,26 @@ export type ScriptRemark={
 	frame:uint,
 	args:string[]
 }
+export type ExtraRemark={
+	type:string,
+	frame_begin:uint,
+	frame_end:uint,
+	args:string[]
+}
+
+export type GeomRemark={
+	type:string,
+	frame_begin:uint,
+	frame_end:uint,
+	args:string[],
+	x:float,
+	y:float,
+	w?:float,
+	h?:float,
+	r?:float,
+	rotate?:float
+}
+
 
 //
 
@@ -64,8 +84,6 @@ export type FrameLabels=Dictionary<uint>;
 export type FrameAction=string[];
 
 //JSON type
-
-
 
 export type frameData={
 	child:childData[],
@@ -99,6 +117,7 @@ export type spriteData={
 		resolution:string
 	}
 };
+
 type rawSprite={
 	SPRITE:{
 		name: string,
@@ -119,6 +138,7 @@ export type fullmodelData={
 		FRT:float//file fps
 	}
 };
+
 export type symbolModelData={
 	N?:string,//fla name
 	SN:string,//symbol name
@@ -126,12 +146,14 @@ export type symbolModelData={
 		L:rawlayerData[]
 	}
 }
+
 type rawlayerData={
 	LN:string,//layer name
 	FR:rawframeData[],
 	LT?:"Clp",//layer type: =mask
 	Clpb?:string//mask parent layer
 }
+
 type rawframeData={
 	I:uint,//start frame,min 0
 	DU:uint,//frame duration,min 1
@@ -140,14 +162,17 @@ type rawframeData={
 	C?:colorData,
 	F?:filterData,
 }
+
 type rawframeElementData={
 	ASI?:rawAsiData,
 	SI?:rawInstenceData
 }
+
 export type rawAsiData={
 	N:string,
 	M3D:m3d
 }
+
 export type rawInstenceData={
 	SN:string,//symbolModelData's SN
 	IN:string,//instance name
@@ -163,7 +188,7 @@ export type rawInstenceData={
 	F?:filterData
 }
 
-type m3d=[float, ...Array<float>] & {length: 16};
+export type m3d=[float, ...Array<float>] & {length: 16};
 
 export enum LoopState{
 	Loop='LP',
@@ -187,6 +212,7 @@ export type colorData={
 	BO:float,
 	AO:float
 };
+
 export type filterData={
 	BLF?:{
 		BLX:float,

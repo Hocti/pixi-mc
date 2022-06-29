@@ -20,7 +20,7 @@ export default class MCScene extends MCDisplayObject {
 		super();
 		this.player=_player;
 		if(model.mcModel.withScene && model.mcModel.mainSymbolModel===model){
-			let allSceneMC=new MC(model,_player);
+			let allSceneMC=new MC(model,{player:_player});
 			allSceneMC.showFrame(1);
 			for(let c of allSceneMC.children ){
 				let nameArr=(<MC>c).name.split('$');

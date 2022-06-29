@@ -2,12 +2,17 @@ import {Matrix,Rectangle} from '@pixi/math';
 import {Texture} from '@pixi/core'
 import {BLEND_MODES} from '@pixi/constants';
 
-import {childData,frameData,FrameLabels, PlayRemark,SoundRemark,SoundType} from './MCStructure';//action,
+import MC from './MC';
+import {
+	childData,frameData,rawAsiData,symbolModelData,layerData,
+	FrameLabels, AsiModel,SoundType,m3d,GeomRemark,
+	PlayRemark,SoundRemark,ExtraRemark,ScriptRemark
+} from './MCStructure';//action,
 import MCModel from './MCModel';
 import {MCType} from './MCType';
 import ASI from './ASI';
-import {AsiModel,ScriptRemark,rawAsiData,symbolModelData} from './MCStructure';
 import * as TMath from '../utils/TMath';
+import MCDisplayObject from './MCDisplayObject';
 
 export default class MCSymbolModel {
 
@@ -15,14 +20,13 @@ export default class MCSymbolModel {
 	protected _name:string='';
 	protected _data:symbolModelData;
 
-	protected LayerNameList:string[]=[];
+	protected _layerNameList:string[]=[];
 	protected _LabelList:FrameLabels={};
 	protected _totalFrame:uint=1;
-	
 	private _isMaster:boolean=false;
 
-	constructor(data:symbolModelData,mc:MCModel,isMaster:boolean=false) {
-		this.mcModel=mc
+	constructor(data:symbolModelData,_model:MCModel,isMaster:boolean=false) {
+		this.mcModel=_model
 		this._data=data;
 		this._name=data.SN;
 		this._isMaster=isMaster;
@@ -30,36 +34,47 @@ export default class MCSymbolModel {
 		if(data.SN.substring(0,14)=='remark/remark_')return
 
 		let totalFrame=1;
-		let keyMarker:string[]=[]
 		let asiCount=0;
 		let mcCount=0;
 		let remarkCount=0;
-		let onlyAsi:rawAsiData | undefined;
+		let firstAsi:rawAsiData | undefined;
 		let maxtimeslot=1;
+
+		//loop all layer
 		for(const k in data.TL.L){
 			let timeslot=0
+
+			this._layerNameList.push(data.TL.L[k].LN);
+
+			//loop all frame on each layer
 			for(const f of data.TL.L[k].FR){
 				timeslot++
 				maxtimeslot=Math.max(timeslot,maxtimeslot)
+
+				//label name
 				if(f.N){
 					this._LabelList[<string>f.N]=f.I+1;
 				}
+
 				totalFrame=Math.max(totalFrame,f.I+f.DU);
+
+				//loop all element on 1 layer,1 frame
 				for(const e of f.E){
-					//if(e.SI && e.SI.SN)console.log(e.SI.SN)
+					
+					//find remark
 					if(e.SI && e.SI.SN.substring(0,14)=='remark/remark_'){
 						let type:string=e.SI.SN.substring(14);
-						if(type.substring(0,5)=='key'){
-							keyMarker[f.I]=e.SI.IN==""?type.substring(6):e.SI.IN;
-							continue;
-						}
 						this.processRemark(type,String(e.SI.IN).split('$'),f.I+1,f.I+f.DU);
+						remarkCount++;
+					}else if(e.SI && e.SI.SN.substring(0,12)=='remark/geom_'){
+						let type:string=e.SI.SN.substring(12);
+						this.processGeomRemark(type,String(e.SI.IN).split('$'),f.I+1,f.I+f.DU,TMath.m3dto2d(e.SI.M3D));
 						remarkCount++;
 					}else if(e.SI){
 						mcCount++
 					}else if(e.ASI){
 						if(asiCount==0){
-							onlyAsi=e.ASI
+							firstAsi=e.ASI
 						}
 						asiCount++;
 					}
@@ -68,15 +83,22 @@ export default class MCSymbolModel {
 		}
 		this._totalFrame=totalFrame;
 		
-		if(onlyAsi){
+		//if is Special ASI
+		if(firstAsi){
+			
+
 			//change to solid color box asi
 			if(data.SN.substring(0,14)=='solidcolorbox_'){
+
+				//make 1 pixel canvas
 				let canvas = document.createElement('canvas');
 				canvas.width = 1;
 				canvas.height = 1;
 				let ctx = canvas.getContext("2d")!;
 				ctx.fillStyle = "#"+data.SN.substring(14);
 				ctx.fillRect(0, 0, 1, 1);
+				console.log(ctx.fillStyle,data.SN)
+
 				this.specialAsiModel=<AsiModel>{
 					rect:new Rectangle(0,0,1,1),
 					image:'solid',
@@ -86,60 +108,32 @@ export default class MCSymbolModel {
 					matrix:new Matrix()
 				};
 				this.specialAsimatrix=new Matrix();
+				this.specialAsimatrix.d=this.mcModel.partList[firstAsi.N].rect.width
+				this.specialAsimatrix.a=this.mcModel.partList[firstAsi.N].rect.height
 				this._isSpecialASI=true;
-				this.specialAsimatrix=new Matrix();
-				this.specialAsimatrix.d=this.mcModel.partList[onlyAsi.N].rect.width
-				this.specialAsimatrix.a=this.mcModel.partList[onlyAsi.N].rect.height
 				return
 			}
 
-			//change to asi
 			if(asiCount==1 && mcCount==0 && maxtimeslot==1){
-				this._isSpecialASI=true;
-				this.specialAsiModel=this.mcModel.partList[onlyAsi.N];
-				this.specialAsimatrix=TMath.m3dto2d(onlyAsi.M3D);
-				return
-			}
-		}
 
-		/*
-		//process key inn action
-		if(keyMarker.length>0){
-			for(let k in this.actionList){
-				let keynum=0;
-				for(let i=this.actionList[k].begin;i<=this.actionList[k].end;i++){
-					if(keyMarker[i]){
-						const keyname=keyMarker[i]=='auto'?`p${++keynum}`:keyMarker[i];
-						this.actionList[k].keys[keyname]=i
-					}
-				}
+				this._isSpecialASI=true;
+				this.specialAsiModel=this.mcModel.partList[firstAsi.N];
+				this.specialAsimatrix=TMath.m3dto2d(firstAsi.M3D);
 			}
-			console.log(this.actionList)
-			//*process actions
 		}
-		*/
 	}
+
+	//remarks
 
 	public soundRemark:SoundRemark[][]=[];
 	public playRemark:PlayRemark[]=[];
+	public visibleRemarks:boolean[]=[];
 	public scriptRemarks:Dictionary<ScriptRemark>={};
-	//public actionList:Dictionary<action>={};
-
 	public defaultBlendMode:BLEND_MODES=BLEND_MODES.NORMAL;
 	public defaultStopAtEnd:boolean=false;
+	public defaultVisible:boolean=true;
 
-	//special Asi: all child just contain one asi
-	 private _isSpecialASI:boolean=false;
-	 private specialAsiModel?:AsiModel;
-	 public specialAsimatrix?:Matrix;
-	 public makeASI():ASI{
-		 //a.blendMode=this.defaultBlendMode;
-		return new ASI(this.specialAsiModel!,this.name);
-	}
-
-	 public get isSpecialASI():boolean{
-		return this._isSpecialASI;
-	}
+	public extraRemark:Dictionary<ExtraRemark[]>={};
 
 	private processRemark(type:string,args:string[],frame_begin:uint,frame_end:uint){
 		if(type==="sound" || type==="stopAllSound"){
@@ -168,18 +162,42 @@ export default class MCSymbolModel {
 			}
 		}else if(type=='stopAtEnd'){
 			this.defaultStopAtEnd=true;
-		}/*else if(type=='action'){
-			this.actionList[args[0]]={
-				name:args[0],
-				begin:frame_begin,
-				end:frame_end,
-				keys:{}
+		}else if(type=='hideAtStart'){
+			this.defaultVisible=false;
+		}else if(type=='hideHere'){
+			this.visibleRemarks[frame_begin]=false;
+		}else if(type=='showHere'){
+			this.visibleRemarks[frame_begin]=true;
+		}else{
+			if(!this.extraRemark[type]){
+				this.extraRemark[type]=[];
 			}
-		}*/
+			this.extraRemark[type].push({type,frame_begin,frame_end,args:args});
+		}
 	}
 
+	
+	public geomRemarks:GeomRemark[]=[];
+	private processGeomRemark(type:string,args:string[],frame_begin:uint,frame_end:uint,m2d:Matrix){
+		const detail=TMath.m2dDetail(m2d);
+		const gr:GeomRemark={type,frame_begin,frame_end,args:args,x:detail.x,y:detail.y}
+		if(type==="rect"){
+			gr.w=detail.scaleX*100;
+			gr.h=detail.scaleY*100;
+		}else if(type==="circle"){
+			gr.r=detail.scaleX*200;
+		}else if(type==="line"){
+			gr.w=detail.scaleX*100;
+			gr.rotate=detail.rotate;
+		}
+		this.geomRemarks.push(gr)
+	}
+
+	//frame=============================
+
 	private frameDataCache:frameData[]=[]
-	//private childDataCache:any=[];
+	private layerDataCache:layerData[]=[]
+	private childDataCache:Dictionary<childData>={};
 
 	public getFrame(frame:uint):frameData{
 		if(this.frameDataCache[frame]){
@@ -187,72 +205,102 @@ export default class MCSymbolModel {
 		}
 		let FrameData:frameData={child:[],layer:[]};
 		//let FrameData:frameData={child:[],sound:[],script:[],timeline:[],layer:[]};
-
+		let minFrame:uint=0;
 		for(let layer_num:uint=this._data.TL.L.length-1;layer_num>=0;layer_num--){
 			let layer_name=<string>this._data.TL.L[layer_num].LN;
 			if(layer_name.substring(7)=='remark_'){
 				//* remark special layer
 				continue
 			}
+			if(!this.layerDataCache[layer_num]){
+				this.layerDataCache[layer_num]={
+					name:layer_name,
+					isMask:(this._data.TL.L[layer_num].LT==='Clp'),
+					maskBy:this._data.TL.L[layer_num].Clpb
+				}
+			}
 			//Clp=mask,Clpb=mask Layer name
 			let timeslot=0;
 			for(const f of this._data.TL.L[layer_num].FR){
 				timeslot++;
 				if(frame>=f.I && frame <=f.I+f.DU ){
+
+					minFrame=Math.max(minFrame,f.I)
 					const firstframe=f.I;
-					for(const e of f.E){
-					//for(let en:number=f.E.length-1;en>=0;en--){
-						//let e=f.E[en];
-						if(e.SI && e.SI.SN.substring(0,8)=='_remark/'){
+
+					for(let ei:uint=0,et:uint=f.E.length;ei<et;ei++){
+						if(f.E[ei].SI && f.E[ei].SI!.SN.substring(0,7)=='remark/'){
 							continue;
 						}
-
-						let childData:childData={data:undefined,type:MCType.ASI,firstframe,layer:layer_num,timeslot};
-						//*cache too...
-						if(e.SI){
-							if(e.SI.SN.substring(0,7)=='remark/'){
-								/*run remark
-								if(firstframe==frame){
-									const type=e.SI.SN.substring(7)
-									const args=e.SI.IN.split('|')
-								}
-								*/
-								continue
-							}else{
-								childData.data=e.SI
-								childData.type=e.SI.ST
-								FrameData.child.push(childData)
-								//dpo=this.showChild(e.SI,layer_num)
-							}
-						}else if(e.ASI){
-							childData.data=e.ASI
-							FrameData.child.push(childData)
-							//dpo=this.showChild(e.ASI,layer_num)
+						const cacheKey=`${layer_num}.${f.I}.${ei}`;
+						if(this.childDataCache[cacheKey]){
+							FrameData.child.push(this.childDataCache[cacheKey])
+							continue;
 						}
-						
-						//MCEffect.setEffect(dpo,e.C,e.F)
-						//*layer color change
+						let childData:childData={data:undefined,type:MCType.ASI,firstframe,layer:layer_num,timeslot};
+						if(f.E[ei].SI){
+							childData.data=f.E[ei].SI
+							childData.type=f.E[ei].SI!.ST
+						}else if(f.E[ei].ASI){
+							childData.data=f.E[ei].ASI
+						}else{
+							continue;
+						}
+						if(f.DU>1){
+							this.childDataCache[cacheKey]=childData;
+						}
+						FrameData.child.push(childData);
 					}
-					if(layer_name.substring(0,7)=='remark_'){
-						continue;
-					}
-					FrameData.layer[layer_num]={
-						name:layer_name,
-						C:f.C,
-						F:f.F,
-						isMask:(this._data.TL.L[layer_num].LT==='Clp'),//this._data.TL.L[layer_num].LT && 
-						maskBy:this._data.TL.L[layer_num].Clpb
-					};
+					if(!f.C && !f.F){
+						FrameData.layer[layer_num]=this.layerDataCache[layer_num];
+					}else{
+						if(f.C && !this.layerDataCache[layer_num].C){//} && !this.layerDataCache[layer_num].F){
+							this.layerDataCache[layer_num].C=f.C;
+						}
+						if(f.F && !this.layerDataCache[layer_num].F){
+							this.layerDataCache[layer_num].F=f.F;
+						}
+						FrameData.layer[layer_num]=<layerData>{
+							...this.layerDataCache[layer_num],
+							F:f.F,
+							C:f.C
+						};
 
+					}
 					break;
 				}
 			}
 		}
-		this.frameDataCache[frame]=FrameData;
+
+		//cache
+		minFrame++;
+		if(!this.frameDataCache[minFrame]){
+			this.frameDataCache[minFrame]=FrameData
+		}
+		this.frameDataCache[frame]=this.frameDataCache[minFrame];
+
 		return FrameData;
 	}
 
-	//read
+	//special Asi===========================
+	//all child just contain one asi
+	 private _isSpecialASI:boolean=false;
+	 private specialAsiModel?:AsiModel;
+	 public specialAsimatrix?:Matrix;
+	 public get isSpecialASI():boolean{
+		return this._isSpecialASI;
+	}
+
+	//instance=============================
+
+	public makeInstance():MCDisplayObject{
+		if(this.isSpecialASI){
+			return new ASI(this.specialAsiModel!,this.name);
+		}
+		return new MC(this);
+	}
+
+	//read only=============================
 
 	public get isMaster():boolean{
 		return this._isMaster;
@@ -266,7 +314,16 @@ export default class MCSymbolModel {
 		return this._LabelList;
 	}
 
+	public get layerNameList():string[]{
+		return this._layerNameList;
+	}
+
 	public get totalFrames():uint{
 		return this._totalFrame;
 	}
+    
+    public containLabel(_label:string):boolean
+    {
+        return this.LabelList[_label]!==undefined;
+    }
 }

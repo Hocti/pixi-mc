@@ -7,6 +7,7 @@ import {playStatus,playDirection} from './Timeline';
 import Timeline from './Timeline';
 import MCSound from './MCSound';
 import * as TMath from '../utils/TMath';
+import { Container } from '@pixi/display';
 
 export default class MCTimeline extends Timeline{
 	//public get only
@@ -22,6 +23,10 @@ export default class MCTimeline extends Timeline{
 		this.mc=_mc;
 	}
 
+	public onMCAdded(){
+		this.mc.showFrame(1)
+	}
+
 	public onFrameChange(_oldFrame:uint=1){
 		this.remarkSound(this._currentFrame)
 		if(this.mc.type==MCType.MovieClip){
@@ -30,8 +35,6 @@ export default class MCTimeline extends Timeline{
 		}
 		this.emit(timelineEventType.frameChange,{mc:this.mc,oldFrame:_oldFrame,newFrame:this.currentFrame});
 	}
-
-	
 
 	private scriptList:Function[][]=[];
 

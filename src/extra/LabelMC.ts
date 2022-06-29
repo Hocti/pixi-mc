@@ -1,34 +1,49 @@
-import MC from '../MC';
-import {MCType} from '../MCType';
-import MCTimeline from '../MCTimeline';
-import MCSymbolModel from '../MCSymbolModel';
-import MCPlayer from '../MCPlayer';
-import Timeline,{playStatus,playDirection} from '../Timeline';
-import {playTarget} from '../MCStructure';
-import * as TMath from '../../utils/TMath';
+import MC from '../MC/MC';
+import {MCType} from '../MC/MCType';
+import MCTimeline from '../MC/MCTimeline';
+import MCSymbolModel from '../MC/MCSymbolModel';
+import MCPlayer from '../MC/MCPlayer';
+import {playStatus} from '../MC/Timeline';
+import {playTarget} from '../MC/MCStructure';
+import * as TMath from '../utils/TMath';
+//import { Container } from '@pixi/display';
 
 
 export class LabelTimeline extends MCTimeline{
 
     protected targetLabel?:string;
     protected targetFrame:uint;
-    protected playFinish:boolean;
+    protected labelPlayFinish:boolean;
     protected doneCall?:Function;
 
     constructor(_mc:LabelMC){
         super(_mc)
         this.targetFrame=0;
-        this.playFinish=true;
+        this.labelPlayFinish=true;
     }
 
+    //override
+	public onMCAdded(){
+		this.mc.showFrame(1)
+	}
+
 	protected processTick():void{
+        if(!this.labelPlayFinish){
+            this.processLabel()
+        }else{
+			this.processMC()
+            //super.processTick()
+        }
+    }
+
+    protected processLabel():void{
 		if(this._playStatus==playStatus.playing){
 
             const oldFrame:uint=this._currentFrame;
 
-            this._direction=this._currentFrame<this.targetFrame?1:-1;
+            const labelDirection:int=this._currentFrame<this.targetFrame?1:-1;
 
-			this._currentFrameFloat+=this._speed*this._direction;
+			this._currentFrameFloat+=this._speed*labelDirection;
 			let intFrame=Math.ceil(this._currentFrameFloat);
 
             //loop
@@ -41,8 +56,8 @@ export class LabelTimeline extends MCTimeline{
 			intFrame=TMath.clamp(Math.round(this._currentFrameFloat),1,this.totalFrames)
 
             if(
-                (oldFrame>this.targetFrame && intFrame<this.targetFrame && this._direction<0) ||
-                (oldFrame<this.targetFrame && intFrame>this.targetFrame && this._direction>0)
+                (oldFrame>this.targetFrame && intFrame<this.targetFrame && labelDirection<0) ||
+                (oldFrame<this.targetFrame && intFrame>this.targetFrame && labelDirection>0)
             ){
                 intFrame=this.targetFrame
             }
@@ -71,12 +86,12 @@ export class LabelTimeline extends MCTimeline{
             this.targetFrame=_target;
             this.targetLabel=this.getLabel(_target);
         }else{
-            if(this.mc.containLabel(_target)){
+            if(this.mc.symbolModel.containLabel(_target)){
                 this.targetLabel=_target;
                 this.targetFrame=this.labels[_target];
             }
         }
-        this.playFinish=true;
+        this.labelPlayFinish=true;
         this.doneCall=undefined;
     }
 
@@ -85,7 +100,7 @@ export class LabelTimeline extends MCTimeline{
         this.setTarget(_target)
         this.doneCall=_doneCall;
         if(this.currentFrame!==this.targetFrame){
-            this.playFinish=false;
+            this.labelPlayFinish=false;
             this._playStatus=playStatus.playing;
         }else{
             this.playDone();
@@ -108,7 +123,7 @@ export class LabelTimeline extends MCTimeline{
 
     public cancel():void 
     {
-        this.playFinish = true;
+        this.labelPlayFinish = true;
         this._playStatus=playStatus.stop;
         this.doneCall=undefined;
     }
@@ -120,7 +135,7 @@ export class LabelTimeline extends MCTimeline{
 
     public resume():void 
     {
-        if(this._playStatus==playStatus.stop && !this.playFinish){
+        if(this._playStatus==playStatus.stop && !this.labelPlayFinish){
             this._playStatus=playStatus.playing;
         }
     }
@@ -130,18 +145,16 @@ export class LabelTimeline extends MCTimeline{
 export default class LabelMC extends MC{
     
 	constructor(model:MCSymbolModel, _startLabel:string = "",_player:MCPlayer=MCPlayer.getInstance()) {
-		super(model,_player);
-        //console.log(this.containLabel(_startLabel),_startLabel)
-        if(this.containLabel(_startLabel)){
+		super(model,{player:_player});
+        if(this.symbolModel.containLabel(_startLabel)){
             this.timeline.gotoAndStop(_startLabel)
         }
         this.type=MCType.MovieClip
 	}
 
+    //override
 	protected initTimeline():MCTimeline{
-		this.on('added',(_mc)=>{
-            //console.log('added label')
-		})
 		return new LabelTimeline(this);
 	}
+
 }
