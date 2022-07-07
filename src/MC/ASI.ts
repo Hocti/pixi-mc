@@ -6,11 +6,13 @@ export default class ASI extends MCDisplayObject {
 
 	public static MAX_SIDE:uint=2048;
 	public static totalASI:uint=0;
-	public model:AsiModel;
+	private _model:AsiModel;
+	private _specialAsi:boolean;
 
-	constructor(_model:AsiModel,name?:string) {
+	constructor(_model:AsiModel,name?:string,specialasi?:boolean) {
 		super();
-		this.model=_model;
+		this._model=_model;
+		this._specialAsi=specialasi?true:false;
 		if(name){
 			this.name=name
 		}
@@ -23,17 +25,27 @@ export default class ASI extends MCDisplayObject {
 		ASI.totalASI++;
 	}
 
-	public prepareTexture(){
+	public get specialAsi():boolean{
+		return this._specialAsi;
+	}
+
+	public get model():AsiModel{
+		return this._model;
+	}
+
+	public prepareTexture():boolean{
 		if(this.model.texture===undefined){
 			ASI.makeTexture(this.model)
 			this.texture=<Texture>this.model.texture!;
+			return true
 		}
+		return false
 	}
 
 	private static textureCache:Dictionary<Texture>={};
 	private static baseTextureCache:Dictionary<BaseTexture>={};
 
-	public static makeTexture(_model:AsiModel){
+	public static makeTexture(_model:AsiModel):Texture{
 		if(!_model.texture){
 			if(_model.rect.width>ASI.MAX_SIDE || _model.rect.height>ASI.MAX_SIDE){
 				_model.texture=Texture.WHITE;
@@ -55,5 +67,6 @@ export default class ASI extends MCDisplayObject {
 				_model.texture.rotate=2;
 			}
 		}
+		return _model.texture!;
 	}
 }

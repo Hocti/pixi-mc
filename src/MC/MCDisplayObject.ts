@@ -21,6 +21,22 @@ export default abstract class MCDisplayObject extends Sprite{
 		EffectGroupAction.append(this,eg);
 	}
 
+	protected effectChanged:boolean=false;
+
+	public addEffect(effect:EffectGroup,name:string):void{
+		this.extraEffects[name]=effect;
+		this.effectChanged=true;
+	}
+
+	public containEffect(name:string):boolean{
+		return this.extraEffects[name]===undefined;
+	}
+
+	public removeEffect(name:string):void{
+		delete this.extraEffects[name];
+		this.effectChanged=true;
+	}
+
 }
 
 /*

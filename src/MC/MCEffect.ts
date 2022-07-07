@@ -354,7 +354,7 @@ export class EffectGroupAction{
 			visible:true,
 			filters:[],
 			alpha:1,
-			colorMatrix:ColorMatrixAction.create(),
+			//colorMatrix:ColorMatrixAction.create(),
 			blendMode:BLEND_MODES.NORMAL
 		}
 	}
@@ -362,19 +362,19 @@ export class EffectGroupAction{
 	public static clone(_effect:EffectGroup):EffectGroup{
 		return {
 			visible:_effect.visible,
-			filters:_effect.filters,
 			alpha:_effect.alpha,
-			colorMatrix:_effect.colorMatrix,
-			blendMode:_effect.blendMode
+			blendMode:_effect.blendMode,
+			filters:[..._effect.filters],
+			colorMatrix:_effect.colorMatrix?ColorMatrixAction.clone(_effect.colorMatrix):undefined
 		}
 	}
 
 	public static merge(_effect1:EffectGroup,_effect2:EffectGroup):EffectGroup{
 		return {
 			visible:_effect1.visible && _effect2.visible,
-			filters:[..._effect1.filters,..._effect2.filters],
+			filters:[..._effect1.filters,..._effect2.filters],//unique?
 			alpha:_effect1.alpha*_effect2.alpha,
-			colorMatrix:ColorMatrixAction.multiply(_effect1.colorMatrix,_effect2.colorMatrix),
+			colorMatrix:_effect1.colorMatrix&&_effect2.colorMatrix?ColorMatrixAction.multiply(_effect1.colorMatrix,_effect2.colorMatrix):(_effect1.colorMatrix?_effect1.colorMatrix:(_effect2.colorMatrix?_effect2.colorMatrix:undefined)),
 			blendMode:(_effect1.blendMode!==BLEND_MODES.NORMAL?_effect1.blendMode:_effect2.blendMode)
 		}
 	}
@@ -383,8 +383,10 @@ export class EffectGroupAction{
 		_obj.visible=_effect.visible;
 		_obj.alpha=_effect.alpha;
 		_obj.blendMode=_effect.blendMode;
-		_obj.filters=_effect.filters;
-		MCEffect.setColorMatrix(_obj,_effect.colorMatrix,"mixed_")
+		_obj.filters=[...new Set(_effect.filters)];
+		if(_effect.colorMatrix){
+			MCEffect.setColorMatrix(_obj,_effect.colorMatrix,"mixed_")
+		}
 	}
 }
 
@@ -398,7 +400,7 @@ export type EffectGroup={
 	visible:boolean,
 	filters:Filter[],
 	alpha:float,
-	colorMatrix:ColorMatrix,
+	colorMatrix?:ColorMatrix,
 	blendMode:BLEND_MODES
 }
 

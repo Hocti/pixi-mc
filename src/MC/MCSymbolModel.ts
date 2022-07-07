@@ -1,6 +1,7 @@
 import {Matrix,Rectangle} from '@pixi/math';
-import {Texture} from '@pixi/core'
+import {Texture,BufferResource} from '@pixi/core'
 import {BLEND_MODES} from '@pixi/constants';
+import {hashHexToUint8} from '../utils/color';
 
 import MC from './MC';
 import {
@@ -89,22 +90,15 @@ export default class MCSymbolModel {
 
 			//change to solid color box asi
 			if(data.SN.substring(0,14)=='solidcolorbox_'){
-
-				//make 1 pixel canvas
-				let canvas = document.createElement('canvas');
-				canvas.width = 1;
-				canvas.height = 1;
-				let ctx = canvas.getContext("2d")!;
-				ctx.fillStyle = "#"+data.SN.substring(14);
-				ctx.fillRect(0, 0, 1, 1);
-				console.log(ctx.fillStyle,data.SN)
+				const colorHexStr=data.SN.substring(14)
+				const texture=Texture.fromBuffer(hashHexToUint8(colorHexStr),1,1);
 
 				this.specialAsiModel=<AsiModel>{
 					rect:new Rectangle(0,0,1,1),
 					image:'solid',
 					rotated:false,
 					zoom:1,
-					texture:Texture.from(canvas),
+					texture,
 					matrix:new Matrix()
 				};
 				this.specialAsimatrix=new Matrix();
@@ -170,7 +164,7 @@ export default class MCSymbolModel {
 			this.visibleRemarks[frame_begin]=true;
 		}else{
 			if(!this.extraRemark[type]){
-				this.extraRemark[type]=[];
+				this.extraRemark[type]=[]; 
 			}
 			this.extraRemark[type].push({type,frame_begin,frame_end,args:args});
 		}
@@ -180,15 +174,21 @@ export default class MCSymbolModel {
 	public geomRemarks:GeomRemark[]=[];
 	private processGeomRemark(type:string,args:string[],frame_begin:uint,frame_end:uint,m2d:Matrix){
 		const detail=TMath.m2dDetail(m2d);
-		const gr:GeomRemark={type,frame_begin,frame_end,args:args,x:detail.x,y:detail.y}
+		const gr:GeomRemark={type,frame_begin,frame_end,args:args,
+			x:detail.x,
+			y:detail.y
+		}
 		if(type==="rect"){
 			gr.w=detail.scaleX*100;
 			gr.h=detail.scaleY*100;
 		}else if(type==="circle"){
-			gr.r=detail.scaleX*200;
+			gr.w=detail.scaleX*50;
+			gr.h=detail.scaleY*50;
 		}else if(type==="line"){
 			gr.w=detail.scaleX*100;
-			gr.rotate=detail.rotate;
+			gr.rotate=detail.rotation;
+		}else if(type==="point"){
+			gr.rotate=detail.rotation;
 		}
 		this.geomRemarks.push(gr)
 	}
@@ -295,7 +295,7 @@ export default class MCSymbolModel {
 
 	public makeInstance():MCDisplayObject{
 		if(this.isSpecialASI){
-			return new ASI(this.specialAsiModel!,this.name);
+			return new ASI(this.specialAsiModel!,this.name,true);
 		}
 		return new MC(this);
 	}

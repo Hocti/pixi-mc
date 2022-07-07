@@ -11,6 +11,7 @@ import {childData, LoopState,layerData,rawInstenceData, rawAsiData} from './MCSt
 import {MCType} from './MCType';
 import * as TMath from '../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
+import {BLEND_MODES} from '@pixi/constants';
 
 
 type MCOption={
@@ -158,14 +159,26 @@ export default class MC extends MCDisplayObject {
 
 	public showFrame(frame:uint):void{
 		
+		//change effect
 		frame=TMath.clamp(frame,1,this.timeline.totalFrames)
-		//if(this.currShowing == frame)return;
-		this.currShowing= frame
-		
+		if(this.effectChanged){
+			this.effectChanged=false;
+			this.showEffect();
+		}
+
+		//only update contain when frame changed
+		if(this.currShowing == frame && !this.effectChanged)return;
+		this.currShowing= frame;
+
 		const currFrameData=this.symbolModel.getFrame(frame);
 		
 		if(this.symbolModel.visibleRemarks[frame]!==undefined){
 			this.baseEffect.visible=this.symbolModel.visibleRemarks[frame];
+			if(this.baseEffect.visible){
+				this.showEffect();
+			}else{
+				return
+			}
 		}
 
 		for(const k in this.mcChildrenUsed){
@@ -206,9 +219,11 @@ export default class MC extends MCDisplayObject {
 
 				//layer effect
 				if(this.layerEffects[ly.name]){
-					ch.extraEffects['layerEffect']=this.layerEffects[ly.name];
+					ch.addEffect(this.layerEffects[ly.name],'layerEffect')
+					//ch.extraEffects['layerEffect']=;
 				}else if(ch.extraEffects['layerEffect']){
-					delete ch.extraEffects['layerEffect'];
+					ch.removeEffect('layerEffect')
+					//delete ch.extraEffects['layerEffect'];
 				}
 
 				ch.showEffect();
@@ -219,9 +234,6 @@ export default class MC extends MCDisplayObject {
 				}
 			} 
 		}
-
-		
-		this.showEffect();
 
 		//set mask
 		for(let m of setMaskList){
@@ -271,32 +283,37 @@ export default class MC extends MCDisplayObject {
 		return this.maskList[_name];
 	}
 
+
 	protected showChild(obj:childData,frame:uint):MCDisplayObject{
 		const m2d:Matrix=TMath.m3dto2d(obj.data!.M3D)
+		//console.log((<rawInstenceData>obj.data).IN,TMath.m2dDetail(m2d))
+
 		let name:string='';
-		let layerNum=obj.layer;
 		let child:MCDisplayObject;
 		let m2d2:Matrix;
-		if((<rawInstenceData>obj.data).SN !== undefined){
-			[name,child,m2d2]=this.showMC(obj.data! as rawInstenceData,layerNum);
-			//child.transform.setFromMatrix(m2d)
-		}else{
-			[name,child,m2d2]=this.showSprite(obj.data! as rawAsiData,layerNum);
-		}
+		[name,child,m2d2]=this.showChildInner(obj.data!,(<rawInstenceData>obj.data).SN !== undefined,obj.layer)
+		
+		child.transform.setFromMatrix(m2d.append(m2d2))
 
-		child.showEffect();
-		if(this.blendMode!=0){
+		if(this.blendMode!==BLEND_MODES.NORMAL){
 			(<Sprite>child).blendMode=this.blendMode
 		}
 		
-		child.transform.setFromMatrix(m2d.append(m2d2))
 		this.mcChildrenUsed[name]=true;
 		if(!this.mcChildren[name]){
 			this.mcChildren[name]=child;
 			this.addChild(child);
 		}
-		child.visible=true;
+		//child.visible=true;
 		return child;
+	}
+
+	protected showChildInner(data:rawInstenceData | rawAsiData,isMC:boolean,layerNum:uint):[string,MCDisplayObject,Matrix]{
+		if(isMC){
+			return this.showMC(data! as rawInstenceData,layerNum);
+		}else{
+			return this.showSprite(data! as rawAsiData,layerNum);
+		}
 	}
 
 	protected showMC(obj:rawInstenceData,layerNum:uint):[string,MCDisplayObject,Matrix]{
@@ -314,7 +331,7 @@ export default class MC extends MCDisplayObject {
 			mc.name=obj.IN;
 		}
 		if(isASI){//set asi matrix
-			newmatrix=newmatrix.append(this.symbolModel.mcModel.symbolList[obj.SN].specialAsimatrix!).append((<ASI>mc).model.matrix)
+			newmatrix=newmatrix.append(this.symbolModel.mcModel.symbolList[obj.SN].specialAsimatrix!).append((<ASI>mc).model.matrix);
 		}else if(mc instanceof MC){//Graphic Frame
 			if(mc.type==MCType.Graphic){
 				if(obj.FF!=undefined){
@@ -326,14 +343,6 @@ export default class MC extends MCDisplayObject {
 			}
 		}
 
-		/*
-		replacement by empty container
-		if(mc skin changed && change mc exsit){
-			
-		}
-		*/
-
-		//filter
 		MCEffect.setRawColorAndFilter(mc,obj.C,obj.F,"timeline_")
 
 		return [name,mc,newmatrix]
@@ -343,13 +352,7 @@ export default class MC extends MCDisplayObject {
 		const partname:string=obj.N
 
 		const part=this.symbolModel.mcModel.partList[partname];
-		/*re skin
-		if(mc skin changed && change part exsit){
-			part=new skin part
-			matrix chanage
-		}
-		//*clear unsed skin?
-		*/
+		
 		//set asi matrix
 		let newmatrix=part.matrix;
 
@@ -388,13 +391,7 @@ export default class MC extends MCDisplayObject {
 	}
 }
 
-/*extend MC+MC to long mc
-instance/library flyweight
-
-
-combine MC
-
-
+/*
 
 SKIN Object:
 load base

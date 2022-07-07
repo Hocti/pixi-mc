@@ -109,7 +109,7 @@ export default class MCTimeline extends Timeline{
 	public processMC(){
 		if(this._playStatus==playStatus.playing){
 			this._currentFrameFloat+=this._speed*this._direction;
-			let intFrame=Math.ceil(this._currentFrameFloat);
+			let intFrame=Math.round(this._currentFrameFloat);
 			if(this.mc.isScene){
 				//console.log(this.totalFrames,intFrame,this._currentFrameFloat,this.mc.stopAtEnd)
 			}

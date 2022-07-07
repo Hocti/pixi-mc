@@ -57,6 +57,7 @@ export default class MCPlayer {
 			if(!mc.timeline.active)continue
 			if(!mc.worldVisible )continue
 			mc.timeline.processFrame();
+			if(!mc.parent)continue
 			mc.showFrame(mc.timeline.currentFrame);
 		}
 		if(removed>50){

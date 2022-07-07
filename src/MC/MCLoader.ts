@@ -46,6 +46,17 @@ export default class MCLoader extends EventEmitter{
 		return container
 	}
 
+	/*
+	public static async loadModel(_args:folderInfo | string[]):Promise<MCModel>{
+		
+	}
+
+	public static async loadModels(_args:folderInfo[]):Promise<MCModel[]>{
+
+		MCLoader.loadModels()
+	}
+	*/
+
 	public load(_args:folderInfo | string[],_loadcall?:EventEmitter.ListenerFn) {//* in node: rootPath only, or zip
 		let _mc_folder!:folderInfo;
 		let fileList:string[]=[];

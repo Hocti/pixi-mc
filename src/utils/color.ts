@@ -20,6 +20,23 @@ export function hashHexToNum(_s:string):uint{
 	}
 	return Number('0x'+_s)
 }
+export function hashHexToUint8(_s:string):Uint8Array{
+	if(_s.length===6){
+		return Uint8Array.from([
+			parseInt('0x'+_s.substring(0,2)),
+			parseInt('0x'+_s.substring(2,4)),
+			parseInt('0x'+_s.substring(4,6)),
+			255])
+	}else if(_s.length===8){
+		return Uint8Array.from([
+			parseInt('0x'+_s.substring(0,2)),
+			parseInt('0x'+_s.substring(2,4)),
+			parseInt('0x'+_s.substring(4,6)),
+			parseInt('0x'+_s.substring(6,8))
+		])
+	}
+	return Uint8Array.from([0,0,0,0]);
+}
 export function hashHexToRGBA(_s:string):rgb{
 	let num=hashHexToNum(_s)
 	if(num>0xffffff){
