@@ -12,6 +12,7 @@ import {MCType} from './MCType';
 import * as TMath from '../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
 import {BLEND_MODES} from '@pixi/constants';
+import { getTimer } from '../utils/utils';
 
 
 type MCOption={
@@ -283,20 +284,22 @@ export default class MC extends MCDisplayObject {
 		return this.maskList[_name];
 	}
 
-
 	protected showChild(obj:childData,frame:uint):MCDisplayObject{
-		const m2d:Matrix=TMath.m3dto2d(obj.data!.M3D)
+		const m2d:Matrix=TMath.m3dto2d(obj.data!.M3D);
+		
 		//console.log((<rawInstenceData>obj.data).IN,TMath.m2dDetail(m2d))
 
-		let name:string='';
-		let child:MCDisplayObject;
-		let m2d2:Matrix;
-		[name,child,m2d2]=this.showChildInner(obj.data!,(<rawInstenceData>obj.data).SN !== undefined,obj.layer)
+		const isMC:boolean=(<rawInstenceData>obj.data).SN !== undefined;
+		let [name,child,m2d2]=this.showChildInner(obj.data!,isMC,obj.layer);
+
+			(<MC>child).temp_matrix.m2d=m2d;
+			(<MC>child).temp_matrix.m2d2=m2d2;
 		
-		child.transform.setFromMatrix(m2d.append(m2d2))
+		
+		child.transform.setFromMatrix(m2d.append(m2d2));
 
 		if(this.blendMode!==BLEND_MODES.NORMAL){
-			(<Sprite>child).blendMode=this.blendMode
+			(<Sprite>child).blendMode=this.blendMode;
 		}
 		
 		this.mcChildrenUsed[name]=true;
@@ -319,7 +322,7 @@ export default class MC extends MCDisplayObject {
 	protected showMC(obj:rawInstenceData,layerNum:uint):[string,MCDisplayObject,Matrix]{
 		let newmatrix=new Matrix();
 		let name:string=this.getUniName(`L${layerNum}|${obj.SN}|${obj.IN}|${obj.ST}`);
-		let mc=<MCDisplayObject>this.search(name)
+		let mc=<MCDisplayObject>this.search(name);
 		let isASI=this.symbolModel.mcModel.symbolList[obj.SN].isSpecialASI;
 		if(!mc){
 			if(isASI){
@@ -330,26 +333,32 @@ export default class MC extends MCDisplayObject {
 			}
 			mc.name=obj.IN;
 		}
+		//newmatrix.translate(obj.TRP.x,obj.TRP.y)
+
+		(<MC>mc).temp_matrix.TRP=obj.TRP;
+		//console.log(this.pivot)
+
 		if(isASI){//set asi matrix
 			newmatrix=newmatrix.append(this.symbolModel.mcModel.symbolList[obj.SN].specialAsimatrix!).append((<ASI>mc).model.matrix);
 		}else if(mc instanceof MC){//Graphic Frame
 			if(mc.type==MCType.Graphic){
 				if(obj.FF!=undefined){
-					mc.firstFrame=Number(obj.FF)+1
+					mc.firstFrame=Number(obj.FF)+1;
 				}
 				if(obj.LP){
-					mc.loop=obj.LP
+					mc.loop=obj.LP;
 				}
 			}
 		}
 
-		MCEffect.setRawColorAndFilter(mc,obj.C,obj.F,"timeline_")
+
+		MCEffect.setRawColorAndFilter(mc,obj.C,obj.F,"timeline_");
 
 		return [name,mc,newmatrix]
 	}
 
 	protected showSprite(obj:rawAsiData,layerNum:uint):[string,ASI,Matrix]{
-		const partname:string=obj.N
+		const partname:string=obj.N;
 
 		const part=this.symbolModel.mcModel.partList[partname];
 		
@@ -367,18 +376,17 @@ export default class MC extends MCDisplayObject {
 
 	protected getUniName(name:string):string{
 		let num=1;
-		let newname=''
+		let newname='';
 		if(!this.mcChildrenUsed[name]){
-			return name
+			return name;
 		}else{
 			do{
-				newname=`${name}-${++num}`
+				newname=`${name}-${++num}`;
 				if(num>MC.MAX_SAME){
 					console.error('name all fail',newname,name)
 					return newname;
-					break
 				}
-			}while(this.mcChildrenUsed[newname])
+			}while(this.mcChildrenUsed[newname]);
 		}
 		return newname;
 	}

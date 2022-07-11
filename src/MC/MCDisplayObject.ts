@@ -1,12 +1,22 @@
 import { Filter } from '@pixi/core';
 import { Sprite } from '@pixi/sprite';
-
+import {Matrix,Point} from '@pixi/math';
 import {MCEffect,EffectGroup,EffectGroupAction} from './MCEffect';
 
 export default abstract class MCDisplayObject extends Sprite{
 	public filtercache:Dictionary<Filter>={};
 	public baseEffect:EffectGroup;
 	public extraEffects:Dictionary<EffectGroup>={};
+
+
+	public temp_matrix:{
+		m2d?:Matrix,
+		m2d2?:Matrix,
+		TRP?:{
+			x:float,
+			y:float
+		}
+	}={}
 
 	constructor(){
 		super();

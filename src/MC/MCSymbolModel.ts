@@ -61,7 +61,6 @@ export default class MCSymbolModel {
 
 				//loop all element on 1 layer,1 frame
 				for(const e of f.E){
-					
 					//find remark
 					if(e.SI && e.SI.SN.substring(0,14)=='remark/remark_'){
 						let type:string=e.SI.SN.substring(14);
