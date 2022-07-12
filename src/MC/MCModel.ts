@@ -37,12 +37,12 @@ export default class MCModel{
 			}
 		}
 		this.basepath=basepath;
-		if(this.mainSymbolModel.totalFrames==1){
+		if(this.mainSymbolModel.totalFrames===1){
 			this.withScene=true;
 			for(let c of this.mainSymbolModel.getFrame(1).child){
 				const inName:string=(<rawInstenceData>c.data!).IN;
 				const snName:string=(<rawInstenceData>c.data!).SN;
-				if(inName && inName.substring(0,5)=='scene'){
+				if(inName && inName.substring(0,5)==='scene'){
 					this.sceneList[Number(inName.substring(5))]=snName;
 				}else{
 					this.withScene=false;

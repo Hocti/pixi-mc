@@ -2,9 +2,9 @@ import MC from './MC';
 import MCPlayer from './MCPlayer';
 import MCSymbolModel from './MCSymbolModel';
 import MCTimeline from './MCTimeline';
+import {timelineEventType} from './Timeline';
 //import MCDisplayObject from './MCDisplayObject';
 import MCDisplayObject from './MCDisplayObject';
-import {timelineEventType} from './MCEvent';
 
 export default class MCScene extends MCDisplayObject {
 

@@ -1,16 +1,18 @@
 import {Matrix,Rectangle} from '@pixi/math';
 import {Texture,BufferResource} from '@pixi/core'
 import {BLEND_MODES} from '@pixi/constants';
-import {hashHexToUint8} from '../utils/color';
+
 
 import MC from './MC';
-import {
+import MCSprite from './MCSprite';
+import {hashHexToUint8} from '../utils/color';
+
+import {MCType,
 	childData,frameData,rawAsiData,symbolModelData,layerData,
 	FrameLabels, AsiModel,SoundType,m3d,GeomRemark,
 	PlayRemark,SoundRemark,ExtraRemark,ScriptRemark
 } from './MCStructure';//action,
 import MCModel from './MCModel';
-import {MCType} from './MCType';
 import ASI from './ASI';
 import * as TMath from '../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
@@ -32,7 +34,7 @@ export default class MCSymbolModel {
 		this._name=data.SN;
 		this._isMaster=isMaster;
 
-		if(data.SN.substring(0,14)=='remark/remark_')return
+		if(data.SN.substring(0,14)==='remark/remark_')return
 
 		let totalFrame=1;
 		let asiCount=0;
@@ -62,11 +64,11 @@ export default class MCSymbolModel {
 				//loop all element on 1 layer,1 frame
 				for(const e of f.E){
 					//find remark
-					if(e.SI && e.SI.SN.substring(0,14)=='remark/remark_'){
+					if(e.SI && e.SI.SN.substring(0,14)==='remark/remark_'){
 						let type:string=e.SI.SN.substring(14);
 						this.processRemark(type,String(e.SI.IN).split('$'),f.I+1,f.I+f.DU);
 						remarkCount++;
-					}else if(e.SI && e.SI.SN.substring(0,12)=='remark/geom_'){
+					}else if(e.SI && e.SI.SN.substring(0,12)==='remark/geom_'){
 						let type:string=e.SI.SN.substring(12);
 						this.processGeomRemark(type,String(e.SI.IN).split('$'),f.I+1,f.I+f.DU,TMath.m3dto2d(e.SI.M3D));
 						remarkCount++;
@@ -88,11 +90,11 @@ export default class MCSymbolModel {
 			
 
 			//change to solid color box asi
-			if(data.SN.substring(0,14)=='solidcolorbox_'){
+			if(data.SN.substring(0,14)==='solidcolorbox_'){
 				const colorHexStr=data.SN.substring(14)
 				const texture=Texture.fromBuffer(hashHexToUint8(colorHexStr),1,1);
 
-				this.specialAsiModel=<AsiModel>{
+				this.spriteModel=<AsiModel>{
 					rect:new Rectangle(0,0,1,1),
 					image:'solid',
 					rotated:false,
@@ -100,18 +102,18 @@ export default class MCSymbolModel {
 					texture,
 					matrix:new Matrix()
 				};
-				this.specialAsimatrix=new Matrix();
-				this.specialAsimatrix.d=this.mcModel.partList[firstAsi.N].rect.width
-				this.specialAsimatrix.a=this.mcModel.partList[firstAsi.N].rect.height
-				this._isSpecialASI=true;
+				this._spriteMatrix=new Matrix();
+				this._spriteMatrix.d=this.mcModel.partList[firstAsi.N].rect.width
+				this._spriteMatrix.a=this.mcModel.partList[firstAsi.N].rect.height
+				this._isSprite=true;
 				return
 			}
 
-			if(asiCount==1 && mcCount==0 && maxtimeslot==1){
+			if(asiCount===1 && mcCount===0 && maxtimeslot===1){
 
-				this._isSpecialASI=true;
-				this.specialAsiModel=this.mcModel.partList[firstAsi.N];
-				this.specialAsimatrix=TMath.m3dto2d(firstAsi.M3D);
+				this._isSprite=true;
+				this.spriteModel=this.mcModel.partList[firstAsi.N];
+				this._spriteMatrix=TMath.m3dto2d(firstAsi.M3D);
 			}
 		}
 	}
@@ -134,18 +136,18 @@ export default class MCSymbolModel {
 				this.soundRemark[frame_begin]=[]
 			}
 			this.soundRemark[frame_begin].push({type:args[0] as SoundType,soundFile:args[1]});
-		}else if(type=='play' || type=='stop'){
+		}else if(type==='play' || type==='stop'){
 			this.playRemark[frame_begin]={type};
-		}else if(type=='gotoAndPlay' || type=='gotoAndStop' || type=='jump'){
+		}else if(type==='gotoAndPlay' || type==='gotoAndStop' || type==='jump'){
 			if(parseInt(args[1])>0){
 				this.playRemark[frame_begin]={type,frame:parseInt(args[1]),frameNumber:parseInt(args[1])};
 			}else{
 				this.playRemark[frame_begin]={type,frame:args[1],frameLabel:args[1]};
 			}
-		}else if(type=='script'){
+		}else if(type==='script'){
 			const scriptName=args.shift();
 			this.scriptRemarks[scriptName!]={frame:frame_begin,args:args};
-		}else if(type=='blendMode'){
+		}else if(type==='blendMode'){
 
 			const bName:string=(args[0].toUpperCase());
 			
@@ -153,13 +155,13 @@ export default class MCSymbolModel {
 				this.defaultBlendMode=Object.values(BLEND_MODES).indexOf(bName)
 				//BLEND_MODES[bName]
 			}
-		}else if(type=='stopAtEnd'){
+		}else if(type==='stopAtEnd'){
 			this.defaultStopAtEnd=true;
-		}else if(type=='hideAtStart'){
+		}else if(type==='hideAtStart'){
 			this.defaultVisible=false;
-		}else if(type=='hideHere'){
+		}else if(type==='hideHere'){
 			this.visibleRemarks[frame_begin]=false;
-		}else if(type=='showHere'){
+		}else if(type==='showHere'){
 			this.visibleRemarks[frame_begin]=true;
 		}else{
 			if(!this.extraRemark[type]){
@@ -207,7 +209,7 @@ export default class MCSymbolModel {
 		let minFrame:uint=0;
 		for(let layer_num:uint=this._data.TL.L.length-1;layer_num>=0;layer_num--){
 			let layer_name=<string>this._data.TL.L[layer_num].LN;
-			if(layer_name.substring(7)=='remark_'){
+			if(layer_name.substring(7)==='remark_'){
 				//* remark special layer
 				continue
 			}
@@ -228,7 +230,7 @@ export default class MCSymbolModel {
 					const firstframe=f.I;
 
 					for(let ei:uint=0,et:uint=f.E.length;ei<et;ei++){
-						if(f.E[ei].SI && f.E[ei].SI!.SN.substring(0,7)=='remark/'){
+						if(f.E[ei].SI && f.E[ei].SI!.SN.substring(0,7)==='remark/'){
 							continue;
 						}
 						const cacheKey=`${layer_num}.${f.I}.${ei}`;
@@ -283,18 +285,24 @@ export default class MCSymbolModel {
 
 	//special Asi===========================
 	//all child just contain one asi
-	 private _isSpecialASI:boolean=false;
-	 private specialAsiModel?:AsiModel;
-	 public specialAsimatrix?:Matrix;
-	 public get isSpecialASI():boolean{
-		return this._isSpecialASI;
+	 private _isSprite:boolean=false;
+	 private spriteModel?:AsiModel;
+	 private _spriteMatrix?:Matrix;
+	 public get isSprite():boolean{
+		return this._isSprite;
 	}
+	public get spriteMatrix():Matrix{
+		if(!this._spriteMatrix){
+			return new Matrix();
+		}
+	   return this._spriteMatrix;
+   }
 
 	//instance=============================
 
 	public makeInstance():MCDisplayObject{
-		if(this.isSpecialASI){
-			return new ASI(this.specialAsiModel!,this.name,true);
+		if(this.isSprite){
+			return new MCSprite(this.spriteModel!,this.name,this._spriteMatrix!);
 		}
 		return new MC(this);
 	}

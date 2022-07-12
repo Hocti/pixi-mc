@@ -1,11 +1,25 @@
 import {Matrix,Rectangle} from '@pixi/math';;
 import {Texture} from '@pixi/core';
 import { DisplayObject } from '@pixi/display';
-
-import {MCType} from './MCType'
 import MCModel from './MCModel'
 
-//structure
+//MC processed data structure
+
+export type frameData={
+	child:childData[],
+	/*
+	sound:any[],
+	*/
+	layer:layerData[]
+}
+
+export type childData={
+	data?:rawInstenceData | rawAsiData,
+	type:MCType,
+	firstframe:uint,
+	layer:uint,
+	timeslot:uint
+}
 
 export type layerData={
 	name:string,
@@ -24,7 +38,7 @@ export type AsiModel={
 	texture?:Texture
 }
 
-//remark
+//remark===================
 
 export enum SoundType {
     SoundEffect='se',
@@ -72,8 +86,7 @@ export type GeomRemark={
 }
 
 
-//
-
+//=========================
 
 export type MCLoadedEvent={
 	model:MCModel,
@@ -83,23 +96,7 @@ export type MCLoadedEvent={
 export type FrameLabels=Dictionary<uint>;
 export type FrameAction=string[];
 
-//JSON type
-
-export type frameData={
-	child:childData[],
-	/*
-	sound:any[],
-	*/
-	layer:layerData[]
-}
-
-export type childData={
-	data?:rawInstenceData | rawAsiData,
-	type:MCType,
-	firstframe:uint,
-	layer:uint,
-	timeslot:uint
-}
+//RAW spriteSheet JSON===========================
 
 export type spriteData={
 	ATLAS:{
@@ -128,6 +125,8 @@ type rawSprite={
 		rotated: boolean
 	}
 }
+
+//RAW animation JSON===========================
 
 export type fullmodelData={
 	AN:symbolModelData,//root symbol
@@ -186,6 +185,13 @@ export type rawInstenceData={
 	M3D:m3d,
 	C?:colorData,
 	F?:filterData
+}
+
+export enum MCType{
+	MovieClip='MC',
+	Button='B',
+	Graphic='G',
+	ASI='asi'
 }
 
 export type m3d=[float, ...Array<float>] & {length: 16};

@@ -9,6 +9,7 @@ export type action={
 	end:uint,
 	keys:Dictionary<uint>
 }
+/*
 export type actorInfo={
 	mcModel:MCSymbolModel,
 	scale:float,
@@ -57,9 +58,9 @@ export class MCActor extends MCDisplayObject{
 				}
 			}
 			ratio=TMath.clamp(ratio,0,1);
-			if(ratio==0){
+			if(ratio===0){
 				this.showActionFrame(action_name,start_f)
-			}else if(ratio==1){
+			}else if(ratio===1){
 				this.showActionFrame(action_name,end_f)
 			}else{
 				this.showActionFrame(action_name,end_f+(end_f-start_f)*ratio,half_frame)
@@ -74,3 +75,4 @@ export class MCActor extends MCDisplayObject{
 	}
 
 }
+*/

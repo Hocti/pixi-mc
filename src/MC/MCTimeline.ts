@@ -1,9 +1,7 @@
-import {MCType} from './MCType';
-import {timelineEventType} from './MCEvent';
-import {FrameLabels,LoopState, SoundType,SoundRemark} from './MCStructure';
+import {MCType,FrameLabels,LoopState, SoundType,SoundRemark} from './MCStructure';
 import MCScene from './MCScene';
 import MC from './MC';
-import {playStatus,playDirection} from './Timeline';
+import {playStatus,playDirection,timelineEventType} from './Timeline';
 import Timeline from './Timeline';
 import MCSound from './MCSound';
 import * as TMath from '../utils/TMath';
@@ -29,7 +27,7 @@ export default class MCTimeline extends Timeline{
 
 	public onFrameChange(_oldFrame:uint=1){
 		this.remarkSound(this._currentFrame)
-		if(this.mc.type==MCType.MovieClip){
+		if(this.mc.type===MCType.MovieClip){
 			this.remarkPlay(this._currentFrame)
 			this.remarkScript(this._currentFrame)
 		}
@@ -74,17 +72,17 @@ export default class MCTimeline extends Timeline{
 	private remarkPlay(_f:uint):void{
 		if(this.mc.symbolModel.playRemark[_f]){
 			let type:string=this.mc.symbolModel.playRemark[_f].type;
-			if(type=='play'){
+			if(type==='play'){
 				this.play();
-			}else if(type=='stop'){
+			}else if(type==='stop'){
 				this.stop();
 			}else{
 				let frame=<uint | string>this.mc.symbolModel.playRemark[_f].frame;
-				if(type=='gotoAndPlay'){
+				if(type==='gotoAndPlay'){
 					this.gotoAndPlay(frame)
-				}else if(type=='gotoAndStop'){
+				}else if(type==='gotoAndStop'){
 					this.gotoAndStop(frame)
-				}else if(type=='goto'){
+				}else if(type==='goto'){
 					this.goto(frame)
 				}
 			}
@@ -107,7 +105,7 @@ export default class MCTimeline extends Timeline{
 
 
 	public processMC(){
-		if(this._playStatus==playStatus.playing){
+		if(this._playStatus===playStatus.playing){
 			this._currentFrameFloat+=this._speed*this._direction;
 			let intFrame=Math.round(this._currentFrameFloat);
 			if(this.mc.isScene){
@@ -174,11 +172,11 @@ export default class MCTimeline extends Timeline{
 
 	protected processTick():void{
 		//need change to state?
-		if(this.mc.type==MCType.MovieClip){
+		if(this.mc.type===MCType.MovieClip){
 			this.processMC()
-		}else if(this.mc.type==MCType.Graphic){
+		}else if(this.mc.type===MCType.Graphic){
 			this.processG()
-		}else if(this.mc.type==MCType.Button){
+		}else if(this.mc.type===MCType.Button){
 			this.processB()
 		}else{
 			super.processTick();

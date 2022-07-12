@@ -9,11 +9,6 @@ import * as TMath from '../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
 import {colorData,filterData} from './MCStructure'
 
-export enum TintType{
-	none,
-	flash,
-	over
-}
 
 const DELTA_INDEX:float[] = [
 	0,    0.01, 0.02, 0.04, 0.05, 0.06, 0.07, 0.08, 0.1,  0.11,
@@ -28,6 +23,20 @@ const DELTA_INDEX:float[] = [
 	7.3,  7.5,  7.8,  8.0,  8.4,  8.7,  9.0,  9.4,  9.6,  9.8, 
 	10.0
 ];
+
+export enum TintType{
+	none,
+	flash,
+	over
+}
+
+export type EffectGroup={
+	visible:boolean,
+	filters:Filter[],
+	alpha:float,
+	colorMatrix?:ColorMatrix,
+	blendMode:BLEND_MODES
+}
 
 export class ColorMatrixAction{
 	
@@ -199,7 +208,7 @@ export class ColorMatrixAction{
 			x = 50+p_val/100*50
 		} else {
 			x = p_val%1;
-			if (x == 0) {
+			if (x === 0) {
 				x = DELTA_INDEX[p_val];
 			} else {
 				x = DELTA_INDEX[(p_val<<0)]*(1-x)+DELTA_INDEX[(p_val<<0)+1]*x;
@@ -215,6 +224,144 @@ export class ColorMatrixAction{
 			//0, 0, 0, 0, 1
 		];
 		return cmatrix;
+	}
+
+}
+
+export class ColorChange{
+	
+	private _brightness:float=0;
+	private _saturation:float=0;
+	private _hue:float=0;
+	private _contrast:float=0;
+
+	private _tintColor:uint=0;
+	private _tintRate:float=0;
+	private _tintType:TintType=TintType.none;
+
+	public _colorMatrix:ColorMatrix;
+
+	constructor(
+			brightness:float=0,
+			hue:float=0,
+			saturation:float=0,
+			contrast:float=0,
+			tintColor:uint=0,
+			tintRate:float=0,
+			tintType:TintType=TintType.none
+		){
+		this._brightness=brightness;
+		this._saturation=saturation;
+		this._hue=hue;
+		this._contrast=contrast;
+
+		this._tintColor=tintColor;
+		this._tintRate=tintRate;
+		this._tintType=tintType;
+
+		this._colorMatrix=this.renew();
+	}
+
+	public get brightness():float{
+		return this._brightness;
+	}
+
+	public get hue():float{
+		return this._hue;
+	}
+
+	public get saturation():float{
+		return this._saturation;
+	}
+
+	public get contrast():float{
+		return this._contrast;
+	}
+
+	public get tintColor():uint{
+		return this._tintColor;
+	}
+
+	public get tintRate():float{
+		return this._tintRate;
+	}
+
+	public get tintType():TintType{
+		return this._tintType;
+	}
+
+	public get colorMatrix():ColorMatrix{
+		return this._colorMatrix;
+	}
+
+
+	public set brightness(brightness:float){
+		this._brightness=brightness;
+		this.renew();
+	}
+
+	public set hue(hue:float){
+		this._hue=hue;
+		this.renew();
+	}
+
+	public set saturation(saturation:float){
+		this._saturation=saturation;
+		this.renew();
+	}
+
+	public set contrast(contrast:float){
+		this._contrast=contrast;
+		this.renew();
+	}
+
+	public set tintColor(_color:uint | string){
+		if(Number(_color)!==NaN){
+			this._tintColor=<uint>_color;
+		}else{
+			this._tintColor=Color.hashHexToNum(<string>_color)
+		}
+		
+		if(this._tintType===TintType.none){
+			this._tintType=TintType.over;
+		}
+		this.renew();
+	}
+
+	public set tintOver(_rate:float){
+		this._tintRate=_rate;
+		this._tintType=TintType.flash;
+		this.renew();
+	}
+
+	public clearTintOver(){
+		this._tintType=TintType.none;
+		this.renew();
+	}
+
+	private renew():ColorMatrix{
+		let m=ColorMatrixAction.create();
+
+		if(this._tintType===TintType.flash){
+			m=ColorMatrixAction.multiply(m,ColorMatrixAction.tint(this._tintColor,this._tintRate))
+		}else if(this._tintType===TintType.over){
+			m=ColorMatrixAction.multiply(m,ColorMatrixAction.tintOver(this._tintColor))
+		}
+
+		if(this._brightness!=0){
+			m=ColorMatrixAction.multiply(m,ColorMatrixAction.brightness(this._brightness))
+		}
+		if(this._hue!=0){
+			m=ColorMatrixAction.multiply(m,ColorMatrixAction.hue(this._hue))
+		}
+		if(this._saturation!=0){
+			m=ColorMatrixAction.multiply(m,ColorMatrixAction.saturation(this._saturation))
+		}
+		if(this._contrast!=0){
+			m=ColorMatrixAction.multiply(m,ColorMatrixAction.contrast(this._contrast))
+		}
+		this._colorMatrix=m;
+		return m
 	}
 
 }
@@ -328,17 +475,17 @@ export class MCEffect {
 	private static getFilterCache(obj:MCDisplayObject,_key:string,_prefix:string='',_option?:GlowFilterOptions):Filter{
 		const cacheName=`${_prefix}${_key}`
 		if(!obj.filtercache[cacheName]){
-			if(_key=="ColorMatrixFilter"){
+			if(_key==="ColorMatrixFilter"){
 				obj.filtercache[cacheName]=new ColorMatrixFilter()
-			}else if(_key=="BlurFilter"){
+			}else if(_key==="BlurFilter"){
 				obj.filtercache[cacheName]=new BlurFilter()
-			}else if(_key=="DropShadowFilter"){
+			}else if(_key==="DropShadowFilter"){
 				obj.filtercache[cacheName]=new DropShadowFilter()
-			}else if(_key=="GlowFilter"){
+			}else if(_key==="GlowFilter"){
 				obj.filtercache[cacheName]=new GlowFilter(_option)
-			}else if(_key=="BevelFilter"){
+			}else if(_key==="BevelFilter"){
 				obj.filtercache[cacheName]=new BevelFilter()
-			}else if(_key=="AdjustmentFilter"){
+			}else if(_key==="AdjustmentFilter"){
 				obj.filtercache[cacheName]=new ColorMatrixFilter()
 				//obj.filtercache[cacheName]=new AdjustmentFilter()
 			}
@@ -388,156 +535,4 @@ export class EffectGroupAction{
 			MCEffect.setColorMatrix(_obj,_effect.colorMatrix,"mixed_")
 		}
 	}
-}
-
-
-
-
-
-
-
-export type EffectGroup={
-	visible:boolean,
-	filters:Filter[],
-	alpha:float,
-	colorMatrix?:ColorMatrix,
-	blendMode:BLEND_MODES
-}
-
-export class ColorChange{
-	
-	private _brightness:float=0;
-	private _saturation:float=0;
-	private _hue:float=0;
-	private _contrast:float=0;
-
-	private _tintColor:uint=0;
-	private _tintRate:float=0;
-	private _tintType:TintType=TintType.none;
-
-	public _colorMatrix:ColorMatrix;
-
-	constructor(
-			brightness:float=0,
-			hue:float=0,
-			saturation:float=0,
-			contrast:float=0,
-			tintColor:uint=0,
-			tintRate:float=0,
-			tintType:TintType=TintType.none
-		){
-		this._brightness=brightness;
-		this._saturation=saturation;
-		this._hue=hue;
-		this._contrast=contrast;
-
-		this._tintColor=tintColor;
-		this._tintRate=tintRate;
-		this._tintType=tintType;
-
-		this._colorMatrix=this.renew();
-	}
-
-	public get brightness():float{
-		return this._brightness;
-	}
-
-	public get hue():float{
-		return this._hue;
-	}
-
-	public get saturation():float{
-		return this._saturation;
-	}
-
-	public get contrast():float{
-		return this._contrast;
-	}
-
-	public get tintColor():uint{
-		return this._tintColor;
-	}
-
-	public get tintRate():float{
-		return this._tintRate;
-	}
-
-	public get tintType():TintType{
-		return this._tintType;
-	}
-
-	public get colorMatrix():ColorMatrix{
-		return this._colorMatrix;
-	}
-
-
-	public set brightness(brightness:float){
-		this._brightness=brightness;
-		this.renew();
-	}
-
-	public set hue(hue:float){
-		this._hue=hue;
-		this.renew();
-	}
-
-	public set saturation(saturation:float){
-		this._saturation=saturation;
-		this.renew();
-	}
-
-	public set contrast(contrast:float){
-		this._contrast=contrast;
-		this.renew();
-	}
-
-	public set tintColor(_color:uint | string){
-		if(Number(_color)!==NaN){
-			this._tintColor=<uint>_color;
-		}else{
-			this._tintColor=Color.hashHexToNum(<string>_color)
-		}
-		
-		if(this._tintType==TintType.none){
-			this._tintType=TintType.over;
-		}
-		this.renew();
-	}
-
-	public set tintOver(_rate:float){
-		this._tintRate=_rate;
-		this._tintType=TintType.flash;
-		this.renew();
-	}
-
-	public clearTintOver(){
-		this._tintType=TintType.none;
-		this.renew();
-	}
-
-	private renew():ColorMatrix{
-		let m=ColorMatrixAction.create();
-
-		if(this._tintType===TintType.flash){
-			m=ColorMatrixAction.multiply(m,ColorMatrixAction.tint(this._tintColor,this._tintRate))
-		}else if(this._tintType===TintType.over){
-			m=ColorMatrixAction.multiply(m,ColorMatrixAction.tintOver(this._tintColor))
-		}
-
-		if(this._brightness!=0){
-			m=ColorMatrixAction.multiply(m,ColorMatrixAction.brightness(this._brightness))
-		}
-		if(this._hue!=0){
-			m=ColorMatrixAction.multiply(m,ColorMatrixAction.hue(this._hue))
-		}
-		if(this._saturation!=0){
-			m=ColorMatrixAction.multiply(m,ColorMatrixAction.saturation(this._saturation))
-		}
-		if(this._contrast!=0){
-			m=ColorMatrixAction.multiply(m,ColorMatrixAction.contrast(this._contrast))
-		}
-		this._colorMatrix=m;
-		return m
-	}
-
 }

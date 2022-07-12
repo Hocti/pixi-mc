@@ -42,7 +42,7 @@ export class FileList {
 		let l:uint=_path.length;
 		let arr:fileInfo[]=[];
 		for(let k in this.allFiles){
-			if(k.substring(0,l)==_path){
+			if(k.substring(0,l)===_path){
 				if(!_subfolder && k.substring(l+1).indexOf('/')>0){
 					continue
 				}

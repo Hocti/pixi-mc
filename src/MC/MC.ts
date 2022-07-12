@@ -7,12 +7,12 @@ import MCTimeline from './MCTimeline';
 import MCPlayer from './MCPlayer';
 import {ColorMatrixAction,MCEffect,EffectGroup,EffectGroupAction} from './MCEffect';
 import ASI from './ASI';
-import {childData, LoopState,layerData,rawInstenceData, rawAsiData} from './MCStructure';
-import {MCType} from './MCType';
+import {MCType,childData, LoopState,layerData,rawInstenceData, rawAsiData} from './MCStructure';
 import * as TMath from '../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
 import {BLEND_MODES} from '@pixi/constants';
 import { getTimer } from '../utils/utils';
+import MCSprite from './MCSprite';
 
 
 type MCOption={
@@ -115,7 +115,7 @@ export default class MC extends MCDisplayObject {
 	public searchChildBySymbolName(_name:string){
 		for(const c of this.children){
 			if(c instanceof MC){
-				if((<MC>c).symbolModel.name==_name){
+				if((<MC>c).symbolModel.name===_name){
 					return c;
 				}
 			}
@@ -143,7 +143,7 @@ export default class MC extends MCDisplayObject {
 	public set type(_type:MCType){
 		if(this._type!=_type){
 			this._type=_type;
-			if(_type==MCType.Button){
+			if(_type===MCType.Button){
 				this.buttonMode=true;
 				this.interactive = true;
 			}else{
@@ -168,7 +168,7 @@ export default class MC extends MCDisplayObject {
 		}
 
 		//only update contain when frame changed
-		if(this.currShowing == frame && !this.effectChanged)return;
+		if(this.currShowing === frame && !this.effectChanged)return;
 		this.currShowing= frame;
 
 		const currFrameData=this.symbolModel.getFrame(frame);
@@ -194,7 +194,7 @@ export default class MC extends MCDisplayObject {
 		for(let c of currFrameData.child){
 			ly=currFrameData.layer[c.layer];
 			ch=this.showChild(c,frame)
-			if(c.type==MCType.Graphic){
+			if(c.type===MCType.Graphic){
 				(<MC>ch).graphic_start=0;//c.firstframe-frame;
 				
 			}
@@ -249,7 +249,7 @@ export default class MC extends MCDisplayObject {
 		for(const k in this.mcChildrenUsed){
 			//this.mcChildren[k].visible=this.mcChildrenUsed[k]
 			if(!this.mcChildrenUsed[k]){
-				if(this.mcChildren[k].parent==this){
+				if(this.mcChildren[k].parent===this){
 					this.removeChild(this.mcChildren[k])
 				}
 				this.mcChildren[k].visible=false;
@@ -315,7 +315,7 @@ export default class MC extends MCDisplayObject {
 		if(isMC){
 			return this.showMC(data! as rawInstenceData,layerNum);
 		}else{
-			return this.showSprite(data! as rawAsiData,layerNum);
+			return this.showASI(data! as rawAsiData,layerNum);
 		}
 	}
 
@@ -323,10 +323,10 @@ export default class MC extends MCDisplayObject {
 		let newmatrix=new Matrix();
 		let name:string=this.getUniName(`L${layerNum}|${obj.SN}|${obj.IN}|${obj.ST}`);
 		let mc=<MCDisplayObject>this.search(name);
-		let isASI=this.symbolModel.mcModel.symbolList[obj.SN].isSpecialASI;
+		let isSprite=this.symbolModel.mcModel.symbolList[obj.SN].isSprite;
 		if(!mc){
-			if(isASI){
-				mc=this.symbolModel.mcModel.symbolList[obj.SN].makeInstance()//*isSpecialASI
+			if(isSprite){
+				mc=this.symbolModel.mcModel.symbolList[obj.SN].makeInstance()//*isSprite
 			}else{
 				mc=new MC(this.symbolModel.mcModel.symbolList[obj.SN],{player:this.player});
 				(<MC>mc).type=obj.ST;
@@ -338,10 +338,10 @@ export default class MC extends MCDisplayObject {
 		(<MC>mc).temp_matrix.TRP=obj.TRP;
 		//console.log(this.pivot)
 
-		if(isASI){//set asi matrix
-			newmatrix=newmatrix.append(this.symbolModel.mcModel.symbolList[obj.SN].specialAsimatrix!).append((<ASI>mc).model.matrix);
+		if(isSprite){//set asi matrix
+			//newmatrix=newmatrix.append(this.symbolModel.mcModel.symbolList[obj.SN].spriteMatrix!).append((<ASI>mc).model.matrix);
 		}else if(mc instanceof MC){//Graphic Frame
-			if(mc.type==MCType.Graphic){
+			if(mc.type===MCType.Graphic){
 				if(obj.FF!=undefined){
 					mc.firstFrame=Number(obj.FF)+1;
 				}
@@ -357,7 +357,7 @@ export default class MC extends MCDisplayObject {
 		return [name,mc,newmatrix]
 	}
 
-	protected showSprite(obj:rawAsiData,layerNum:uint):[string,ASI,Matrix]{
+	protected showASI(obj:rawAsiData,layerNum:uint):[string,ASI,Matrix]{
 		const partname:string=obj.N;
 
 		const part=this.symbolModel.mcModel.partList[partname];

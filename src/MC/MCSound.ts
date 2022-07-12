@@ -23,7 +23,7 @@ export default class MCSound{
 			if(Loader.shared.resources[filepath]){
 				if(_soundRemark.type===SoundType.SoundEffect){
 					MCSound.playSE(filepath)
-				}else if(_soundRemark.type==SoundType.BackgroundMusic){
+				}else if(_soundRemark.type===SoundType.BackgroundMusic){
 					MCSound.playBGM(filepath)
 				}
 				//*remove after played?

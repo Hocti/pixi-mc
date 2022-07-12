@@ -8,7 +8,7 @@ export default abstract class MCDisplayObject extends Sprite{
 	public baseEffect:EffectGroup;
 	public extraEffects:Dictionary<EffectGroup>={};
 
-
+	//debug
 	public temp_matrix:{
 		m2d?:Matrix,
 		m2d2?:Matrix,

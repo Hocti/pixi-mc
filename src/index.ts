@@ -1,6 +1,4 @@
-export * as MCType from './MC/MCType';
 export * as MCStructure from './MC/MCStructure';
-export {timelineEventType} from './MC/MCEvent';
 
 export {MCEffect,ColorMatrixAction,ColorChange,EffectGroup,EffectGroupAction,TintType} from './MC/MCEffect';
 export {getTimer} from './utils/utils';
@@ -37,9 +35,7 @@ export {
 export {MCEffect,effect,ColorChange,ColorMatrixAction} from './MC/MCEffect';
 
 //type enum
-export * as MCType from './MC/MCType';
 export * as MCStructure from './MC/MCStructure';
-export {timelineEventType} from './MC/MCEvent';
 
 export * from './MC/MCDisplayObject';
 export * from './MC/ASI';

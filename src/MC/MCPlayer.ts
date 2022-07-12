@@ -39,7 +39,7 @@ export default class MCPlayer {
 		
 		this.realFloatFrame+=delta*this.fps*(1/MCPlayer.ticker.FPS )
 		const realIntFrame:uint=Math.round(this.realFloatFrame);
-		if(realIntFrame==this.currFrame){
+		if(realIntFrame===this.currFrame){
 			//*or do half frame
 			return
 		}

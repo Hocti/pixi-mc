@@ -1,10 +1,9 @@
 import MC from '../MC/MC';
-import {MCType} from '../MC/MCType';
 import MCTimeline from '../MC/MCTimeline';
 import MCSymbolModel from '../MC/MCSymbolModel';
 import MCPlayer from '../MC/MCPlayer';
 import {playStatus} from '../MC/Timeline';
-import {playTarget} from '../MC/MCStructure';
+import {MCType,playTarget} from '../MC/MCStructure';
 import * as TMath from '../utils/TMath';
 //import { Container } from '@pixi/display';
 
@@ -37,7 +36,7 @@ export class LabelTimeline extends MCTimeline{
     }
 
     protected processLabel():void{
-		if(this._playStatus==playStatus.playing){
+		if(this._playStatus===playStatus.playing){
 
             const oldFrame:uint=this._currentFrame;
 
@@ -135,7 +134,7 @@ export class LabelTimeline extends MCTimeline{
 
     public resume():void 
     {
-        if(this._playStatus==playStatus.stop && !this.labelPlayFinish){
+        if(this._playStatus===playStatus.stop && !this.labelPlayFinish){
             this._playStatus=playStatus.playing;
         }
     }
