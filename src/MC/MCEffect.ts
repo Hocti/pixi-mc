@@ -1,13 +1,14 @@
 import { Filter } from '@pixi/core';
 import { BlurFilter } from '@pixi/filter-blur';
 import { ColorMatrixFilter,ColorMatrix} from '@pixi/filter-color-matrix';
-import {BevelFilter,DropShadowFilter,GlowFilter,GlowFilterOptions} from 'pixi-filters';
+import {BevelFilter,DropShadowFilter,GlowFilter,GlowFilterOptions,MultiColorReplaceFilter} from 'pixi-filters';
 import {BLEND_MODES} from '@pixi/constants';
 
 import * as Color from '../utils/color';
 import * as TMath from '../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
 import {colorData,filterData} from './MCStructure'
+import MC from './MC'
 
 
 const DELTA_INDEX:float[] = [
@@ -23,6 +24,8 @@ const DELTA_INDEX:float[] = [
 	7.3,  7.5,  7.8,  8.0,  8.4,  8.7,  9.0,  9.4,  9.6,  9.8, 
 	10.0
 ];
+declare type Color = number;
+const baseTintColors=[0xff0000,0xff00,0xff,0xffff00,0xff00ff,0xffff];
 
 export enum TintType{
 	none,
@@ -392,7 +395,7 @@ export class MCEffect {
 				currfilter.push(b)
 			}
 			if(_fData.GF){//glow
-				let f=<GlowFilter>MCEffect.getFilterCache(obj,'GlowFilter',_prefix,<GlowFilterOptions>{
+				let f=<GlowFilter>MCEffect.getFilterCache(obj,'GlowFilter',_prefix,{
 					quality:_fData.GF.Q/100,
 					distance:_fData.GF.BLX
 				});
@@ -471,8 +474,46 @@ export class MCEffect {
 		//TODO: remove unuse filter?
 		obj.baseEffect.filters=currfilter;
 	}
+
+	public static tint(obj:MCDisplayObject,colors:uint[],bw?:{black?:uint,white?:uint},epsilon:float=0.01):void{
+		const tintArray:[Color, Color][]=[];
+		for(let i:uint=0,t:uint=Math.min(colors.length,6);i<t;i++){
+			tintArray.push([baseTintColors[i],colors[i]]);
+		}
+		if(bw){
+			if(bw.black!==undefined){
+				tintArray.push([0,bw.black]);
+			}
+			if(bw.white!==undefined){
+				tintArray.push([0xffffff,bw.white]);
+			}
+		}
+		//console.log(tintArray)
+		if(!obj.filtercache['multiTint']){
+			obj.filtercache['multiTint']=new MultiColorReplaceFilter(tintArray,epsilon,tintArray.length);
+		}else{
+			(<MultiColorReplaceFilter>obj.filtercache['multiTint']).replacements=tintArray;
+			(<MultiColorReplaceFilter>obj.filtercache['multiTint']).epsilon=epsilon;
+		}
+		if(obj.filters?.indexOf(obj.filtercache['multiTint'])===-1){
+			obj.filters?.push(obj.filtercache['multiTint'])
+		}
+		//console.log(obj.filters,obj.filtercache)
+		//obj.cacheAsBitmap=true;
+	}
+
+	public static removeTint(obj:MCDisplayObject):void{
+		if(obj.filtercache['multiTint']){
+			const fid:int=obj.filters!.indexOf(obj.filtercache['multiTint'])
+			if(fid>=0){
+				obj.filters!.splice(fid, 1);
+			}
+			//obj.filtercache['multiTint'].destroy();
+			console.log(obj.filters,obj.filtercache)
+		}
+	}
 	
-	private static getFilterCache(obj:MCDisplayObject,_key:string,_prefix:string='',_option?:GlowFilterOptions):Filter{
+	private static getFilterCache(obj:MCDisplayObject,_key:string,_prefix:string='',_option?:{quality:float,distance:float}):Filter{
 		const cacheName=`${_prefix}${_key}`
 		if(!obj.filtercache[cacheName]){
 			if(_key==="ColorMatrixFilter"){
@@ -482,7 +523,10 @@ export class MCEffect {
 			}else if(_key==="DropShadowFilter"){
 				obj.filtercache[cacheName]=new DropShadowFilter()
 			}else if(_key==="GlowFilter"){
-				obj.filtercache[cacheName]=new GlowFilter(_option)
+				obj.filtercache[cacheName]=new GlowFilter(<GlowFilterOptions>{
+					quality:_option?_option.quality:1,
+					distance:_option?_option.distance:10
+				})
 			}else if(_key==="BevelFilter"){
 				obj.filtercache[cacheName]=new BevelFilter()
 			}else if(_key==="AdjustmentFilter"){
@@ -516,7 +560,14 @@ export class EffectGroupAction{
 		}
 	}
 
+	public static equalSimple(_effect1:EffectGroup,_effect2:EffectGroup):boolean{
+		return _effect1.visible==_effect2.visible && 
+		_effect1.alpha==_effect2.alpha && 
+		_effect1.blendMode==_effect2.blendMode
+	}
+
 	public static merge(_effect1:EffectGroup,_effect2:EffectGroup):EffectGroup{
+		//console.log('merge,',_effect1.blendMode,_effect2.blendMode)
 		return {
 			visible:_effect1.visible && _effect2.visible,
 			filters:[..._effect1.filters,..._effect2.filters],//unique?
@@ -527,6 +578,12 @@ export class EffectGroupAction{
 	}
 
 	public static append(_obj:MCDisplayObject,_effect:EffectGroup):void{
+		/*
+		if(_obj instanceof  MC && (<MC>_obj).symbolModel.name==='Symbol 11'){
+			console.log('append,',_effect.blendMode)
+		}
+		*/
+
 		_obj.visible=_effect.visible;
 		_obj.alpha=_effect.alpha;
 		_obj.blendMode=_effect.blendMode;

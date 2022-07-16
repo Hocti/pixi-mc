@@ -30,7 +30,7 @@ export default class MCModel{
 			this.preloadTexture();
 		}
 
-		this.mainSymbolModel=this.processAnimationData(animation.AN,true)
+		this.mainSymbolModel=this.processAnimationData(animation.AN)
 		if(animation.SD){
 			for(let v of animation.SD.S){
 				this.processAnimationData(v)
@@ -52,7 +52,7 @@ export default class MCModel{
 				this.sceneList=[];
 			}
 		}
-		MCLibrary.getInstance().push(this,basepath)
+		MCLibrary.push(this,basepath)
 	}
 
 	public preloadTexture(){
@@ -71,8 +71,8 @@ export default class MCModel{
 		return new MC(this.mainSymbolModel);
 	}
 
-	public processAnimationData(data:symbolModelData,isMaster:boolean=false):MCSymbolModel{
-		let syb=new MCSymbolModel(data,this,isMaster);
+	public processAnimationData(data:symbolModelData):MCSymbolModel{
+		let syb=new MCSymbolModel(data,this);
 		this.symbolList[syb.name]=syb
 		return syb;
 	}

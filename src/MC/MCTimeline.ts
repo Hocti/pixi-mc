@@ -1,11 +1,10 @@
-import {MCType,FrameLabels,LoopState, SoundType,SoundRemark} from './MCStructure';
+import {MCType,LoopState, SoundType,SoundRemark} from './MCStructure';
 import MCScene from './MCScene';
 import MC from './MC';
-import {playStatus,playDirection,timelineEventType} from './Timeline';
+import {playStatus,playDirection,timelineEventType,FrameLabels} from './Timeline';
 import Timeline from './Timeline';
 import MCSound from './MCSound';
 import * as TMath from '../utils/TMath';
-import { Container } from '@pixi/display';
 
 export default class MCTimeline extends Timeline{
 	//public get only

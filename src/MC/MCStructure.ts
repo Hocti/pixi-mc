@@ -7,9 +7,6 @@ import MCModel from './MCModel'
 
 export type frameData={
 	child:childData[],
-	/*
-	sound:any[],
-	*/
 	layer:layerData[]
 }
 
@@ -22,6 +19,7 @@ export type childData={
 }
 
 export type layerData={
+	num:uint,
 	name:string,
 	C?:colorData,
 	F?:filterData,
@@ -69,6 +67,7 @@ export type ExtraRemark={
 	type:string,
 	frame_begin:uint,
 	frame_end:uint,
+	frame_label?:string,
 	args:string[]
 }
 
@@ -84,17 +83,6 @@ export type GeomRemark={
 	r?:float,
 	rotate?:float
 }
-
-
-//=========================
-
-export type MCLoadedEvent={
-	model:MCModel,
-	content?:DisplayObject
-}
-
-export type FrameLabels=Dictionary<uint>;
-export type FrameAction=string[];
 
 //RAW spriteSheet JSON===========================
 
@@ -191,7 +179,7 @@ export enum MCType{
 	MovieClip='MC',
 	Button='B',
 	Graphic='G',
-	ASI='asi'
+	ASI='asi'//not in raw
 }
 
 export type m3d=[float, ...Array<float>] & {length: 16};

@@ -2,6 +2,7 @@ import typescript from "@rollup/plugin-typescript";
 //import ts from "rollup-plugin-ts";
 import { terser } from "rollup-plugin-terser";
 import sourcemaps from 'rollup-plugin-sourcemaps';
+import dts from "rollup-plugin-dts";
 //import minify  from "rollup-plugin-minify-es";
 //import resolve from "rollup-plugin-node-resolve";
 //import commonjs from "rollup-plugin-commonjs";
@@ -10,6 +11,7 @@ import pkg from "./package.json";
 const plugins = [
 	typescript(),
     sourcemaps(),
+    //dts(),
 	//ts(),
 	//minify({}, minify),
     //resolve(),
@@ -51,7 +53,7 @@ const banner = `/*!
 export default {
     input: "src/index.ts",
     external: Object.keys(pkg.peerDependencies),
-    output: 
+    output: [
         {
             banner,
             freeze: false,
@@ -79,7 +81,8 @@ export default {
                 '@pixi/sound':'PIXI.sound',
                 'pixi-filters':'PIXI.filters'
             }
-		},
+		}
+    ],
     /*[
 		{
 			file: "dist/pixi-mc.d.ts",

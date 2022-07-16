@@ -50,7 +50,7 @@
 		<input type="button" value="stopAllSound">
 		<br/>
 		
-		<input type="text" id="jump_ip" value="448"><input type="button" value="goto">
+		<input type="text" id="jump_ip" value="44"><input type="button" value="goto">
 		<br/>
 		<input type="text" id="fps_ip" value="60"><input type="button" value="fps">
 		<select id="select_scene"></select>
@@ -75,6 +75,7 @@
 		var scenemc;
 		PIXIMC.FileList.getfolderInfoFromText('media/files.txt','media/', function (_data) {
 			var myFolderList = PIXIMC.FileList.getInstance().getFolderInfoFromPath(path);
+			console.log(path,myFolderList)
 			var myMcLoader = new PIXIMC.MCLoader(myFolderList, function (event) {
 				
 				scenemc = (event.model).makeInstance();

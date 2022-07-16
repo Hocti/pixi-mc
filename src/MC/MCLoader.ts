@@ -26,15 +26,15 @@ export default class MCLoader extends EventEmitter{
 		const [rootPath,fileList]=FileList.getFilesFromFolder(_args);
 
 		const aniDataPath=rootPath+'Animation.json';
-		const addList:string[]=[];
 		
 		if(fileList.indexOf(aniDataPath)===-1){
 			return Promise.reject(new Error(`${rootPath} not contain 'Animation.json'`))
 		}
 
+		const addList:string[]=[];
 		let sheet_count=0;
 		for(let v of fileList){
-			//if(v.type=='json' || v.type=='png' || v.type=='wav' || v.type=='mp3' || v.type=='jpg'){
+			//if(v.type==='json' || v.type==='png' || v.type==='wav' || v.type==='mp3' || v.type==='jpg'){
 			if(!Loader.shared.resources[v]){
 				addList.push(v)
 			}
@@ -47,7 +47,7 @@ export default class MCLoader extends EventEmitter{
 		}
 
 		if(addList.length===0){
-			const modelFromLibrary=MCLibrary.getInstance().get(rootPath)
+			const modelFromLibrary=MCLibrary.get(rootPath)
 			if(modelFromLibrary){
 				return Promise.resolve(modelFromLibrary)
 			}
@@ -68,26 +68,19 @@ export default class MCLoader extends EventEmitter{
 						Loader.shared.resources[k]=resources[k]!; //* may be fail?
 					}
 				}
+
+				//check Animation.json
 				if(!Loader.shared.resources[aniDataPath]){
 					return reject(`${rootPath} not contain 'Animation.json' (files.txt contain file not exsit)`);
 				}
-				/*
-				const frameDataPath=rootPath+'Frame.json';
-				const skinDataPath=rootPath+'Skin.json';
-				if(Loader.shared.resources[frameDataPath]){
-					//* stop/loop + sound script
-				}
-				if(Loader.shared.resources[skinDataPath]){
-					//*
-				}
-				*/
+				
+				//check spritemap.json and png
 				let spritemaps:spriteData[]=[];
 				for(let ss=1;ss<=sheet_count;ss++){
 					let d:spriteData=Loader.shared.resources[rootPath+'spritemap'+ss+'.json'].data as spriteData;
-					//_data.spritesheet.push(Spritemap.toSpritesheet(Loader.shared.resources[rootPath+d.meta.image].texture,d))
 					spritemaps.push(d)
-					//image.push(rootPath+d.meta.image)
 				}
+
 				myloader.destroy();
 				resolve(new MCModel(Loader.shared.resources[aniDataPath].data,spritemaps,rootPath));
 			});
@@ -128,6 +121,24 @@ export default class MCLoader extends EventEmitter{
 				_loadcall(results)
 			}
 		});
+	}
+
+	//unLoad=============
+
+	public static unload(modelname:string):void {
+		/*TODO
+		remove all model,sub model instance
+		clean ASI base texture cache
+		clean ASI model cache
+
+		remove resuorces in Loader
+		*/
+	}
+
+	public static unloadMulti(modelnames:string[]):void {
+		for(const modelname of modelnames){
+			MCLoader.unload(modelname)
+		}
 	}
 
 	//Load Container=============
@@ -171,3 +182,9 @@ export default class MCLoader extends EventEmitter{
 		});
 	}
 }
+
+/*
+TODO:
+load model only, without image and sprite
+unload
+*/

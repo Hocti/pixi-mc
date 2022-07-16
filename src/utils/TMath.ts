@@ -15,6 +15,13 @@ export const degree:float = 180 / Math.PI;
 export const radian:float = Math.PI / 180;
 
 
+export function makeMatrix(scaleX:float,scaleY?:float,rotate:float=0,x:float=0,y:float=0):Matrix{
+	if(scaleY===undefined){
+		scaleY=Math.abs(scaleX)
+	}
+	const m=new Matrix(scaleX,0,0,scaleY,x,y);
+	return m.rotate(rotate*radian);
+}
 
 export function m2dDetail(m:Matrix){
 	

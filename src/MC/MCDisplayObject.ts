@@ -23,17 +23,21 @@ export default abstract class MCDisplayObject extends Sprite{
 		this.baseEffect=EffectGroupAction.create();
 	}
 
-	public showEffect():void{
+	public showEffect():EffectGroup{
 		let eg:EffectGroup=this.baseEffect;
 		for(let k in this.extraEffects){
 			eg=EffectGroupAction.merge(eg,this.extraEffects[k]);
 		}
 		EffectGroupAction.append(this,eg);
+		return eg;
 	}
 
 	protected effectChanged:boolean=false;
 
 	public addEffect(effect:EffectGroup,name:string):void{
+		if(this.extraEffects[name] && EffectGroupAction.equalSimple(this.extraEffects[name],effect)){
+			return
+		}
 		this.extraEffects[name]=effect;
 		this.effectChanged=true;
 	}

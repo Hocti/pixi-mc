@@ -24,7 +24,7 @@ function filesText(_path){
 	let content='';
 	for(let k of arr){
 		var stats = fs.statSync(k)
-		content+=`${k.substr(l)}	${stats['size']}\n`;
+		content+=`${k.substr(l)}	${stats['size']}	${Math.floor(stats['mtimeMs']/1000)}\n`;
 	}
 	return content;
 }

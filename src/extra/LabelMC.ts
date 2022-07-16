@@ -75,7 +75,7 @@ export class LabelTimeline extends MCTimeline{
     //=============
 
 	public goto(_target:playTarget){
-        console.log('goto',_target)
+        //console.log('goto',_target)
         super.goto(_target);
         this.setTarget(_target)
 	}
@@ -83,7 +83,7 @@ export class LabelTimeline extends MCTimeline{
     private setTarget(_target:playTarget):void{
         if(typeof _target ==='number'){
             this.targetFrame=_target;
-            this.targetLabel=this.getLabel(_target);
+            this.targetLabel=this.getLabelFromFrame(_target);
         }else{
             if(this.mc.symbolModel.containLabel(_target)){
                 this.targetLabel=_target;

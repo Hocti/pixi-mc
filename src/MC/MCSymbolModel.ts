@@ -9,9 +9,10 @@ import {hashHexToUint8} from '../utils/color';
 
 import {MCType,
 	childData,frameData,rawAsiData,symbolModelData,layerData,
-	FrameLabels, AsiModel,SoundType,m3d,GeomRemark,
+	 AsiModel,SoundType,m3d,GeomRemark,
 	PlayRemark,SoundRemark,ExtraRemark,ScriptRemark
 } from './MCStructure';//action,
+import {FrameLabels} from './Timeline';
 import MCModel from './MCModel';
 import ASI from './ASI';
 import * as TMath from '../utils/TMath';
@@ -28,11 +29,13 @@ export default class MCSymbolModel {
 	protected _totalFrame:uint=1;
 	private _isMaster:boolean=false;
 
-	constructor(data:symbolModelData,_model:MCModel,isMaster:boolean=false) {
+	public defaultMatrix?:Matrix;
+
+	constructor(data:symbolModelData,_model:MCModel) {
 		this.mcModel=_model
 		this._data=data;
 		this._name=data.SN;
-		this._isMaster=isMaster;
+		this._isMaster=data.N!==undefined;
 
 		if(data.SN.substring(0,14)==='remark/remark_')return
 
@@ -56,7 +59,7 @@ export default class MCSymbolModel {
 
 				//label name
 				if(f.N){
-					this._LabelList[<string>f.N]=f.I+1;
+					this._LabelList[f.N]=f.I+1;
 				}
 
 				totalFrame=Math.max(totalFrame,f.I+f.DU);
@@ -66,7 +69,7 @@ export default class MCSymbolModel {
 					//find remark
 					if(e.SI && e.SI.SN.substring(0,14)==='remark/remark_'){
 						let type:string=e.SI.SN.substring(14);
-						this.processRemark(type,String(e.SI.IN).split('$'),f.I+1,f.I+f.DU);
+						this.processRemark(type,e.SI.IN===''?[]:String(e.SI.IN).split('$'),f.I+1,f.I+f.DU,f.N);
 						remarkCount++;
 					}else if(e.SI && e.SI.SN.substring(0,12)==='remark/geom_'){
 						let type:string=e.SI.SN.substring(12);
@@ -92,19 +95,21 @@ export default class MCSymbolModel {
 			//change to solid color box asi
 			if(data.SN.substring(0,14)==='solidcolorbox_'){
 				const colorHexStr=data.SN.substring(14)
-				const texture=Texture.fromBuffer(hashHexToUint8(colorHexStr),1,1);
+				const texture=Texture.fromBuffer(hashHexToUint8(colorHexStr),16,16);
 
 				this.spriteModel=<AsiModel>{
-					rect:new Rectangle(0,0,1,1),
+					rect:new Rectangle(0,0,16,16),
 					image:'solid',
 					rotated:false,
 					zoom:1,
 					texture,
 					matrix:new Matrix()
 				};
-				this._spriteMatrix=new Matrix();
-				this._spriteMatrix.d=this.mcModel.partList[firstAsi.N].rect.width
-				this._spriteMatrix.a=this.mcModel.partList[firstAsi.N].rect.height
+				const m=new Matrix();
+				m.d=this.mcModel.partList[firstAsi.N].rect.width;
+				m.a=this.mcModel.partList[firstAsi.N].rect.height;
+
+				this._spriteMatrix=m;
 				this._isSprite=true;
 				return
 			}
@@ -130,7 +135,7 @@ export default class MCSymbolModel {
 
 	public extraRemark:Dictionary<ExtraRemark[]>={};
 
-	private processRemark(type:string,args:string[],frame_begin:uint,frame_end:uint){
+	private processRemark(type:string,args:string[],frame_begin:uint,frame_end:uint,frame_label?:string){
 		if(type==="sound" || type==="stopAllSound"){
 			if(!this.soundRemark[frame_begin]){
 				this.soundRemark[frame_begin]=[]
@@ -148,11 +153,11 @@ export default class MCSymbolModel {
 			const scriptName=args.shift();
 			this.scriptRemarks[scriptName!]={frame:frame_begin,args:args};
 		}else if(type==='blendMode'){
-
 			const bName:string=(args[0].toUpperCase());
 			
 			if(bName in BLEND_MODES){
 				this.defaultBlendMode=Object.values(BLEND_MODES).indexOf(bName)
+				//console.log(2,type,args,this.defaultBlendMode)
 				//BLEND_MODES[bName]
 			}
 		}else if(type==='stopAtEnd'){
@@ -167,7 +172,7 @@ export default class MCSymbolModel {
 			if(!this.extraRemark[type]){
 				this.extraRemark[type]=[]; 
 			}
-			this.extraRemark[type].push({type,frame_begin,frame_end,args:args});
+			this.extraRemark[type].push({type,frame_begin,frame_end,args:args,frame_label});
 		}
 	}
 
@@ -215,9 +220,10 @@ export default class MCSymbolModel {
 			}
 			if(!this.layerDataCache[layer_num]){
 				this.layerDataCache[layer_num]={
+					num:layer_num,
 					name:layer_name,
 					isMask:(this._data.TL.L[layer_num].LT==='Clp'),
-					maskBy:this._data.TL.L[layer_num].Clpb
+					maskBy:this._data.TL.L[layer_num].Clpb,
 				}
 			}
 			//Clp=mask,Clpb=mask Layer name
@@ -291,10 +297,7 @@ export default class MCSymbolModel {
 	 public get isSprite():boolean{
 		return this._isSprite;
 	}
-	public get spriteMatrix():Matrix{
-		if(!this._spriteMatrix){
-			return new Matrix();
-		}
+	public get spriteMatrix():Matrix | undefined{
 	   return this._spriteMatrix;
    }
 
@@ -302,7 +305,7 @@ export default class MCSymbolModel {
 
 	public makeInstance():MCDisplayObject{
 		if(this.isSprite){
-			return new MCSprite(this.spriteModel!,this.name,this._spriteMatrix!);
+			return new MCSprite(this.spriteModel!,this.name,this._spriteMatrix!,this.defaultBlendMode);
 		}
 		return new MC(this);
 	}

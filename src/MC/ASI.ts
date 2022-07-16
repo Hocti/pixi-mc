@@ -7,15 +7,10 @@ export default class ASI extends MCDisplayObject {
 	public static MAX_SIDE:uint=2048;
 	public static totalASI:uint=0;
 	private _model:AsiModel;
-	private _specialAsi:boolean;
 
-	constructor(_model:AsiModel,name?:string,specialasi?:boolean) {
+	constructor(_model:AsiModel) {
 		super();
 		this._model=_model;
-		this._specialAsi=specialasi?true:false;
-		if(name){
-			this.name=name
-		}
 		if(this.model.texture!==undefined){
 			this.texture=<Texture>this.model.texture;
 		}else{
@@ -23,10 +18,6 @@ export default class ASI extends MCDisplayObject {
 			this.on('added',this.prepareTexture)
 		}
 		ASI.totalASI++;
-	}
-
-	public get specialAsi():boolean{
-		return this._specialAsi;
 	}
 
 	public get model():AsiModel{

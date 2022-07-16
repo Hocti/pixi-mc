@@ -7,7 +7,7 @@ import MCTimeline from './MCTimeline';
 import MCPlayer from './MCPlayer';
 import {ColorMatrixAction,MCEffect,EffectGroup,EffectGroupAction} from './MCEffect';
 import ASI from './ASI';
-import {MCType,childData, LoopState,layerData,rawInstenceData, rawAsiData} from './MCStructure';
+import {MCType,childData, LoopState,layerData,rawInstenceData, rawAsiData, frameData} from './MCStructure';
 import * as TMath from '../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
 import {BLEND_MODES} from '@pixi/constants';
@@ -15,7 +15,7 @@ import { getTimer } from '../utils/utils';
 import MCSprite from './MCSprite';
 
 
-type MCOption={
+export type MCOption={
 	player?:MCPlayer
 }
 
@@ -31,6 +31,18 @@ export default class MC extends MCDisplayObject {
 		}
 		return t
 	}
+	public path():string{
+		let trees:string[]=[this.name];
+		let con:Container=this.parent;
+		while(con instanceof MC){
+			trees.push(con.name)
+			con=con.parent
+			if(!con)break;
+		}
+		return trees.reverse().join('.');
+	}
+
+	//=================
 	
 	public static MAX_SAME:uint=100;
 
@@ -55,9 +67,9 @@ export default class MC extends MCDisplayObject {
 
 	public removePasted:boolean=false;//remove children who not display on currentFrame
 
-	private maskList:Dictionary<Container>={};
-	private asiMaskList:Dictionary<ASI>={};
-	private currShowing:uint=0;
+	protected maskList:Dictionary<Container>={};
+	protected asiMaskList:Dictionary<ASI>={};
+	protected currShowingFrame:uint=0;
 	protected mcChildren:Dictionary<MCDisplayObject>={};
 	protected mcChildrenUsed:Dictionary<boolean>={};
 	
@@ -71,22 +83,22 @@ export default class MC extends MCDisplayObject {
 	
 	public isScene:boolean=false;
 
+	//inital and destory
 
-	constructor(model:MCSymbolModel,option?:MCOption) {
+
+	constructor(symbolModel:MCSymbolModel,option?:MCOption) {
 		super();
-		
-		this._symbolModel=model;
-
+		//set status from model
+		this._symbolModel=symbolModel;
+		this.stopAtEnd=symbolModel.defaultStopAtEnd;
+		this.baseEffect.blendMode=this.blendMode=symbolModel.defaultBlendMode;
+		this.baseEffect.visible=symbolModel.defaultVisible;
+		//player,timeline
 		this._player=(option?.player)?option.player:MCPlayer.getInstance();
-		this._timeline=this.initTimeline()
-		
-		this.on('added',this.onAdded)
-		
-		this.blendMode=model.defaultBlendMode;
-		this.stopAtEnd=model.defaultStopAtEnd;
-		this.baseEffect.visible=model.defaultVisible;
 		this._player.addMC(this);
-
+		this._timeline=this.initTimeline()
+		//
+		this.on('added',this.onAdded)
 
 		//for debug
 		++MC.totalMC;
@@ -100,7 +112,43 @@ export default class MC extends MCDisplayObject {
 		this._timeline.onMCAdded();
 		this.showEffect();
 	}
-    
+	
+	protected destroyOption={
+		children:true,texture:false
+	}
+
+	public destroy(options?: IDestroyOptions | boolean){
+		for(const k in this.asiMaskList){
+			this.asiMaskList[k].destroy(this.destroyOption)
+		}
+		for(const k in this.maskList){
+			this.maskList[k].destroy(this.destroyOption)
+		}
+		for(const k in this.mcChildren){
+			this.mcChildren[k].destroy(this.destroyOption)
+		}
+		super.destroy(options)
+	}
+
+	//MC type
+
+	public set type(_type:MCType){
+		if(this._type!=_type){
+			this._type=_type;
+			if(_type===MCType.Button){
+				this.buttonMode=true;
+				this.interactive = true;
+			}else{
+				this.buttonMode=false;  
+			}
+		}
+	}
+
+	public get type():MCType{
+		return this._type
+	}
+
+	//method
 
 	public stopAll():void{
 		this.timeline.stop();
@@ -122,41 +170,8 @@ export default class MC extends MCDisplayObject {
 		}
 	}
 	*/
-	
-	protected destroyOption={
-		children:true,texture:false
-	}
 
-	public destroy(options?: IDestroyOptions | boolean){
-		for(const k in this.asiMaskList){
-			this.asiMaskList[k].destroy(this.destroyOption)
-		}
-		for(const k in this.maskList){
-			this.maskList[k].destroy(this.destroyOption)
-		}
-		for(const k in this.mcChildren){
-			this.mcChildren[k].destroy(this.destroyOption)
-		}
-		super.destroy(options)
-	}
-
-	public set type(_type:MCType){
-		if(this._type!=_type){
-			this._type=_type;
-			if(_type===MCType.Button){
-				this.buttonMode=true;
-				this.interactive = true;
-			}else{
-				this.buttonMode=false;  
-			}
-		}
-	}
-
-	public get type():MCType{
-		return this._type
-	}
-
-	public layerEffects:Dictionary<EffectGroup>={};
+	//show frame
 
 	public showFrame(frame:uint):void{
 		
@@ -168,11 +183,16 @@ export default class MC extends MCDisplayObject {
 		}
 
 		//only update contain when frame changed
-		if(this.currShowing === frame && !this.effectChanged)return;
-		this.currShowing= frame;
+		if(this.currShowingFrame === frame && !this.effectChanged)return;
+		this.currShowingFrame= frame;
 
-		const currFrameData=this.symbolModel.getFrame(frame);
+		const currFrameData:frameData=this.symbolModel.getFrame(frame);
+		/*TODO:half frame
+			this.showFrameByData(currFrameData,frame);
+		}
 		
+		protected showFrameByData(currFrameData:frameData,frame:uint):void{
+		*/
 		if(this.symbolModel.visibleRemarks[frame]!==undefined){
 			this.baseEffect.visible=this.symbolModel.visibleRemarks[frame];
 			if(this.baseEffect.visible){
@@ -193,13 +213,12 @@ export default class MC extends MCDisplayObject {
 		let setMaskList:{child:MCDisplayObject,mask:string}[]=[];
 		for(let c of currFrameData.child){
 			ly=currFrameData.layer[c.layer];
-			ch=this.showChild(c,frame)
+			ch=this.showChild(c,ly);
 			if(c.type===MCType.Graphic){
 				(<MC>ch).graphic_start=0;//c.firstframe-frame;
 				
 			}
 			ch.zIndex=++z;
-			ch.visible=true;
 			if(!ch.parent){
 				this.addChild(ch)
 			}
@@ -216,15 +235,6 @@ export default class MC extends MCDisplayObject {
 				if(ly.C || ly.F){
 					//console.log(ly.C,ly.F,"layer",c)
 					MCEffect.setRawColorAndFilter(ch,ly.C,ly.F,"rawLayer_")
-				}
-
-				//layer effect
-				if(this.layerEffects[ly.name]){
-					ch.addEffect(this.layerEffects[ly.name],'layerEffect')
-					//ch.extraEffects['layerEffect']=;
-				}else if(ch.extraEffects['layerEffect']){
-					ch.removeEffect('layerEffect')
-					//delete ch.extraEffects['layerEffect'];
 				}
 
 				ch.showEffect();
@@ -252,7 +262,6 @@ export default class MC extends MCDisplayObject {
 				if(this.mcChildren[k].parent===this){
 					this.removeChild(this.mcChildren[k])
 				}
-				this.mcChildren[k].visible=false;
 			}
 			if(this.mcChildren[k] instanceof MC){
 				(<MC>this.mcChildren[k]).timeline.active=this.mcChildrenUsed[k];
@@ -284,22 +293,27 @@ export default class MC extends MCDisplayObject {
 		return this.maskList[_name];
 	}
 
-	protected showChild(obj:childData,frame:uint):MCDisplayObject{
+	protected showChild(obj:childData,ly:layerData):MCDisplayObject{
 		const m2d:Matrix=TMath.m3dto2d(obj.data!.M3D);
 		
 		//console.log((<rawInstenceData>obj.data).IN,TMath.m2dDetail(m2d))
 
+		let name:string,child:MCDisplayObject,m2d2:Matrix;
 		const isMC:boolean=(<rawInstenceData>obj.data).SN !== undefined;
-		let [name,child,m2d2]=this.showChildInner(obj.data!,isMC,obj.layer);
+		if(isMC){
+			[name,child,m2d2]=this.showMC(obj.data! as rawInstenceData,ly);
+		}else{
+			[name,child,m2d2]=this.showASI(obj.data! as rawAsiData,ly);
+		}
 
-			(<MC>child).temp_matrix.m2d=m2d;
-			(<MC>child).temp_matrix.m2d2=m2d2;
+		//(<MC>child).temp_matrix.m2d=m2d;
+		//(<MC>child).temp_matrix.m2d2=m2d2;
 		
 		
 		child.transform.setFromMatrix(m2d.append(m2d2));
 
-		if(this.blendMode!==BLEND_MODES.NORMAL){
-			(<Sprite>child).blendMode=this.blendMode;
+		if(this.baseEffect.blendMode!==BLEND_MODES.NORMAL){
+			child.baseEffect.blendMode=this.baseEffect.blendMode;
 		}
 		
 		this.mcChildrenUsed[name]=true;
@@ -311,53 +325,58 @@ export default class MC extends MCDisplayObject {
 		return child;
 	}
 
-	protected showChildInner(data:rawInstenceData | rawAsiData,isMC:boolean,layerNum:uint):[string,MCDisplayObject,Matrix]{
-		if(isMC){
-			return this.showMC(data! as rawInstenceData,layerNum);
+	protected showMCInner(obj:rawInstenceData,ly:layerData):[MCDisplayObject,Matrix]{
+		let mc:MCDisplayObject;
+        let currSymbolModel:MCSymbolModel=this.symbolModel.mcModel.symbolList[obj.SN];
+        let m:Matrix=currSymbolModel.defaultMatrix?currSymbolModel.defaultMatrix:new Matrix();
+
+		let isSprite=currSymbolModel.isSprite;
+		if(isSprite){
+			mc=currSymbolModel.makeInstance();
 		}else{
-			return this.showASI(data! as rawAsiData,layerNum);
+			mc=new MC(currSymbolModel,{player:this.player});
+			(<MC>mc).type=obj.ST;
 		}
+
+		return [mc,m];
 	}
 
-	protected showMC(obj:rawInstenceData,layerNum:uint):[string,MCDisplayObject,Matrix]{
-		let newmatrix=new Matrix();
-		let name:string=this.getUniName(`L${layerNum}|${obj.SN}|${obj.IN}|${obj.ST}`);
+	protected showMC(obj:rawInstenceData,ly:layerData):[string,MCDisplayObject,Matrix]{
+		let name:string=this.getUniName(`L${ly.num}|${obj.SN}|${obj.IN}|${obj.ST}`);
+
 		let mc=<MCDisplayObject>this.search(name);
-		let isSprite=this.symbolModel.mcModel.symbolList[obj.SN].isSprite;
+		let newmatrix:Matrix;
 		if(!mc){
-			if(isSprite){
-				mc=this.symbolModel.mcModel.symbolList[obj.SN].makeInstance()//*isSprite
+			[mc,newmatrix]=this.showMCInner(obj,ly);
+			if(obj.IN!==''){
+				mc.name=obj.IN;
 			}else{
-				mc=new MC(this.symbolModel.mcModel.symbolList[obj.SN],{player:this.player});
-				(<MC>mc).type=obj.ST;
+				mc.name=name;
 			}
-			mc.name=obj.IN;
+		}else{
+			newmatrix=new Matrix();
 		}
-		//newmatrix.translate(obj.TRP.x,obj.TRP.y)
-
-		(<MC>mc).temp_matrix.TRP=obj.TRP;
-		//console.log(this.pivot)
-
+		
+		/*
 		if(isSprite){//set asi matrix
 			//newmatrix=newmatrix.append(this.symbolModel.mcModel.symbolList[obj.SN].spriteMatrix!).append((<ASI>mc).model.matrix);
-		}else if(mc instanceof MC){//Graphic Frame
-			if(mc.type===MCType.Graphic){
-				if(obj.FF!=undefined){
-					mc.firstFrame=Number(obj.FF)+1;
-				}
-				if(obj.LP){
-					mc.loop=obj.LP;
-				}
+		}else 
+		*/
+
+		if(mc instanceof MC && mc.type===MCType.Graphic){//Graphic Frame
+			if(obj.FF!=undefined){
+				mc.firstFrame=Number(obj.FF)+1;
+			}
+			if(obj.LP){
+				mc.loop=obj.LP;
 			}
 		}
 
-
 		MCEffect.setRawColorAndFilter(mc,obj.C,obj.F,"timeline_");
-
 		return [name,mc,newmatrix]
 	}
 
-	protected showASI(obj:rawAsiData,layerNum:uint):[string,ASI,Matrix]{
+	protected showASI(obj:rawAsiData,ld:layerData):[string,ASI,Matrix]{
 		const partname:string=obj.N;
 
 		const part=this.symbolModel.mcModel.partList[partname];
@@ -365,7 +384,7 @@ export default class MC extends MCDisplayObject {
 		//set asi matrix
 		let newmatrix=part.matrix;
 
-		let name:string=this.getUniName(`L${layerNum}|${partname}`);//*skin
+		let name:string=this.getUniName(`L${ld.num}|${partname}`);//*skin
 		let child:ASI=<ASI>this.search(name)
 		if(!child){
 			child=new ASI(part);

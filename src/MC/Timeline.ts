@@ -1,8 +1,7 @@
 import {EventEmitter} from '@pixi/utils';//eventemitter3
 
-import {LoopState,FrameLabels,playTarget} from './MCStructure';
+import {LoopState,playTarget} from './MCStructure';
 import * as TMath from '../utils/TMath';
-
 
 export enum timelineEventType{
 	complete = 'complete',
@@ -20,6 +19,8 @@ export enum timelineEventType{
 	labelCancel = 'labelCancel',
     */
 }
+
+export type FrameLabels=Dictionary<uint>;
 
 export enum playStatus{
 	playing,
@@ -83,7 +84,7 @@ export default class Timeline extends EventEmitter{
 		this._active=_b;
 	}
 
-	public getLabel(_frame:uint):string | undefined{
+	public getLabelFromFrame(_frame:uint):string | undefined{
 		for(let k in this.labels){
 			if(this.labels[k]===_frame){
 				return k;
@@ -93,7 +94,7 @@ export default class Timeline extends EventEmitter{
 	}
 
 	get currentLabel():string | undefined{
-		return this.getLabel(this._currentFrame);
+		return this.getLabelFromFrame(this._currentFrame);
 	}
 
 	get labels():FrameLabels{
