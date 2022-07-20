@@ -1,9 +1,9 @@
 import MC from './MC';
-import MCPlayer from './MCPlayer';
-import MCSymbolModel from './MCSymbolModel';
-import MCTimeline from './MCTimeline';
-import {timelineEventType} from './Timeline';
 import MCDisplayObject from './MCDisplayObject';
+import MCSymbolModel from '../model/MCSymbolModel';
+import MCPlayer from '../player/MCPlayer';
+import MCTimeline from '../player/MCTimeline';
+import {timelineEventType} from '../player/Timeline';
 
 export default class MCScene extends MCDisplayObject {
 
@@ -68,17 +68,6 @@ export default class MCScene extends MCDisplayObject {
 			this.changeScene(1);
 			this.sceneTimeline.play();
 		}
-	}
-
-	protected destroyOption={
-		children:true,texture:false
-	}
-	
-	public destroy(){
-		this.sceneMCList.forEach(scene => {
-			scene.destroy()
-		});
-		super.destroy(this.destroyOption)
 	}
 
 	private getSceneNum(_scene:number|string):number{
@@ -159,5 +148,18 @@ export default class MCScene extends MCDisplayObject {
 			return _mc.parent;
 		}
 		return undefined
+	}
+
+	//=====================
+
+	protected destroyOption={
+		children:true,texture:false
+	}
+	
+	public destroy(){
+		this.sceneMCList.forEach(scene => {
+			scene.destroy()
+		});
+		super.destroy(this.destroyOption)
 	}
 }

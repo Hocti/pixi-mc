@@ -3,9 +3,9 @@ import {Loader,LoaderResource} from '@pixi/loaders';
 import {Container} from '@pixi/display'
 
 import {spriteData} from './MCStructure';
-import {fileInfo,folderInfo,FileList} from '../utils/FileList';
+import {fileInfo,folderInfo,FileList} from '../../utils/FileList';
 import MCModel from './MCModel';
-import MC from './MC';
+import MC from '../display/MC';
 import MCLibrary from './MCLibrary';
 
 export enum MCEvent{

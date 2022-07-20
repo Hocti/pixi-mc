@@ -1,9 +1,9 @@
-import MC from '../MC/MC';
-import MCTimeline from '../MC/MCTimeline';
-import MCSymbolModel from '../MC/MCSymbolModel';
-import MCPlayer from '../MC/MCPlayer';
-import {playStatus} from '../MC/Timeline';
-import {MCType,playTarget} from '../MC/MCStructure';
+import MCEX from './MCEX';
+
+import {playStatus,MCTimeline,MCPlayer} from '../MC/player/';
+import {MCType,playTarget} from '../MC/model/MCStructure';
+import {MCSymbolModel} from '../MC/model/';
+
 import * as TMath from '../utils/TMath';
 //import { Container } from '@pixi/display';
 
@@ -141,7 +141,7 @@ export class LabelTimeline extends MCTimeline{
 
 }
 
-export default class LabelMC extends MC{
+export default class LabelMC extends MCEX{
     
 	constructor(model:MCSymbolModel, _startLabel:string = "",_player:MCPlayer=MCPlayer.getInstance()) {
 		super(model,{player:_player});

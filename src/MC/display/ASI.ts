@@ -1,5 +1,5 @@
 import {Texture,BaseTexture} from '@pixi/core'
-import {AsiModel} from './MCStructure';
+import {AsiModel} from '../model/MCStructure';
 import MCDisplayObject from './MCDisplayObject';
 //import { Sprite } from '@pixi/sprite';
 

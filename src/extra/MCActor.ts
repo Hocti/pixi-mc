@@ -1,7 +1,8 @@
 import { Matrix } from "@pixi/math";
 
-import MCDisplayObject from '../MC/MCDisplayObject';
-import MCSymbolModel from '../MC/MCSymbolModel';
+import {IMCSprite,MCDisplayObject} from "../MC/display/";
+
+import MCSymbolModel from '../MC/model/MCSymbolModel';
 import * as TMath from '../utils/TMath';
 
 import MCEX from './MCEX';
@@ -21,7 +22,11 @@ export type ActionPhase={
 	frame_end:uint
 }
 
-export default class MCActor extends MCDisplayObject implements IreplacerDisplayObject{
+interface ImultiMC{
+	currentMC?:IMCSprite;
+}
+
+export default class MCActor extends MCDisplayObject implements IreplacerDisplayObject,ImultiMC{
 
 	private actionList:Dictionary<Action>={};
 	private mcList:MCEX[]=[];
@@ -175,11 +180,7 @@ export default class MCActor extends MCDisplayObject implements IreplacerDisplay
 
 	//replacer=============
 	
-    private _replacer:MCReplacer=new MCReplacer(this);
-
-    public get replacer():MCReplacer{
-        return this._replacer;
-    }
+    public replacer:MCReplacer=new MCReplacer(this);
 
     public onRenew():void{
 		this.currentMC?.onRenew();

@@ -1,10 +1,10 @@
-import {MCType,LoopState, SoundType,SoundRemark} from './MCStructure';
-import MCScene from './MCScene';
-import MC from './MC';
+import {MCType,LoopState, SoundType,SoundRemark} from '../model/MCStructure';
+
+import {MC,MCScene} from '../display';
 import {playStatus,playDirection,timelineEventType,FrameLabels} from './Timeline';
 import Timeline from './Timeline';
-import MCSound from './MCSound';
-import * as TMath from '../utils/TMath';
+import MCSound from '../MCSound';
+import * as TMath from '../../utils/TMath';
 
 export default class MCTimeline extends Timeline{
 	//public get only

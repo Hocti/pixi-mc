@@ -2,15 +2,11 @@ import {Matrix,Point} from '@pixi/math';
 import { Container,IDestroyOptions } from '@pixi/display';
 import {EventEmitter} from '@pixi/utils';
 
-import MCSymbolModel from '../MC/MCSymbolModel';
-import {ColorMatrixAction,MCEffect,EffectGroup,EffectGroupAction,ColorChange} from '../MC/MCEffect';
-import {MCType,childData, LoopState,layerData,rawInstenceData, rawAsiData} from '../MC/MCStructure';
+import {ColorMatrixAction,MCEffect,EffectGroup,EffectGroupAction,ColorChange} from '../MC/effect';
+import {MCModel,MCLibrary,MCSymbolModel} from '../MC/model/';
+import {MCDisplayObject} from '../MC/display/';
 
-import * as TMath from '../utils/TMath';
-import MCDisplayObject from '../MC/MCDisplayObject';
 import MCEX from './MCEX';
-import MCModel from '../MC/MCModel';
-import MCLibrary from '../MC/MCLibrary';
 
 export interface Replacer {// extends MCDisplayObject
     addRule(_rule:ReplaceRule):void;
@@ -139,12 +135,14 @@ export class MCReplacer extends EventEmitter implements Replacer{
     private _selfRules:ReplaceRule[]=[];
 
     public addRule(_rule:ReplaceRule):void{
+        if(this._selfRules.indexOf(_rule)!==-1)return
 		this._selfRules.push(_rule);
         this.renewRule();
     }
 
     public addRules(_rules:ReplaceRule[]):void{
         for(const _rule of _rules){
+            if(this._selfRules.indexOf(_rule)!==-1)continue
             this._selfRules.push(_rule);
         }
         this.renewRule();
@@ -181,7 +179,9 @@ export class MCReplacer extends EventEmitter implements Replacer{
         for(let r of this._selfRules){
             if(r.target==='child' || r.target==='both'){
                 rules.push(r);
-            }
+            }/*else if(r.target==='self' && this._mc instanceof MCActor ){
+                rules.push(r);
+            }*/
         }
 
         if(this._mc.parent && MCReplacer.instanceOfIreplacerDisplayObject(this._mc.parent)){
@@ -220,6 +220,16 @@ export class MCReplacer extends EventEmitter implements Replacer{
 
     public cleanCache():void{
         this.replaceCache={};
+    }
+
+    public getReplace(originalSN:string,layerName:string):ReplacerResult{
+        const key:string=`${originalSN}|${layerName}`
+        if(this.replaceCache[key]===undefined){
+            const rr=this.checkReplace(originalSN,layerName);
+            this.replaceCache[key]=rr;
+            //console.log('get',key,this.replaceCache[key],rr)
+        }
+        return this.replaceCache[key];
     }
 
     public checkReplace(originalSN:string,layerName:string):ReplacerResult{
@@ -305,16 +315,6 @@ export class MCReplacer extends EventEmitter implements Replacer{
             effect,
             replaced:mcModel.symbolList[originalSN]===currSymbolModel
         }
-    }
-
-    public getReplace(originalSN:string,layerName:string):ReplacerResult{
-        const key:string=`${originalSN}|${layerName}`
-        if(this.replaceCache[key]===undefined){
-            const rr=this.checkReplace(originalSN,layerName);
-            this.replaceCache[key]=rr;
-            //console.log('get',key,this.replaceCache[key],rr)
-        }
-        return this.replaceCache[key];
     }
 }
 

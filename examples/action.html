@@ -25,6 +25,10 @@
 		<input type="button" value="next_action">
 		<br/>
 		<input type="button" value="add rule" id="btn_rule">
+		<input type="button" value="add rule2" id="btn_rule2">
+
+		<input type="button" value="remove rule" id="btn_rule3">
+		<input type="button" value="remove rule2" id="btn_rule4">
 		<br/>
 		<input type="text" id="fps_ip" value="10"><input type="button" value="fps">
 		<br/>
@@ -123,7 +127,7 @@
             man_attack.timeline.gotoAndStop(13)
             //man_attack.timeline.stop()
             app.stage.addChild(man_attack);
-		currMC=man_attack
+			currMC=man_attack
 			
 
 			PIXIMC.MCLibrary.getSymbol('media/man_alt/','alt_part/face').defaultMatrix=PIXIMC.TMath.makeMatrix(1/2.2,undefined,0,-1,-0.5)
@@ -147,9 +151,51 @@
 
 			/*
 			*/	
+			const rule12=[
+			{
+				target:'self',
+				type:'symbol',
+				matchType:'name',
+				matchKey:'man_part/chest',
+				replaceSymbol:PIXIMC.MCLibrary.getSymbol('media/man_action/','man_part/chest')
+			},{
+				target:'child',
+				matchType:'name',
+				matchKey:'man_part/*',
+				type:'symbol',
+
+				replaceModel:PIXIMC.MCLibrary.get('media/man_alt/'),
+				replaceKey:'alt_part/*'
+			}]
+			
+			const rule34=[{
+				target:'both',
+				matchType:'name',
+				matchKey:'left_*',
+				type:'layer',
+				effect:hairE
+			},{
+				target:'both',
+				matchType:'name',
+				matchKey:'man_part/right_fist',
+				type:'symbol',
+				replaceKey:'man_part/head'
+			}];
+		$("#btn_rule").click(function (e) {
+			man_attack.replacer.addRules(rule12)
+		})
+		$("#btn_rule2").click(function (e) {
+			man_attack.replacer.addRules(rule34)
+		})
+		$("#btn_rule3").click(function (e) {
+			man_attack.replacer.removeRules(rule12)
+		})
+		$("#btn_rule4").click(function (e) {
+			man_attack.replacer.removeRules(rule34)
+		})
 
 
-			return
+			//return
 
             man_action = PIXIMC.MCLibrary.get('media/man_action/').makeInstance();
             man_action.x=300;
@@ -164,7 +210,7 @@
             },1000)
 			*/
             
-            currMC=man_action
+            //currMC=man_action
 
 			const atr=new PIXIMC.MCActor();
 
@@ -219,7 +265,7 @@
 			app.stage.addChild(atr)
 
 
-            currMC=atr
+            //currMC=atr
 			
         })()
 		
@@ -250,40 +296,6 @@
 
 		});
 */
-		$("#btn_rule").click(function (e) {
-			console.log('added1')
-
-			man_attack.replacer.addRules([
-			{
-				target:'self',
-				type:'symbol',
-				matchType:'name',
-				matchKey:'man_part/chest',
-				replaceSymbol:PIXIMC.MCLibrary.getSymbol('media/man_action/','man_part/chest')
-			},{
-				target:'child',
-				matchType:'name',
-				matchKey:'man_part/*',
-				type:'symbol',
-
-				replaceModel:PIXIMC.MCLibrary.get('media/man_alt/'),
-				replaceKey:'alt_part/*'
-			},{
-				target:'both',
-				matchType:'name',
-				matchKey:'left_*',
-				type:'layer',
-				effect:hairE
-			},{
-				target:'both',
-				matchType:'name',
-				matchKey:'man_part/right_fist',
-				type:'symbol',
-				replaceKey:'man_part/head'
-			}])
-
-			console.log('added2')
-		})
 
 
 		//player

@@ -1,7 +1,7 @@
 import { Filter } from '@pixi/core';
 import { Sprite } from '@pixi/sprite';
 import {Matrix,Point} from '@pixi/math';
-import {MCEffect,EffectGroup,EffectGroupAction} from './MCEffect';
+import {MCEffect,EffectGroup,EffectGroupAction} from '../effect';
 
 export default abstract class MCDisplayObject extends Sprite{
 	public filtercache:Dictionary<Filter>={};

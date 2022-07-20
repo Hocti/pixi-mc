@@ -1,7 +1,7 @@
 import {EventEmitter} from '@pixi/utils';//eventemitter3
 
-import {LoopState,playTarget} from './MCStructure';
-import * as TMath from '../utils/TMath';
+import {LoopState,playTarget} from '../model/MCStructure';
+import * as TMath from '../../utils/TMath';
 
 export enum timelineEventType{
 	complete = 'complete',

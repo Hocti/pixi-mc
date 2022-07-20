@@ -2,7 +2,7 @@ import { sound,Sound } from '@pixi/sound';
 import {Ticker} from '@pixi/ticker';
 import {Loader} from '@pixi/loaders';
 
-import {SoundType,SoundRemark} from './MCStructure';
+import {SoundType,SoundRemark} from './model/MCStructure';
 
 export default class MCSound{
 	static seVolume:float=1;

@@ -2,16 +2,15 @@ import {Matrix,Point} from '@pixi/math';
 import { Container,IDestroyOptions } from '@pixi/display';
 import { Sprite } from '@pixi/sprite';
 
-import MCSymbolModel from './MCSymbolModel';
-import MCTimeline from './MCTimeline';
-import MCPlayer from './MCPlayer';
-import {ColorMatrixAction,MCEffect,EffectGroup,EffectGroupAction} from './MCEffect';
+import MCSymbolModel from '../model/MCSymbolModel';
+import MCTimeline from '../player/MCTimeline';
+import MCPlayer from '../player/MCPlayer';
+import {ColorMatrixAction,MCEffect,EffectGroup,EffectGroupAction} from '../effect';
 import ASI from './ASI';
-import {MCType,childData, LoopState,layerData,rawInstenceData, rawAsiData, frameData} from './MCStructure';
-import * as TMath from '../utils/TMath';
+import {MCType,childData, LoopState,layerData,rawInstenceData, rawAsiData, frameData} from '../model/MCStructure';
+import * as TMath from '../../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
 import {BLEND_MODES} from '@pixi/constants';
-import { getTimer } from '../utils/utils';
 import MCSprite from './MCSprite';
 import IMCSprite from './IMCSprite';
 
@@ -361,7 +360,7 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 	
 	protected createFromSymbol(currSymbolModel:MCSymbolModel,data:rawInstenceData):IMCSprite{
 		let mc:IMCSprite
-		if(currSymbolModel.isSprite){
+		if(currSymbolModel.isMCSprite){
 			mc=new MCSprite(currSymbolModel);
 		}else{
 			mc=new (<any>this.constructor)(currSymbolModel,{player:this.player});

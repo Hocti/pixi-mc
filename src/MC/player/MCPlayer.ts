@@ -1,7 +1,6 @@
 import {Ticker} from '@pixi/ticker';
+import {MC,MCScene} from '../display';
 
-import MC from './MC';
-import MCScene from './MCScene';
 export default class MCPlayer {
 
 	//singleton

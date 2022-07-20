@@ -1,12 +1,11 @@
 import {Matrix, Point} from '@pixi/math';
 import {BLEND_MODES} from '@pixi/constants';
 
-import {AsiModel} from './MCStructure';
 import ASI from './ASI';
 import MCDisplayObject from './MCDisplayObject';
-import {MCEffect,EffectGroup,EffectGroupAction} from './MCEffect'
-import {MCType} from './MCStructure';
-import MCSymbolModel from './MCSymbolModel';
+import {MCEffect,EffectGroup,EffectGroupAction} from '../effect'
+import {MCType,AsiModel} from '../model/MCStructure';
+import MCSymbolModel from '../model/MCSymbolModel';
 import IMCSprite from './IMCSprite';
 
 export default class MCSprite extends MCDisplayObject implements IMCSprite{

@@ -1,6 +1,6 @@
 import MCDisplayObject from './MCDisplayObject';
-import {MCType} from './MCStructure';
-import MCSymbolModel from './MCSymbolModel';
+import {MCType} from '../model/MCStructure';
+import MCSymbolModel from '../model/MCSymbolModel';
 
 export default interface IMCSprite extends MCDisplayObject{
     type:MCType,

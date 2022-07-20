@@ -7,8 +7,8 @@ import {BLEND_MODES} from '@pixi/constants';
 import * as Color from '../../utils/color';
 import * as TMath from '../../utils/TMath';
 import {checkArrayEqual} from '../../utils/utils'
-import {colorData,filterData} from '../MCStructure'
-import MCDisplayObject from '../MCDisplayObject';
+import {colorData,filterData} from '../model/MCStructure'
+import MCDisplayObject from '../display/MCDisplayObject';
 
 
 import ColorMatrixAction from './ColorMatrixAction';

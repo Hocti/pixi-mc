@@ -3,21 +3,22 @@ import {Texture,BufferResource} from '@pixi/core'
 import {BLEND_MODES} from '@pixi/constants';
 
 
-import MC from './MC';
-import MCSprite from './MCSprite';
-import {hashHexToUint8} from '../utils/color';
+import MC from '../display/MC';
+import MCSprite from '../display/MCSprite';
+import {hashHexToUint8} from '../../utils/color';
 
 import {MCType,
 	childData,frameData,rawAsiData,symbolModelData,layerData,
 	 AsiModel,SoundType,m3d,GeomRemark,
 	PlayRemark,SoundRemark,ExtraRemark,ScriptRemark
 } from './MCStructure';//action,
-import {FrameLabels} from './Timeline';
+import {FrameLabels} from '../player/Timeline';
 import MCModel from './MCModel';
-import ASI from './ASI';
-import * as TMath from '../utils/TMath';
-import MCDisplayObject from './MCDisplayObject';
-import IMCSprite from './IMCSprite';
+import ASI from '../display/ASI';
+import MCDisplayObject from '../display/MCDisplayObject';
+import IMCSprite from '../display/IMCSprite';
+
+import * as TMath from '../../utils/TMath';
 
 export default class MCSymbolModel {
 
@@ -110,13 +111,13 @@ export default class MCSymbolModel {
 				m.a=this.mcModel.partList[firstAsi.N].rect.height;
 
 				this.spriteMatrix=m;
-				this.isSprite=true;
+				this.isMCSprite=true;
 				return
 			}
 
 			if(asiCount===1 && mcCount===0 && maxtimeslot===1){
 
-				this.isSprite=true;
+				this.isMCSprite=true;
 				this.spriteModel=this.mcModel.partList[firstAsi.N];
 				this.spriteMatrix=TMath.m3dto2d(firstAsi.M3D);
 			}
@@ -293,7 +294,7 @@ export default class MCSymbolModel {
 	//sprite===========================
 	//all child just contain one asi
 
-	public isSprite:boolean=false;
+	public isMCSprite:boolean=false;
 	public spriteMatrix?:Matrix;
 	
 	public spriteModel?:AsiModel;
@@ -301,7 +302,7 @@ export default class MCSymbolModel {
 	//instance=============================
 
 	public makeInstance():IMCSprite{
-		if(this.isSprite){
+		if(this.isMCSprite){
 			return new MCSprite(this);
 		}
 		return new MC(this);

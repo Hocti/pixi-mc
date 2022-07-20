@@ -2,7 +2,7 @@ import {BLEND_MODES} from '@pixi/constants';
 import { Filter } from '@pixi/core';
 import { ColorMatrix} from '@pixi/filter-color-matrix';
 
-import MCDisplayObject from '../MCDisplayObject';
+import MCDisplayObject from '../display/MCDisplayObject';
 import ColorMatrixAction from './ColorMatrixAction';
 import MCEffect from './MCEffect';
 

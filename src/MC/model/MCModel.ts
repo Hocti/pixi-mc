@@ -2,11 +2,11 @@ import {Matrix,Rectangle} from '@pixi/math';
 
 import {AsiModel,spriteData,symbolModelData,fullmodelData,rawInstenceData} from './MCStructure';
 import MCSymbolModel from './MCSymbolModel';
-import MC from './MC';
-import ASI from './ASI';
-import MCScene from './MCScene';
+import MC from '../display/MC';
+import ASI from '../display/ASI';
+import MCScene from '../display/MCScene';
+import MCDisplayObject from '../display/MCDisplayObject';
 import MCLibrary from './MCLibrary';
-import MCDisplayObject from './MCDisplayObject';
 
 export default class MCModel{
 
