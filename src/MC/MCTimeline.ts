@@ -69,14 +69,14 @@ export default class MCTimeline extends Timeline{
 
 
 	private remarkPlay(_f:uint):void{
-		if(this.mc.symbolModel.playRemark[_f]){
-			let type:string=this.mc.symbolModel.playRemark[_f].type;
+		if(this.mc.symbolModel.playRemarks[_f]){
+			let type:string=this.mc.symbolModel.playRemarks[_f].type;
 			if(type==='play'){
 				this.play();
 			}else if(type==='stop'){
 				this.stop();
 			}else{
-				let frame=<uint | string>this.mc.symbolModel.playRemark[_f].frame;
+				let frame=<uint | string>this.mc.symbolModel.playRemarks[_f].frame;
 				if(type==='gotoAndPlay'){
 					this.gotoAndPlay(frame)
 				}else if(type==='gotoAndStop'){
@@ -89,8 +89,8 @@ export default class MCTimeline extends Timeline{
 	}
 
 	private remarkSound(_f:uint):void{
-		if(this.mc.symbolModel.soundRemark[_f]){
-			for(let s of this.mc.symbolModel.soundRemark[_f]){
+		if(this.mc.symbolModel.soundRemarks[_f]){
+			for(let s of this.mc.symbolModel.soundRemarks[_f]){
 				if(s.type===SoundType.stopAllSound){
 					MCSound.stopAllSound();
 					return;
@@ -107,9 +107,6 @@ export default class MCTimeline extends Timeline{
 		if(this._playStatus===playStatus.playing){
 			this._currentFrameFloat+=this._speed*this._direction;
 			let intFrame=Math.round(this._currentFrameFloat);
-			if(this.mc.isScene){
-				//console.log(this.totalFrames,intFrame,this._currentFrameFloat,this.mc.stopAtEnd)
-			}
 			if(intFrame>this.totalFrames){
 				if(this.mc.stopAtEnd){//stopAtEnd
 					intFrame=this._currentFrameFloat=this.totalFrames;

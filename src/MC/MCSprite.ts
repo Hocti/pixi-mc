@@ -5,13 +5,18 @@ import {AsiModel} from './MCStructure';
 import ASI from './ASI';
 import MCDisplayObject from './MCDisplayObject';
 import {MCEffect,EffectGroup,EffectGroupAction} from './MCEffect'
+import {MCType} from './MCStructure';
+import MCSymbolModel from './MCSymbolModel';
+import IMCSprite from './IMCSprite';
 
-export default class MCSprite extends MCDisplayObject {
+export default class MCSprite extends MCDisplayObject implements IMCSprite{
 
+    /*
     private _SN:string;
     public get SN():string{
         return this._SN;
     }
+    */
 
     private innerAsi:ASI;
     public get asi():ASI{
@@ -19,22 +24,27 @@ export default class MCSprite extends MCDisplayObject {
     }
 
     public spriteMatrix?:Matrix;
+	
+    private _symbolModel:MCSymbolModel;
+	public get symbolModel():MCSymbolModel{
+		return this._symbolModel
+	}
 
-    constructor(_model:AsiModel,SN:string,spriteMatrix:Matrix,blendMode:BLEND_MODES=0){
+	public readonly type:MCType=MCType.Sprite;
+
+    constructor(sm:MCSymbolModel){
         super();
-        this.innerAsi=new ASI(_model);
-        this.innerAsi.transform.setFromMatrix(spriteMatrix.clone().append(_model.matrix));
-        this.addChild(this.innerAsi);
-		this._SN=SN;
+        this._symbolModel=sm;
 
-        this.innerAsi.blendMode=blendMode
+        this.innerAsi=new ASI(sm.spriteModel!);
+        this.innerAsi.transform.setFromMatrix(sm.spriteMatrix!.clone().append(sm.spriteModel!.matrix));
+        this.addChild(this.innerAsi);
+
+        this.innerAsi.blendMode=sm.defaultBlendMode
     }
     
-    /*
-	public showEffect():EffectGroup{
-		const eg:EffectGroup=super.showEffect();
-        this.innerAsi.blendMode=eg.blendMode
-        return eg
+	public showEffect():void{
+		super.showEffect();
+        this.innerAsi.blendMode=this.blendMode
 	}
-    */
 }

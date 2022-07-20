@@ -3,7 +3,6 @@ import MCPlayer from './MCPlayer';
 import MCSymbolModel from './MCSymbolModel';
 import MCTimeline from './MCTimeline';
 import {timelineEventType} from './Timeline';
-//import MCDisplayObject from './MCDisplayObject';
 import MCDisplayObject from './MCDisplayObject';
 
 export default class MCScene extends MCDisplayObject {
@@ -16,42 +15,58 @@ export default class MCScene extends MCDisplayObject {
 	public player:MCPlayer;
 	private max_scene:number=1;
 
-	constructor(model:MCSymbolModel,_player:MCPlayer=MCPlayer.getInstance()) {
+	constructor(model?:MCSymbolModel,_player:MCPlayer=MCPlayer.getInstance()) {
 		super();
 		this.player=_player;
-		if(model.mcModel.withScene && model.mcModel.mainSymbolModel===model){
-			let allSceneMC=new MC(model,{player:_player});
-			allSceneMC.showFrame(1);
-			for(let c of allSceneMC.children ){
-				let nameArr=(<MC>c).name.split('$');
-				if(nameArr[0].substring(0,5)!='scene'){
-					continue;
+		if(model){
+			if(model.mcModel.withScene && model.mcModel.mainSymbolModel===model){
+				let allSceneMC=new MC(model,{player:_player});
+				allSceneMC.showFrame(1);
+				for(let c of allSceneMC.children ){
+					let nameArr=(<MC>c).name.split('$');
+					if(nameArr[0].substring(0,5)!='scene'){
+						continue;
+					}
+					let scene_num=Number(nameArr[0].substring(5));
+					this.max_scene=Math.max(this.max_scene,scene_num);
+					if(nameArr[1]){
+						this._sceneName[scene_num]=nameArr[1]
+					}else{
+						this._sceneName[scene_num]=nameArr[0];
+					}
+					this.sceneMCList[scene_num]=(<MC>c);
+					(<MC>c).timeline.stop();
+					(<MC>c).x=0;
+					(<MC>c).y=0;
+					(<MC>c).timeline.active=false;
+					(<MC>c).isScene=true;
+					//console.log('scene',scene_num,this._sceneName[scene_num])
 				}
-				let scene_num=Number(nameArr[0].substring(5));
-				this.max_scene=Math.max(this.max_scene,scene_num);
-				if(nameArr[1]){
-					this._sceneName[scene_num]=nameArr[1]
-				}else{
-					this._sceneName[scene_num]=nameArr[0];
+				for(let i=1;i<this.max_scene;i++){
+					if(!this._sceneName[i]){
+						console.error('not contain scene ',i,this.max_scene)
+						return
+					}
 				}
-				this.sceneMCList[scene_num]=(<MC>c);
-				(<MC>c).timeline.stop();
-				(<MC>c).x=0;
-				(<MC>c).y=0;
-				(<MC>c).timeline.active=false;
-				(<MC>c).isScene=true;
-				//console.log('scene',scene_num,this._sceneName[scene_num])
+				this.changeScene(1)
+				this.sceneTimeline.play()
+			}else{
+				console.error('not a MCscene')
 			}
-			for(let i=1;i<this.max_scene;i++){
-				if(!this._sceneName[i]){
-					console.error('not contain scene ',i,this.max_scene)
-					return
-				}
-			}
-			this.changeScene(1)
-			this.sceneTimeline.play()
-		}else{
-			console.error('not a MCscene')
+		}
+	}
+	
+	public addModelToScene(sm:MCSymbolModel,sceneName?:string):void{
+		const scene=new MC(sm,{player:this.player});
+		const scene_num=++this.max_scene;
+		scene.timeline.active=false;
+		scene.isScene=true;
+		this.sceneMCList[scene_num]=scene;
+		if(!sceneName && sm.name!=='')sceneName=sm.name;
+		this._sceneName[scene_num]=sceneName || `scene${scene_num}`;
+		if(this.max_scene===1){
+			this.changeScene(1);
+			this.sceneTimeline.play();
 		}
 	}
 
@@ -74,7 +89,7 @@ export default class MCScene extends MCDisplayObject {
 		}
 	}
 
-	public changeScene(_scene:number|string){
+	public changeScene(_scene:number|string):void{
 		this.currSceneNum=this.getSceneNum(_scene);
 		let isPlaying:boolean=true;
 		if(this.children.indexOf(this.currSceneMC)>=0){
@@ -103,17 +118,17 @@ export default class MCScene extends MCDisplayObject {
 		}
 	}
 
-	public nextScene(){
-		this.addScene(1)
+	public nextScene():void{
+		this.addSceneNum(1)
 	}
 
-	public prevScene(){
-		this.addScene(-1)
+	public prevScene():void{
+		this.addSceneNum(-1)
 	}
 
-	private addScene(_add:number){
+	private addSceneNum(_add:number):void{
 		if(this.currSceneNum+_add<this.sceneName.length && this.currSceneNum+_add>0){
-			this.changeScene(this.currSceneNum+_add)
+			this.changeScene(this.currSceneNum+_add);
 		}
 	}
 

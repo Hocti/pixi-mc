@@ -13,13 +13,14 @@ import MCDisplayObject from './MCDisplayObject';
 import {BLEND_MODES} from '@pixi/constants';
 import { getTimer } from '../utils/utils';
 import MCSprite from './MCSprite';
+import IMCSprite from './IMCSprite';
 
 
 export type MCOption={
 	player?:MCPlayer
 }
 
-export default class MC extends MCDisplayObject {
+export default class MC extends MCDisplayObject implements IMCSprite{
 
 	//for debug
 	public static totalMC:uint=0;
@@ -91,8 +92,13 @@ export default class MC extends MCDisplayObject {
 		//set status from model
 		this._symbolModel=symbolModel;
 		this.stopAtEnd=symbolModel.defaultStopAtEnd;
-		this.baseEffect.blendMode=this.blendMode=symbolModel.defaultBlendMode;
-		this.baseEffect.visible=symbolModel.defaultVisible;
+
+		if(symbolModel.defaultBlendMode!==BLEND_MODES.NORMAL || !symbolModel.defaultVisible){
+			this.baseEffect.blendMode=this.blendMode=symbolModel.defaultBlendMode;
+			this.baseEffect.visible=symbolModel.defaultVisible;
+			this.effectChanged=true;
+		}
+
 		//player,timeline
 		this._player=(option?.player)?option.player:MCPlayer.getInstance();
 		this._player.addMC(this);
@@ -173,31 +179,32 @@ export default class MC extends MCDisplayObject {
 
 	//show frame
 
+	protected needRedraw:boolean=false;
+
 	public showFrame(frame:uint):void{
+		this.showEffect();
 		
-		//change effect
-		frame=TMath.clamp(frame,1,this.timeline.totalFrames)
-		if(this.effectChanged){
-			this.effectChanged=false;
-			this.showEffect();
-		}
-
 		//only update contain when frame changed
-		if(this.currShowingFrame === frame && !this.effectChanged)return;
-		this.currShowingFrame= frame;
+		frame=TMath.clamp(frame,1,this.timeline.totalFrames)
+		if(this.needRedraw){
+			this.needRedraw=false;
+		}else if(this.currShowingFrame === frame)return;
+		this.currShowingFrame = frame;
+		
 
-		const currFrameData:frameData=this.symbolModel.getFrame(frame);
+		const currFrameData:frameData=this.symbolModel.getFrame(this.currShowingFrame);
+
 		/*TODO:half frame
 			this.showFrameByData(currFrameData,frame);
 		}
 		
 		protected showFrameByData(currFrameData:frameData,frame:uint):void{
 		*/
-		if(this.symbolModel.visibleRemarks[frame]!==undefined){
+
+		if(this.symbolModel.visibleRemarks[frame]!==undefined && this.baseEffect.visible!==this.symbolModel.visibleRemarks[frame]){
 			this.baseEffect.visible=this.symbolModel.visibleRemarks[frame];
-			if(this.baseEffect.visible){
-				this.showEffect();
-			}else{
+			this.effectChanged=true;
+			if(!this.baseEffect.visible){
 				return
 			}
 		}
@@ -211,13 +218,10 @@ export default class MC extends MCDisplayObject {
 		let z:uint=0;
 
 		let setMaskList:{child:MCDisplayObject,mask:string}[]=[];
+
 		for(let c of currFrameData.child){
 			ly=currFrameData.layer[c.layer];
 			ch=this.showChild(c,ly);
-			if(c.type===MCType.Graphic){
-				(<MC>ch).graphic_start=0;//c.firstframe-frame;
-				
-			}
 			ch.zIndex=++z;
 			if(!ch.parent){
 				this.addChild(ch)
@@ -236,14 +240,15 @@ export default class MC extends MCDisplayObject {
 					//console.log(ly.C,ly.F,"layer",c)
 					MCEffect.setRawColorAndFilter(ch,ly.C,ly.F,"rawLayer_")
 				}
-
+				
 				ch.showEffect();
 
 				//mask by object
 				if(ly.maskBy){
 					setMaskList.push({child:ch,mask:ly.maskBy});
 				}
-			} 
+			}
+
 		}
 
 		//set mask
@@ -301,10 +306,26 @@ export default class MC extends MCDisplayObject {
 		let name:string,child:MCDisplayObject,m2d2:Matrix;
 		const isMC:boolean=(<rawInstenceData>obj.data).SN !== undefined;
 		if(isMC){
-			[name,child,m2d2]=this.showMC(obj.data! as rawInstenceData,ly);
+			const dat:rawInstenceData=obj.data! as rawInstenceData
+
+			[name,child,m2d2]=this.showMC(dat,ly);
+
+			//Graphic Frame
+			if(child instanceof MC && child.type===MCType.Graphic){
+				if(dat.FF!=undefined){
+					child.firstFrame=Number(dat.FF)+1;
+				}
+				if(dat.LP){
+					child.loop=dat.LP;
+				}
+				(<MC>child).graphic_start=0;//c.firstframe-frame;
+			}
+			MCEffect.setRawColorAndFilter(child,dat.C,dat.F,"timeline_");
+			//console.log(child,dat.C,dat.F)
 		}else{
 			[name,child,m2d2]=this.showASI(obj.data! as rawAsiData,ly);
 		}
+
 
 		//(<MC>child).temp_matrix.m2d=m2d;
 		//(<MC>child).temp_matrix.m2d2=m2d2;
@@ -312,12 +333,13 @@ export default class MC extends MCDisplayObject {
 		
 		child.transform.setFromMatrix(m2d.append(m2d2));
 
-		if(this.baseEffect.blendMode!==BLEND_MODES.NORMAL){
+		if(this.baseEffect.blendMode!==BLEND_MODES.NORMAL && child.baseEffect.blendMode!==this.baseEffect.blendMode){
 			child.baseEffect.blendMode=this.baseEffect.blendMode;
+			child.effectChanged=true;
 		}
 		
 		this.mcChildrenUsed[name]=true;
-		if(!this.mcChildren[name]){
+		if(!this.mcChildren[name] || this.mcChildren[name]!==child){
 			this.mcChildren[name]=child;
 			this.addChild(child);
 		}
@@ -325,55 +347,30 @@ export default class MC extends MCDisplayObject {
 		return child;
 	}
 
-	protected showMCInner(obj:rawInstenceData,ly:layerData):[MCDisplayObject,Matrix]{
-		let mc:MCDisplayObject;
-        let currSymbolModel:MCSymbolModel=this.symbolModel.mcModel.symbolList[obj.SN];
-        let m:Matrix=currSymbolModel.defaultMatrix?currSymbolModel.defaultMatrix:new Matrix();
+	protected showMC(data:rawInstenceData,ly:layerData):[string,MCDisplayObject,Matrix]{
+		let name:string=this.getUniName(`L${ly.num}|${data.SN}|${data.IN}|${data.ST}`);
+		let child:IMCSprite=<IMCSprite>this.search(name);
 
-		let isSprite=currSymbolModel.isSprite;
-		if(isSprite){
-			mc=currSymbolModel.makeInstance();
-		}else{
-			mc=new MC(currSymbolModel,{player:this.player});
-			(<MC>mc).type=obj.ST;
+		if(!child){
+			let currSymbolModel:MCSymbolModel=this.symbolModel.mcModel.symbolList[data.SN];
+			child=this.createFromSymbol(currSymbolModel,data);
 		}
 
-		return [mc,m];
+		return [name,child,child.symbolModel.defaultMatrix||new Matrix()]
 	}
-
-	protected showMC(obj:rawInstenceData,ly:layerData):[string,MCDisplayObject,Matrix]{
-		let name:string=this.getUniName(`L${ly.num}|${obj.SN}|${obj.IN}|${obj.ST}`);
-
-		let mc=<MCDisplayObject>this.search(name);
-		let newmatrix:Matrix;
-		if(!mc){
-			[mc,newmatrix]=this.showMCInner(obj,ly);
-			if(obj.IN!==''){
-				mc.name=obj.IN;
-			}else{
-				mc.name=name;
-			}
+	
+	protected createFromSymbol(currSymbolModel:MCSymbolModel,data:rawInstenceData):IMCSprite{
+		let mc:IMCSprite
+		if(currSymbolModel.isSprite){
+			mc=new MCSprite(currSymbolModel);
 		}else{
-			newmatrix=new Matrix();
+			mc=new (<any>this.constructor)(currSymbolModel,{player:this.player});
+			(<MC>mc).type=data.ST;
 		}
-		
-		/*
-		if(isSprite){//set asi matrix
-			//newmatrix=newmatrix.append(this.symbolModel.mcModel.symbolList[obj.SN].spriteMatrix!).append((<ASI>mc).model.matrix);
-		}else 
-		*/
-
-		if(mc instanceof MC && mc.type===MCType.Graphic){//Graphic Frame
-			if(obj.FF!=undefined){
-				mc.firstFrame=Number(obj.FF)+1;
-			}
-			if(obj.LP){
-				mc.loop=obj.LP;
-			}
+		if(data.IN!==''){
+			mc.name=data.IN;
 		}
-
-		MCEffect.setRawColorAndFilter(mc,obj.C,obj.F,"timeline_");
-		return [name,mc,newmatrix]
+		return mc
 	}
 
 	protected showASI(obj:rawAsiData,ld:layerData):[string,ASI,Matrix]{
@@ -417,14 +414,3 @@ export default class MC extends MCDisplayObject {
 		return undefined;
 	}
 }
-
-/*
-
-SKIN Object:
-load base
-load json
-load img in json
-check if meta.json
-	replace?
-	color?
-*/

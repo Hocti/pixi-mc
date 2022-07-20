@@ -179,7 +179,8 @@ export enum MCType{
 	MovieClip='MC',
 	Button='B',
 	Graphic='G',
-	ASI='asi'//not in raw
+	ASI='asi',//not in raw
+	Sprite='Sprite'//not in raw
 }
 
 export type m3d=[float, ...Array<float>] & {length: 16};

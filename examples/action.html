@@ -24,6 +24,8 @@
 		<input type="button" value="prev_action">
 		<input type="button" value="next_action">
 		<br/>
+		<input type="button" value="add rule" id="btn_rule">
+		<br/>
 		<input type="text" id="fps_ip" value="10"><input type="button" value="fps">
 		<br/>
 		<table id='catable'>
@@ -103,35 +105,26 @@
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
-
-        (async()=>{
-
-
-
-            const re=await PIXIMC.FileList.getfolderInfoFromTextAsync('media/files.txt','media/')
-            await PIXIMC.MCLoader.loadModelsAsync(mc_list,'media/')
-            //console.log('loaded files',re)
-            
-            //.symbolList['alt_part/hair']
-            let man_alt = PIXIMC.MCLibrary.get('media/man_alt/').makeInstance();
-            man_alt.x=200;
-            man_alt.y=150;
-            //app.stage.addChild(man_alt);
-
-            
-            man_attack = new PIXIMC.MCEX(PIXIMC.MCLibrary.getSymbol('media/man_attack/'))
-            man_attack.x=100;
-            man_attack.y=200;
-            man_attack.timeline.gotoAndStop(13)
-			
 			const hairE=PIXIMC.EffectGroupAction.create();
 			hairE.alpha=0.5
 			hairE.blendMode=7
-
-			const hairEE=PIXIMC.EffectGroupAction.create();
 			const cc=new PIXIMC.ColorChange();
 			cc.brightness=0.5
 			hairE.colorMatrix=cc.colorMatrix;
+
+        (async()=>{
+
+            const re=await PIXIMC.FileList.getfolderInfoFromTextAsync('media/files.txt','media/')
+            await PIXIMC.MCLoader.loadModelsAsync(mc_list,'media/');
+            
+            man_attack = new PIXIMC.MCEX(PIXIMC.MCLibrary.getSymbol('media/man_attack/'))
+            man_attack.x=100;
+            man_attack.y=220;
+            man_attack.timeline.gotoAndStop(13)
+            //man_attack.timeline.stop()
+            app.stage.addChild(man_attack);
+		currMC=man_attack
+			
 
 			PIXIMC.MCLibrary.getSymbol('media/man_alt/','alt_part/face').defaultMatrix=PIXIMC.TMath.makeMatrix(1/2.2,undefined,0,-1,-0.5)
 			/*
@@ -145,46 +138,18 @@
 			})
 			*/
 
-			PIXIMC.MCReplacer.addDefaultRule({
+			PIXIMC.MCReplacer.addRule({
 				matchType:'name',
 				matchModelKey:'media/man_alt/',
 				matchKey:'alt_part/hair*',
 				replaceMatrix:PIXIMC.TMath.makeMatrix(1,1.5)
 			})
 
-			man_attack.replacer.addRules([
-			{
-				target:'self',
-				type:'symbol',
-				matchType:'name',
-				matchKey:'man_part/chest',
-				replaceSymbol:PIXIMC.MCLibrary.getSymbol('media/man_action/','man_part/chest')
-			},{
-				target:'child',
-				matchType:'name',
-				matchKey:'man_part/*',
-				type:'symbol',
-
-				replaceModel:PIXIMC.MCLibrary.get('media/man_alt/'),
-				replaceKey:'alt_part/*'
-			},{
-				target:'both',
-				matchType:'name',
-				matchKey:'left_*',
-				type:'layer',
-				effect:hairE
-			},{
-				target:'both',
-				matchType:'name',
-				matchKey:'man_part/right_fist',
-				type:'symbol',
-				replaceKey:'man_part/head'
-			}])
 			/*
 			*/	
 
-            app.stage.addChild(man_attack);
 
+			return
 
             man_action = PIXIMC.MCLibrary.get('media/man_action/').makeInstance();
             man_action.x=300;
@@ -285,6 +250,40 @@
 
 		});
 */
+		$("#btn_rule").click(function (e) {
+			console.log('added1')
+
+			man_attack.replacer.addRules([
+			{
+				target:'self',
+				type:'symbol',
+				matchType:'name',
+				matchKey:'man_part/chest',
+				replaceSymbol:PIXIMC.MCLibrary.getSymbol('media/man_action/','man_part/chest')
+			},{
+				target:'child',
+				matchType:'name',
+				matchKey:'man_part/*',
+				type:'symbol',
+
+				replaceModel:PIXIMC.MCLibrary.get('media/man_alt/'),
+				replaceKey:'alt_part/*'
+			},{
+				target:'both',
+				matchType:'name',
+				matchKey:'left_*',
+				type:'layer',
+				effect:hairE
+			},{
+				target:'both',
+				matchType:'name',
+				matchKey:'man_part/right_fist',
+				type:'symbol',
+				replaceKey:'man_part/head'
+			}])
+
+			console.log('added2')
+		})
 
 
 		//player

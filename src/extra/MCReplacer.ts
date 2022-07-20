@@ -1,28 +1,24 @@
 import {Matrix,Point} from '@pixi/math';
 import { Container,IDestroyOptions } from '@pixi/display';
-import { Sprite } from '@pixi/sprite';
-import {BLEND_MODES} from '@pixi/constants';
+import {EventEmitter} from '@pixi/utils';
 
-import MC from '../MC/MC';
 import MCSymbolModel from '../MC/MCSymbolModel';
-import MCTimeline from '../MC/MCTimeline';
-import MCPlayer from '../MC/MCPlayer';
 import {ColorMatrixAction,MCEffect,EffectGroup,EffectGroupAction,ColorChange} from '../MC/MCEffect';
-import ASI from '../MC/ASI';
 import {MCType,childData, LoopState,layerData,rawInstenceData, rawAsiData} from '../MC/MCStructure';
 
 import * as TMath from '../utils/TMath';
 import MCDisplayObject from '../MC/MCDisplayObject';
 import MCEX from './MCEX';
 import MCModel from '../MC/MCModel';
+import MCLibrary from '../MC/MCLibrary';
 
 export interface Replacer {// extends MCDisplayObject
     addRule(_rule:ReplaceRule):void;
-
 }
 
-export interface ReplacerDisplayObject extends MCDisplayObject{
+export interface IreplacerDisplayObject extends MCDisplayObject{
     replacer:MCReplacer;
+    onRenew():void;
 }
 
 export type ReplaceRule={
@@ -30,7 +26,7 @@ export type ReplaceRule={
     target:'self' | 'child' | 'both',
 
     //match
-    matchType:'name' | 'regex',
+    matchType:'name' | 'regex' | 'instanceName',
     matchKey:string,//name or regex
     matchModelKey?:string,
 
@@ -44,11 +40,18 @@ export type ReplaceRule={
     effect?:EffectGroup
 }
 
-export class MCReplacer implements Replacer{
+export type ReplacerResult={
+    symbolModel:MCSymbolModel,
+    matrix:Matrix,
+    effect?:EffectGroup,
+    replaced:boolean
+}
+
+export class MCReplacer extends EventEmitter implements Replacer{
 
     //static===================
 
-    public static instanceOfReplacerDisplayObject(object: MCDisplayObject): object is MCDisplayObject {
+    public static instanceOfIreplacerDisplayObject(object: Container): object is IreplacerDisplayObject {
         return 'replacer' in object;
     }
 
@@ -102,30 +105,35 @@ export class MCReplacer implements Replacer{
         return result.join('');
     }
 
-    static defaultRules:ReplaceRule[]=[];
+    static globalRules:ReplaceRule[]=[];
 
-    public static addDefaultRule(_rule:ReplaceRule):void{
-		this.defaultRules.push(_rule);
+    public static addRule(_rule:ReplaceRule):void{
+		this.globalRules.push(_rule);
     }
 
-    public static removeDefaultRule(_rule:ReplaceRule):void{
-        let index = this.defaultRules.indexOf(_rule);
+    public static removeRule(_rule:ReplaceRule):void{
+        let index = this.globalRules.indexOf(_rule);
         if (index !== -1) {
-            this.defaultRules.splice(index, 1);
+            this.globalRules.splice(index, 1);
         }
     }
 
     //===================
 
-    private _mc:ReplacerDisplayObject;
+    private _mc:IreplacerDisplayObject;
 
-	constructor(mc:ReplacerDisplayObject) {
+	constructor(mc:IreplacerDisplayObject) {
+        super();
         this._mc=mc;
 		this._mc.on('added',(_parent:Container)=>{
             //console.log('onAdded',_parent,this)
             this.renewRule();
         })
+        this.on('renew',()=>{
+            this._mc.onRenew();
+        });
     }
+
     //add rules=====================
 
     private _selfRules:ReplaceRule[]=[];
@@ -175,6 +183,11 @@ export class MCReplacer implements Replacer{
                 rules.push(r);
             }
         }
+
+        if(this._mc.parent && MCReplacer.instanceOfIreplacerDisplayObject(this._mc.parent)){
+            rules.push(...(<IreplacerDisplayObject>this._mc.parent).replacer.getRule4Children());
+        }
+        
         return rules;
     }
 
@@ -185,20 +198,12 @@ export class MCReplacer implements Replacer{
                 rules.push(r);
             }
         }
-        let currMC:MCDisplayObject=this._mc;
-        let l:uint=0;
 
-        while(currMC.parent instanceof MCDisplayObject){
-            currMC=currMC.parent;
-            if(MCReplacer.instanceOfReplacerDisplayObject(currMC)){
-                rules.push(...(<ReplacerDisplayObject>currMC).replacer.getRule4Children());
-            }
-            if(l++>10){
-                break;
-            }
+        if(this._mc.parent && MCReplacer.instanceOfIreplacerDisplayObject(this._mc.parent)){
+            rules.push(...(<IreplacerDisplayObject>this._mc.parent).replacer.getRule4Children());
         }
-
         this.cacheRules=rules;
+        this.emit('renew')
         return rules;
     }
 
@@ -211,6 +216,106 @@ export class MCReplacer implements Replacer{
 
     //use rule=================
 
+    private replaceCache:Dictionary<ReplacerResult>={};
+
+    public cleanCache():void{
+        this.replaceCache={};
+    }
+
+    public checkReplace(originalSN:string,layerName:string):ReplacerResult{
+        const mcModel:MCModel=(<MCEX>this._mc).symbolModel.mcModel;
+        let currSymbolModel:MCSymbolModel=mcModel.symbolList[originalSN];
+        const effects:EffectGroup[]=[];
+        let m:Matrix=currSymbolModel.defaultMatrix?currSymbolModel.defaultMatrix.clone():new Matrix();
+
+        //change slot by rule
+        const modelKey:string=MCLibrary.getKeyFromModel(mcModel)!;
+        const rules:ReplaceRule[]=this.rules;
+
+        for(const rule of rules){
+            if(rule.matchModelKey!==undefined && rule.matchModelKey!==modelKey){
+                continue;
+            }
+            if( rule.type==='symbol' && 
+                MCReplacer.checkMatch(originalSN,rule)
+            ){
+                if(rule.replaceSymbol){
+                    currSymbolModel=rule.replaceSymbol;
+                }else if(rule.replaceKey){
+                    const replacedName:string | undefined=MCReplacer.starReplace(originalSN,rule.matchKey,rule.replaceKey);
+                    if(replacedName){
+                        if(rule.replaceModel && rule.replaceModel.symbolList[replacedName]){
+                            currSymbolModel=rule.replaceModel.symbolList[replacedName];
+                        }else if(mcModel.symbolList[replacedName]){
+                            currSymbolModel=mcModel.symbolList[replacedName];
+                        }
+                    }
+                }else if(rule.replaceModel && rule.replaceModel.symbolList[rule.matchKey]){
+                    currSymbolModel=rule.replaceModel.symbolList[rule.matchKey];
+                }
+
+                if(rule.replaceMatrix){
+                    m.append(rule.replaceMatrix);
+                }
+                if(rule.effect){
+                    effects.push(rule.effect);
+                }
+
+                if(mcModel.symbolList[originalSN]!==currSymbolModel){//after changed
+                    if(currSymbolModel.defaultMatrix){
+                        m=currSymbolModel.defaultMatrix.clone();
+                    }
+                    for(const rule of MCReplacer.globalRules){
+                        if( //rule.matchModelKey!==undefined && 
+                            rule.matchModelKey===MCLibrary.getKeyFromModel(currSymbolModel.mcModel) &&
+                            MCReplacer.checkMatch(currSymbolModel.name,rule)
+                        ){
+                            if(rule.replaceMatrix){
+                                m.append(rule.replaceMatrix);
+                            }
+                            if(rule.effect){
+                                effects.push(rule.effect);
+                            }
+                        }
+                    }
+                    
+                }
+            }else if(rule.type==='layer' && MCReplacer.checkMatch(layerName,rule)){
+                //console.log('layer')
+                if(rule.effect){
+                    effects.push(rule.effect);
+                }
+            }
+        }
+
+        let effect:EffectGroup | undefined;
+        if(effects.length>1){
+            let eg:EffectGroup=EffectGroupAction.create();
+            for(const effect of effects){
+                eg=EffectGroupAction.merge(eg,effect);
+            }
+            effect=eg;
+        }else if(effects.length===1){
+            effect=effects[0];
+        }
+
+        return {
+            symbolModel:currSymbolModel,
+            matrix:m,
+            effect,
+            replaced:mcModel.symbolList[originalSN]===currSymbolModel
+        }
+    }
+
+    public getReplace(originalSN:string,layerName:string):ReplacerResult{
+        const key:string=`${originalSN}|${layerName}`
+        if(this.replaceCache[key]===undefined){
+            const rr=this.checkReplace(originalSN,layerName);
+            this.replaceCache[key]=rr;
+            //console.log('get',key,this.replaceCache[key],rr)
+        }
+        return this.replaceCache[key];
+    }
 }
 
 /*

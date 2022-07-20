@@ -17,29 +17,29 @@ import MCModel from './MCModel';
 import ASI from './ASI';
 import * as TMath from '../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
+import IMCSprite from './IMCSprite';
 
 export default class MCSymbolModel {
 
+	private _data:symbolModelData;
+
 	public mcModel:MCModel;
-	protected _name:string='';
-	protected _data:symbolModelData;
-
-	protected _layerNameList:string[]=[];
-	protected _LabelList:FrameLabels={};
-	protected _totalFrame:uint=1;
-	private _isMaster:boolean=false;
-
-	public defaultMatrix?:Matrix;
+	public name:string='';
+	public layerNameList:string[]=[];
+	public LabelList:FrameLabels={};
+	public totalFrames:uint=1;
+	public isMaster:boolean=false;
 
 	constructor(data:symbolModelData,_model:MCModel) {
+
 		this.mcModel=_model
 		this._data=data;
-		this._name=data.SN;
-		this._isMaster=data.N!==undefined;
+		this.name=data.SN;
+		this.isMaster=data.N!==undefined;
 
 		if(data.SN.substring(0,14)==='remark/remark_')return
 
-		let totalFrame=1;
+		let totalFrames=1;
 		let asiCount=0;
 		let mcCount=0;
 		let remarkCount=0;
@@ -50,7 +50,7 @@ export default class MCSymbolModel {
 		for(const k in data.TL.L){
 			let timeslot=0
 
-			this._layerNameList.push(data.TL.L[k].LN);
+			this.layerNameList.push(data.TL.L[k].LN);
 
 			//loop all frame on each layer
 			for(const f of data.TL.L[k].FR){
@@ -59,10 +59,10 @@ export default class MCSymbolModel {
 
 				//label name
 				if(f.N){
-					this._LabelList[f.N]=f.I+1;
+					this.LabelList[f.N]=f.I+1;
 				}
 
-				totalFrame=Math.max(totalFrame,f.I+f.DU);
+				totalFrames=Math.max(totalFrames,f.I+f.DU);
 
 				//loop all element on 1 layer,1 frame
 				for(const e of f.E){
@@ -86,7 +86,7 @@ export default class MCSymbolModel {
 				}
 			}
 		}
-		this._totalFrame=totalFrame;
+		this.totalFrames=totalFrames;
 		
 		//if is Special ASI
 		if(firstAsi){
@@ -109,45 +109,48 @@ export default class MCSymbolModel {
 				m.d=this.mcModel.partList[firstAsi.N].rect.width;
 				m.a=this.mcModel.partList[firstAsi.N].rect.height;
 
-				this._spriteMatrix=m;
-				this._isSprite=true;
+				this.spriteMatrix=m;
+				this.isSprite=true;
 				return
 			}
 
 			if(asiCount===1 && mcCount===0 && maxtimeslot===1){
 
-				this._isSprite=true;
+				this.isSprite=true;
 				this.spriteModel=this.mcModel.partList[firstAsi.N];
-				this._spriteMatrix=TMath.m3dto2d(firstAsi.M3D);
+				this.spriteMatrix=TMath.m3dto2d(firstAsi.M3D);
 			}
 		}
 	}
 
 	//remarks
-
-	public soundRemark:SoundRemark[][]=[];
-	public playRemark:PlayRemark[]=[];
+	public soundRemarks:SoundRemark[][]=[];
+	public playRemarks:PlayRemark[]=[];
 	public visibleRemarks:boolean[]=[];
 	public scriptRemarks:Dictionary<ScriptRemark>={};
+	public geomRemarks:GeomRemark[]=[];
+	public extraRemarks:Dictionary<ExtraRemark[]>={};
+
+	//default status
 	public defaultBlendMode:BLEND_MODES=BLEND_MODES.NORMAL;
 	public defaultStopAtEnd:boolean=false;
 	public defaultVisible:boolean=true;
+	public defaultMatrix?:Matrix;
 
-	public extraRemark:Dictionary<ExtraRemark[]>={};
 
 	private processRemark(type:string,args:string[],frame_begin:uint,frame_end:uint,frame_label?:string){
 		if(type==="sound" || type==="stopAllSound"){
-			if(!this.soundRemark[frame_begin]){
-				this.soundRemark[frame_begin]=[]
+			if(!this.soundRemarks[frame_begin]){
+				this.soundRemarks[frame_begin]=[]
 			}
-			this.soundRemark[frame_begin].push({type:args[0] as SoundType,soundFile:args[1]});
+			this.soundRemarks[frame_begin].push({type:args[0] as SoundType,soundFile:args[1]});
 		}else if(type==='play' || type==='stop'){
-			this.playRemark[frame_begin]={type};
+			this.playRemarks[frame_begin]={type};
 		}else if(type==='gotoAndPlay' || type==='gotoAndStop' || type==='jump'){
 			if(parseInt(args[1])>0){
-				this.playRemark[frame_begin]={type,frame:parseInt(args[1]),frameNumber:parseInt(args[1])};
+				this.playRemarks[frame_begin]={type,frame:parseInt(args[1]),frameNumber:parseInt(args[1])};
 			}else{
-				this.playRemark[frame_begin]={type,frame:args[1],frameLabel:args[1]};
+				this.playRemarks[frame_begin]={type,frame:args[1],frameLabel:args[1]};
 			}
 		}else if(type==='script'){
 			const scriptName=args.shift();
@@ -169,15 +172,13 @@ export default class MCSymbolModel {
 		}else if(type==='showHere'){
 			this.visibleRemarks[frame_begin]=true;
 		}else{
-			if(!this.extraRemark[type]){
-				this.extraRemark[type]=[]; 
+			if(!this.extraRemarks[type]){
+				this.extraRemarks[type]=[]; 
 			}
-			this.extraRemark[type].push({type,frame_begin,frame_end,args:args,frame_label});
+			this.extraRemarks[type].push({type,frame_begin,frame_end,args:args,frame_label});
 		}
 	}
 
-	
-	public geomRemarks:GeomRemark[]=[];
 	private processGeomRemark(type:string,args:string[],frame_begin:uint,frame_end:uint,m2d:Matrix){
 		const detail=TMath.m2dDetail(m2d);
 		const gr:GeomRemark={type,frame_begin,frame_end,args:args,
@@ -289,48 +290,24 @@ export default class MCSymbolModel {
 		return FrameData;
 	}
 
-	//special Asi===========================
+	//sprite===========================
 	//all child just contain one asi
-	 private _isSprite:boolean=false;
-	 private spriteModel?:AsiModel;
-	 private _spriteMatrix?:Matrix;
-	 public get isSprite():boolean{
-		return this._isSprite;
-	}
-	public get spriteMatrix():Matrix | undefined{
-	   return this._spriteMatrix;
-   }
+
+	public isSprite:boolean=false;
+	public spriteMatrix?:Matrix;
+	
+	public spriteModel?:AsiModel;
 
 	//instance=============================
 
-	public makeInstance():MCDisplayObject{
+	public makeInstance():IMCSprite{
 		if(this.isSprite){
-			return new MCSprite(this.spriteModel!,this.name,this._spriteMatrix!,this.defaultBlendMode);
+			return new MCSprite(this);
 		}
 		return new MC(this);
 	}
 
 	//read only=============================
-
-	public get isMaster():boolean{
-		return this._isMaster;
-	}
-
-	public get name():string{
-		return this._name;
-	}
-
-	public get LabelList():FrameLabels{
-		return this._LabelList;
-	}
-
-	public get layerNameList():string[]{
-		return this._layerNameList;
-	}
-
-	public get totalFrames():uint{
-		return this._totalFrame;
-	}
     
     public containLabel(_label:string):boolean
     {

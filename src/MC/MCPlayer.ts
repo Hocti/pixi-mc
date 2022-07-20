@@ -5,7 +5,9 @@ import MCScene from './MCScene';
 export default class MCPlayer {
 
 	//singleton
+	
 	private static instance: MCPlayer;
+
 	constructor() {
 		if(!MCPlayer.ticker){
 			console.error('not initTicker')
@@ -13,22 +15,30 @@ export default class MCPlayer {
 		}
 		MCPlayer.ticker.add(this.enterTick.bind(this))
 	}
+
 	static getInstance(): MCPlayer {
 		if (!MCPlayer.instance) {
 			MCPlayer.instance = new MCPlayer();
 		}
 		return MCPlayer.instance;
 	}
+
 	//static init
+
 	static ticker:Ticker;
+
 	public static initTicker(_ticker:Ticker){
 		MCPlayer.ticker=_ticker;
 	}
 
 	//private
+
 	private currFrame:uint=1;
+
 	private realFloatFrame:float=1;
+
 	private mcList:MC[]=[];
+
 	private enterTick(delta:float) {//* delta=f in 60fps
 		/*
 		if(this.realFloatFrame<100){
@@ -43,11 +53,13 @@ export default class MCPlayer {
 			//*or do half frame
 			return
 		}
+
 		let lastFrame:uint=this.currFrame
 		this.currFrame=realIntFrame
 
 		let removed=0;
 		for(let mc of this.mcList){
+			//TODO
 			if(!mc){
 				removed++;
 				continue
@@ -61,12 +73,16 @@ export default class MCPlayer {
 			mc.showFrame(mc.timeline.currentFrame);
 		}
 		if(removed>50){
-			//*GC
-
+			this.mcList = this.mcList.filter(element => {
+				return element !== undefined;
+			});
 		}
 	}
+
 	//public
+
 	public fps:float=60;
+
 	public addMC(mc:MC){
 		this.mcList.push(mc)
 	}

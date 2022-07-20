@@ -5,7 +5,7 @@ import MCSymbolModel from '../MC/MCSymbolModel';
 import * as TMath from '../utils/TMath';
 
 import MCEX from './MCEX';
-import {ReplacerDisplayObject,MCReplacer} from './MCReplacer';
+import {IreplacerDisplayObject,MCReplacer} from './MCReplacer';
 
 export type Action={
 	mcID:uint,
@@ -21,7 +21,7 @@ export type ActionPhase={
 	frame_end:uint
 }
 
-export default class MCActor extends MCDisplayObject implements ReplacerDisplayObject{
+export default class MCActor extends MCDisplayObject implements IreplacerDisplayObject{
 
 	private actionList:Dictionary<Action>={};
 	private mcList:MCEX[]=[];
@@ -44,8 +44,8 @@ export default class MCActor extends MCDisplayObject implements ReplacerDisplayO
 		this.mcList.push(mc);
 		
 		let firstAction:string | null | undefined;
-		if(symbolModel.extraRemark['action']){
-			for(const action of symbolModel.extraRemark['action']){
+		if(symbolModel.extraRemarks['action']){
+			for(const action of symbolModel.extraRemarks['action']){
 				if(!action.args[0] && !action.frame_label){
 					console.error('action name error',action,symbolModel)
 					continue;
@@ -63,7 +63,7 @@ export default class MCActor extends MCDisplayObject implements ReplacerDisplayO
 				
 				const phases:Dictionary<ActionPhase>={};
 				let phaseOrder:string[]=[];
-				for(const phase of symbolModel.extraRemark['phase']){
+				for(const phase of symbolModel.extraRemarks['phase']){
 					if(phase.frame_begin>=action.frame_begin && phase.frame_begin<=action.frame_end){
 						const phaseName:string=phase.args[0]?phase.args[0]:(phase.frame_label?phase.frame_label:'phase');
 						phases[phaseName]={
@@ -162,11 +162,26 @@ export default class MCActor extends MCDisplayObject implements ReplacerDisplayO
 	}
 
 
+	protected destroyOption={
+		children:true,texture:false
+	}
+	
+	public destroy(){
+		this.mcList.forEach(mcex => {
+			mcex.destroy()
+		});
+		super.destroy(this.destroyOption)
+	}
+
 	//replacer=============
 	
     private _replacer:MCReplacer=new MCReplacer(this);
 
     public get replacer():MCReplacer{
         return this._replacer;
+    }
+
+    public onRenew():void{
+		this.currentMC?.onRenew();
     }
 }

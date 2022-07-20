@@ -7,6 +7,7 @@ export default abstract class MCDisplayObject extends Sprite{
 	public filtercache:Dictionary<Filter>={};
 	public baseEffect:EffectGroup;
 	public extraEffects:Dictionary<EffectGroup>={};
+	public effectChanged:boolean=false;
 
 	//debug
 	public temp_matrix:{
@@ -23,16 +24,18 @@ export default abstract class MCDisplayObject extends Sprite{
 		this.baseEffect=EffectGroupAction.create();
 	}
 
-	public showEffect():EffectGroup{
+	public showEffect():void{//EffectGroup{
+		if(!this.effectChanged)return;// this.baseEffect;
 		let eg:EffectGroup=this.baseEffect;
 		for(let k in this.extraEffects){
 			eg=EffectGroupAction.merge(eg,this.extraEffects[k]);
 		}
 		EffectGroupAction.append(this,eg);
-		return eg;
+		//console.log('se2',eg);
+		this.effectChanged=false;
+		//return eg;
 	}
 
-	protected effectChanged:boolean=false;
 
 	public addEffect(effect:EffectGroup,name:string):void{
 		if(this.extraEffects[name] && EffectGroupAction.equalSimple(this.extraEffects[name],effect)){

@@ -1,6 +1,7 @@
 import {Texture,BaseTexture} from '@pixi/core'
 import {AsiModel} from './MCStructure';
 import MCDisplayObject from './MCDisplayObject';
+//import { Sprite } from '@pixi/sprite';
 
 export default class ASI extends MCDisplayObject {
 

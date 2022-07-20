@@ -1,7 +1,4 @@
 import {Matrix,Point} from '@pixi/math';
-import { Container,IDestroyOptions } from '@pixi/display';
-import { Sprite } from '@pixi/sprite';
-import {BLEND_MODES} from '@pixi/constants';
 
 import MC,{MCOption} from '../MC/MC';
 import MCSymbolModel from '../MC/MCSymbolModel';
@@ -14,36 +11,24 @@ import {MCType,childData, LoopState,layerData,rawInstenceData, rawAsiData, frame
 import * as TMath from '../utils/TMath';
 import MCDisplayObject from '../MC/MCDisplayObject';
 import MCSprite from '../MC/MCSprite';
+import IMCSprite from '../MC/IMCSprite';
 
-import {MCReplacer,ReplacerDisplayObject,ReplaceRule} from './MCReplacer';
+import {MCReplacer,IreplacerDisplayObject,ReplacerResult} from './MCReplacer';
 import MCLibrary from '../MC/MCLibrary';
 
-export default class MCEX extends MC implements ReplacerDisplayObject{
-
-    protected _replacer:MCReplacer=new MCReplacer(this);
-
-    public get replacer():MCReplacer{
-        return this._replacer;
-    }
-
-	protected layerEffects:Dictionary<EffectGroup>={};
-    
-    /*
-	constructor(model:MCSymbolModel,option?:MCOption) {
-        super(model,option);
-    }
-    */
+export default class MCEX extends MC implements IreplacerDisplayObject{
     
     public showFloatFrame(_frame:float):void{
         if(Math.floor(_frame)===Math.ceil(_frame)){
             return
         }
-        const rate:float=_frame-Math.floor(_frame);
-		const floorFrameData=this.symbolModel.getFrame(Math.floor(_frame));
-		const ceilFrameData=this.symbolModel.getFrame(Math.ceil(_frame));
-
-        const newData:frameData=floorFrameData
         /*
+		const floorFrameData=this.symbolModel.getFrame(Math.floor(_frame));
+        const rate:float=_frame-Math.floor(_frame);
+		const ceilFrameData=this.symbolModel.getFrame(Math.ceil(_frame));
+        const newData:frameData=floorFrameData
+
+
         TODO..
         console.log(floorFrameData,ceilFrameData)
         for(let c of floorFrameData.child){
@@ -58,106 +43,53 @@ export default class MCEX extends MC implements ReplacerDisplayObject{
 
     }
 
-	protected showMCInner(obj:rawInstenceData,ly:layerData):[MCDisplayObject,Matrix]{
-		let mc:MCDisplayObject;
-        let currSymbolModel:MCSymbolModel=this.symbolModel.mcModel.symbolList[obj.SN];
-        let changed:boolean=false;
-        let m:Matrix=currSymbolModel.defaultMatrix?currSymbolModel.defaultMatrix.clone():new Matrix();
+    //replacer=====================
 
-        //change slot by rule
-        const modelKey:string=MCLibrary.getKeyFromModel(this.symbolModel.mcModel)!;
-        const rules:ReplaceRule[]=this.replacer.rules;
-        const effects:EffectGroup[]=[];
-        for(const rule of rules){
-            if( rule.type==='symbol' && 
-                MCReplacer.checkMatch(obj.SN,rule) && 
-                (rule.matchModelKey===undefined || rule.matchModelKey===modelKey)
-            ){
-                if(rule.replaceSymbol){
-                    currSymbolModel=rule.replaceSymbol;
-                }else if(rule.replaceKey){
-                    const replacedName:string | undefined=MCReplacer.starReplace(obj.SN,rule.matchKey,rule.replaceKey);
-                    if(replacedName){
-                        if(rule.replaceModel && rule.replaceModel.symbolList[replacedName]){
-                            currSymbolModel=rule.replaceModel.symbolList[replacedName];
-                        }else if(this.symbolModel.mcModel.symbolList[replacedName]){
-                            currSymbolModel=this.symbolModel.mcModel.symbolList[replacedName];
-                        }
-                    }
-                }else if(rule.replaceModel && rule.replaceModel.symbolList[rule.matchKey]){
-                    currSymbolModel=rule.replaceModel.symbolList[rule.matchKey];
-                }
+	constructor(model:MCSymbolModel,option?:MCOption) {
+        super(model,option); 
+    }
 
-                if(rule.replaceMatrix){
-                    m.append(rule.replaceMatrix);
-                }
-                if(rule.effect){
-                    effects.push(rule.effect);
-                }
-                changed=true;
+    public replacer:MCReplacer=new MCReplacer(this);
 
-                if(this.symbolModel.mcModel.symbolList[obj.SN]!==currSymbolModel){//after changed
-                    if(currSymbolModel.defaultMatrix){
-                        m=currSymbolModel.defaultMatrix.clone();
-                    }
-                    for(const rule of MCReplacer.defaultRules){
-                        if( //rule.matchModelKey!==undefined && 
-                            rule.matchModelKey===MCLibrary.getKeyFromModel(currSymbolModel.mcModel) &&
-                            MCReplacer.checkMatch(currSymbolModel.name,rule)
-                        ){
-                            if(rule.replaceMatrix){
-                                m.append(rule.replaceMatrix);
-                            }
-                            if(rule.effect){
-                                effects.push(rule.effect);
-                            }
-                        }
-                    }
-                    
-                }
+    public onRenew():void{
+        //console.log('onRenew',this.symbolModel.name)
+        this.needRedraw=true;
+        this.replacer.cleanCache();
+    }
+
+	protected showMC(data:rawInstenceData,ly:layerData):[string,MCDisplayObject,Matrix]{
+		let name:string=this.getUniName(`L${ly.num}|${data.SN}|${data.IN}|${data.ST}`);
+		let child:IMCSprite=<IMCSprite>this.search(name);
+
+        let {symbolModel,matrix,effect}=this.replacer.getReplace(data.SN,ly.name);
+
+		if(!child || symbolModel!==child.symbolModel){
+            if(child){
+                this.removeChild(child);
             }
-        }
-
-		let isSprite=currSymbolModel.isSprite;
-		if(isSprite){
-			mc=currSymbolModel.makeInstance()
-		}else{
-			mc=new MCEX(currSymbolModel,{player:this.player});
-			(<MCEX>mc).type=obj.ST;
+			child=this.createFromSymbol(symbolModel,data);
 		}
-
-        //change effect by rules
-        for(const rule of rules){
-            if(rule.type==='layer' && MCReplacer.checkMatch(ly.name,rule)){
-                //console.log('layer')
-                if(rule.effect){
-                    effects.push(rule.effect);
-                }
-                changed=true;
-            }
+        
+        if(effect){
+            child.addEffect(effect,'replace');
         }
 
-        if(effects.length>1){
-            let eg:EffectGroup=EffectGroupAction.create();
-            for(const effect of effects){
-                eg=EffectGroupAction.merge(eg,effect);
-            }
-            mc.addEffect(eg,'replace');
-        }else if(effects.length===1){
-            mc.addEffect(effects[0],'replace');
-        }
-
-        /*
-        //layer effect
-        if(this.layerEffects[ly.name]){
-            mc.addEffect(this.layerEffects[ly.name],'layerEffect')
-            //ch.extraEffects['layerEffect']=;
-        }else if(ch.extraEffects['layerEffect']){
-            mc.removeEffect('layerEffect')
-            //delete ch.extraEffects['layerEffect'];
-        }
-        */
-
-		return [mc,m];
+		return [name,child,matrix];
 	}
 }
+
+/*
+
+	protected layerEffects:Dictionary<EffectGroup>={};
+    
+    
+
+    //layer effect
+    if(this.layerEffects[ly.name]){
+        mc.addEffect(this.layerEffects[ly.name],'layerEffect')
+        //ch.extraEffects['layerEffect']=;
+    }else if(ch.extraEffects['layerEffect']){
+        mc.removeEffect('layerEffect')
+        //delete ch.extraEffects['layerEffect'];
+    }
+*/
