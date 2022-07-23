@@ -3,10 +3,10 @@ import {BLEND_MODES} from '@pixi/constants';
 
 import ASI from './ASI';
 import MCDisplayObject from './MCDisplayObject';
-import {MCEffect,EffectGroup,EffectGroupAction} from '../effect'
+import {MCEffect,type EffectGroup,EffectGroupAction} from '../effect'
 import {MCType,AsiModel} from '../model/MCStructure';
 import MCSymbolModel from '../model/MCSymbolModel';
-import IMCSprite from './IMCSprite';
+import type IMCSprite from './IMCSprite';
 
 export default class MCSprite extends MCDisplayObject implements IMCSprite{
 

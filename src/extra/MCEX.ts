@@ -3,7 +3,7 @@ import {Matrix} from '@pixi/math';
 import {MC,MCOption,MCDisplayObject,IMCSprite} from '../MC/display/';
 import {layerData,rawInstenceData,childData} from '../MC/model/MCStructure';
 import {MCSymbolModel} from '../MC/model/';
-import {EffectGroup} from '../MC/effect/';
+import type {EffectGroup} from '../MC/effect/';
 
 import {MCReplacer,IreplacerDisplayObject,ReplacerResult} from './MCReplacer';
 
@@ -34,6 +34,8 @@ export default class MCEX extends MC implements IreplacerDisplayObject{
 
     }
 
+    //replacer=====================
+
 	protected showMC(data:rawInstenceData,ly:layerData):[string,MCDisplayObject,Matrix]{
 		let name:string=this.getUniName(`L${ly.num}|${data.SN}|${data.IN}|${data.ST}`);
 		let child:IMCSprite=<IMCSprite>this.search(name);
@@ -41,9 +43,8 @@ export default class MCEX extends MC implements IreplacerDisplayObject{
         let {symbolModel,matrix,effect}=this.replacer.getReplace(data.SN,ly.name);
 
 		if(!child || symbolModel!==child.symbolModel){
-            if(child){
-                this.removeChild(child);
-                child.destroy()
+            if(child && !child.destroyed){
+                child.destroy();
             }
 			child=this.createFromSymbol(symbolModel,data);
 		}
@@ -57,28 +58,12 @@ export default class MCEX extends MC implements IreplacerDisplayObject{
 
 		return [name,child,matrix];
 	}
-    
-	protected showChild(obj:childData,ly:layerData):MCDisplayObject{
-        const mdo:MCDisplayObject=super.showChild(obj,ly);
-
-        //layer effect
-        if(!mdo.extraEffects['layerEffect'] && this.layerEffects[ly.name]){
-            mdo.addEffect(this.layerEffects[ly.name],'layerEffect')
-        }else if(mdo.extraEffects['layerEffect'] && !this.layerEffects[ly.name]){
-            mdo.removeEffect('layerEffect')
-        }
-
-        return mdo;
-    }
-
-    //replacer=====================
 
     public replacer:MCReplacer=new MCReplacer(this);
 
     public onRenew():void{
         //console.log('onRenew',this.symbolModel.name)
         this.needRedraw=true;
-        this.replacer.cleanCache();
         this.cacheAsBitmap=false;
     }
 
@@ -95,5 +80,18 @@ export default class MCEX extends MC implements IreplacerDisplayObject{
     public removeLayerEffect(layerName:string):void{
         delete this.layerEffects[layerName];
         this.needRedraw=true;
+    }
+    
+	protected showChild(obj:childData,ly:layerData):MCDisplayObject{
+        const mdo:MCDisplayObject=super.showChild(obj,ly);
+
+        //layer effect
+        if(!mdo.extraEffects['layerEffect'] && this.layerEffects[ly.name]){
+            mdo.addEffect(this.layerEffects[ly.name],'layerEffect')
+        }else if(mdo.extraEffects['layerEffect'] && !this.layerEffects[ly.name]){
+            mdo.removeEffect('layerEffect')
+        }
+
+        return mdo;
     }
 }

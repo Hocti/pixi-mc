@@ -6,7 +6,7 @@ import MCDisplayObject from '../display/MCDisplayObject';
 import ColorMatrixAction from './ColorMatrixAction';
 import MCEffect from './MCEffect';
 
-export type EffectGroup={
+export type EffectGroup = {
 	visible:boolean,
 	filters:Filter[],
 	alpha:float,

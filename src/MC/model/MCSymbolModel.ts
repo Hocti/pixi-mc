@@ -12,7 +12,7 @@ import {MCType,
 	 AsiModel,SoundType,m3d,GeomRemark,
 	PlayRemark,SoundRemark,ExtraRemark,ScriptRemark
 } from './MCStructure';//action,
-import {FrameLabels} from '../player/Timeline';
+import {type FrameLabels} from '../player/Timeline';
 import MCModel from './MCModel';
 import ASI from '../display/ASI';
 import MCDisplayObject from '../display/MCDisplayObject';

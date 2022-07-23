@@ -4,8 +4,9 @@ import MCSymbolModel from '../model/MCSymbolModel';
 import MCPlayer from '../player/MCPlayer';
 import MCTimeline from '../player/MCTimeline';
 import {timelineEventType} from '../player/Timeline';
+import {ImultiMC} from "./ImultiMC";
 
-export default class MCScene extends MCDisplayObject {
+export default class MCScene extends MCDisplayObject implements ImultiMC{
 
 	private currSceneNum:number=1;
 	private currSceneMC!:MC;
@@ -15,7 +16,7 @@ export default class MCScene extends MCDisplayObject {
 	public player:MCPlayer;
 	private max_scene:number=1;
 
-	constructor(model?:MCSymbolModel,_player:MCPlayer=MCPlayer.getInstance()) {
+	constructor(model?:MCSymbolModel,_player:MCPlayer=MCPlayer.getInstance()){
 		super();
 		this.player=_player;
 		if(model){
@@ -54,6 +55,10 @@ export default class MCScene extends MCDisplayObject {
 				console.error('not a MCscene')
 			}
 		}
+	}
+
+	public get currentMC():MC{
+		return this.currSceneMC!;
 	}
 	
 	public addModelToScene(sm:MCSymbolModel,sceneName?:string):void{

@@ -5,14 +5,14 @@ import { Sprite } from '@pixi/sprite';
 import MCSymbolModel from '../model/MCSymbolModel';
 import MCTimeline from '../player/MCTimeline';
 import MCPlayer from '../player/MCPlayer';
-import {ColorMatrixAction,MCEffect,EffectGroup,EffectGroupAction} from '../effect';
+import {ColorMatrixAction,MCEffect,type EffectGroup,EffectGroupAction} from '../effect';
 import ASI from './ASI';
 import {MCType,childData, LoopState,layerData,rawInstenceData, rawAsiData, frameData} from '../model/MCStructure';
 import * as TMath from '../../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
 import {BLEND_MODES} from '@pixi/constants';
 import MCSprite from './MCSprite';
-import IMCSprite from './IMCSprite';
+import type IMCSprite from './IMCSprite';
 
 
 export type MCOption={
@@ -339,6 +339,9 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 		
 		this.mcChildrenUsed[name]=true;
 		if(!this.mcChildren[name] || this.mcChildren[name]!==child){
+			if(this.mcChildren[name] && !this.mcChildren[name].destroyed){
+				this.mcChildren[name].destroy();
+			}
 			this.mcChildren[name]=child;
 			this.addChild(child);
 		}

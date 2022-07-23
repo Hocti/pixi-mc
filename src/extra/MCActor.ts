@@ -1,6 +1,6 @@
 import { Matrix } from "@pixi/math";
 
-import {IMCSprite,MCDisplayObject} from "../MC/display/";
+import {ImultiMC,MCDisplayObject} from "../MC/display/";
 
 import MCSymbolModel from '../MC/model/MCSymbolModel';
 import * as TMath from '../utils/TMath';
@@ -22,9 +22,6 @@ export type ActionPhase={
 	frame_end:uint
 }
 
-interface ImultiMC{
-	currentMC?:IMCSprite;
-}
 
 export default class MCActor extends MCDisplayObject implements IreplacerDisplayObject,ImultiMC{
 

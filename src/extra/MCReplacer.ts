@@ -2,9 +2,10 @@ import {Matrix,Point} from '@pixi/math';
 import { Container,IDestroyOptions } from '@pixi/display';
 import {EventEmitter} from '@pixi/utils';
 
-import {ColorMatrixAction,MCEffect,EffectGroup,EffectGroupAction,ColorChange} from '../MC/effect';
+import {ColorMatrixAction,MCEffect,type EffectGroup,EffectGroupAction,ColorChange} from '../MC/effect';
 import {MCModel,MCLibrary,MCSymbolModel} from '../MC/model/';
 import {MCDisplayObject} from '../MC/display/';
+import {ImultiMC,instanceOfImultiMC} from '../MC/display/ImultiMC';
 
 import MCEX from './MCEX';
 
@@ -19,7 +20,7 @@ export interface IreplacerDisplayObject extends MCDisplayObject{
 
 export type ReplaceRule={
     type:'layer'| 'symbol' ,//name or regex
-    target:'self' | 'child' | 'both',
+    target:'self' | 'child' | 'both' | 'next',
 
     //match
     matchType:'name' | 'regex' | 'instanceName',
@@ -114,6 +115,8 @@ export class MCReplacer extends EventEmitter implements Replacer{
         }
     }
 
+    //renew all replacer?
+
     //===================
 
     private _mc:IreplacerDisplayObject;
@@ -177,11 +180,11 @@ export class MCReplacer extends EventEmitter implements Replacer{
     protected getRule4Children():ReplaceRule[]{
         const rules:ReplaceRule[]=[];
         for(let r of this._selfRules){
-            if(r.target==='child' || r.target==='both'){
+            if(r.target==='child' || r.target==='next' || r.target==='both'){
                 rules.push(r);
-            }/*else if(r.target==='self' && this._mc instanceof MCActor ){
+            }else if(r.target==='self' && instanceOfImultiMC(this._mc)){
                 rules.push(r);
-            }*/
+            }
         }
 
         if(this._mc.parent && MCReplacer.instanceOfIreplacerDisplayObject(this._mc.parent)){
@@ -203,6 +206,7 @@ export class MCReplacer extends EventEmitter implements Replacer{
             rules.push(...(<IreplacerDisplayObject>this._mc.parent).replacer.getRule4Children());
         }
         this.cacheRules=rules;
+        this.cleanCache();
         this.emit('renew')
         return rules;
     }

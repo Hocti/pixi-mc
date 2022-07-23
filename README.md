@@ -204,17 +204,27 @@ MCScene doesn’t have timeline, but you can use 'MCScene.sceneTimeline' to acce
 If a mc's symbol name is named "solidcolorbox_{hexColorCode}", eg "solidcolorbox_99191A",  
 The texture in them will convert to a 1x1 pixel texture with that color.
 
-## functions (may be) coming soon
+# Extra functions ~~(may be) coming soon~~ I did it
 
-Layer effect  
-Changing skin  
-Separate timeline in multi "actions" with remark object, and a "action player"
+### EffectGroup
+grouped: visible,alpha,blendMode,filters,colorMatrix in one object
 
-## API docs?
+### MCEX
+extented for MC
+**addLayerEffect** can set EffectGroup in specify layer
 
-This is my first typescript, pixijs, git (and markdown) project,  
-I may write a better doc with all api later...
+### LabelMC:
+extented for MCEX
+With LabelTimeline, you to "playTo" a frame label/number (not jump to) from current frame, it would choose play obverse or reverse automatically
 
-## License
+### MCReplacer:
+You can set some rule for specify Symbol, and replace to another Symbol in MCEX (just like Spine's slot)
+Also you can change the EffectGroup or special Symbol for specify **Layer**
+
+### MCActor, with remark [action,phase,geom]:
+You can add multi **MCSymbolModel** (with adding **action/phase remark** in fla file) in a **MCActor**, then choose which action & phase to show by **showAction**, the MCActor would show the correct MCEX and frame
+
+
+# License
 
 MIT License.

@@ -1,30 +1,51 @@
-import typescript from "@rollup/plugin-typescript";
-//import ts from "rollup-plugin-ts";
-import { terser } from "rollup-plugin-terser";
+import typescript from 'rollup-plugin-typescript2';
+import dtsBundle from 'rollup-plugin-dts-bundle';
 import sourcemaps from 'rollup-plugin-sourcemaps';
-import dts from "rollup-plugin-dts";
-//import minify  from "rollup-plugin-minify-es";
-//import resolve from "rollup-plugin-node-resolve";
-//import commonjs from "rollup-plugin-commonjs";
+import commonjs from "rollup-plugin-commonjs";
+import resolve from "rollup-plugin-node-resolve";
+import { terser } from "rollup-plugin-terser";
+//import ts from "rollup-plugin-ts";
+//import dts from "rollup-plugin-dts";
+import minify  from "rollup-plugin-minify-es";
+
 import pkg from "./package.json";
+//import path from 'path';
+//import fs from 'fs';
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 const plugins = [
-	typescript(),
+    typescript({ 
+        downlevelIteration: false
+    }),
+    /*
+    dtsBundle({
+        bundle: {
+            name: 'PIXIMC',
+            main: 'dist/index.d.ts',
+            out: 'pixi-mc.d.ts',
+            //removeSource: true,
+        }
+    }),
+    */
     sourcemaps(),
+    resolve({
+        browser: true,
+        preferBuiltins: false,
+    }),
+    commonjs({
+        namedExports: {
+            'resource-loader': ['Resource'],
+        },
+    }),
     //dts(),
 	//ts(),
-	//minify({}, minify),
-    //resolve(),
-    /*commonjs({
-        namedExports: {
-            "resource-loader": ["Resource"],
-		},
-    })*/
+	//minify({iife: 'iife.min.js', cjs: 'cjs.min.js'},minify())
 ];
 
 // Disabling minification makes faster
 // watch and better coverage debugging
-if (process.env.NODE_ENV === "production") {
+if (isProduction) {
     plugins.push(terser({
         output: {
             comments(node, comment) {
@@ -41,6 +62,7 @@ if (process.env.NODE_ENV === "production") {
 
 const sourcemap = true;
 const compiled = (new Date()).toUTCString().replace(/GMT/g, "UTC");
+
 const banner = `/*!
  * ${pkg.name} - v${pkg.version}
  * By Hocti
@@ -50,58 +72,72 @@ const banner = `/*!
  * http://www.opensource.org/licenses/mit-license
  */`;
 
-export default {
-    input: "src/index.ts",
-    external: Object.keys(pkg.peerDependencies),
-    output: [
-        {
-            banner,
-            freeze: false,
-            format: "iife",
-            name: "PIXIMC",
-            sourcemap,
-            file: "dist/pixi-mc.js",
-            globals: {
-                'pixi.js':'PIXI',
+const globals={
+    'pixi.js':'PIXI',
 
-                '@pixi/core': 'PIXI',
-                '@pixi/constants': 'PIXI',
-                '@pixi/settings': 'PIXI',
-                '@pixi/math': 'PIXI',
-                '@pixi/sprite': 'PIXI',
-                '@pixi/ticker': 'PIXI',
-                '@pixi/display': 'PIXI',
-                '@pixi/loaders': 'PIXI',
-                
-                '@pixi/utils': 'PIXI.utils',
-                
-                '@pixi/filter-blur':'PIXI.filters',
-                '@pixi/filter-color-matrix':'PIXI.filters',
+    '@pixi/core': 'PIXI',
+    '@pixi/constants': 'PIXI',
+    '@pixi/settings': 'PIXI',
+    '@pixi/math': 'PIXI',
+    '@pixi/sprite': 'PIXI',
+    '@pixi/ticker': 'PIXI',
+    '@pixi/display': 'PIXI',
+    '@pixi/loaders': 'PIXI',
+    
+    '@pixi/utils': 'PIXI.utils',
+    
+    '@pixi/filter-blur':'PIXI.filters',
+    '@pixi/filter-color-matrix':'PIXI.filters',
 
-                '@pixi/sound':'PIXI.sound',
-                'pixi-filters':'PIXI.filters'
+    '@pixi/sound':'PIXI.sound',
+    'pixi-filters':'PIXI.filters'
+}
+const freeze=false;
+
+const results=[];
+
+async function main() {
+    results.push(
+    {
+        input: ["src/index.ts"],
+        external: Object.keys(pkg.peerDependencies),
+        output: [
+            {
+                banner,
+                freeze,
+                sourcemap,
+                format: "iife",
+                name: "PIXIMC",
+                file: pkg.main,
+                globals
+            },
+            {
+                banner,
+                freeze,
+                sourcemap,
+                format: "esm",
+                file: "dist/pixi-mc.esm.js",
+                globals
+            },
+            {
+                banner,
+                freeze,
+                sourcemap,
+                format: "cjs",
+                file: "dist/pixi-mc.cjs.js",
+                globals
             }
-		}
-    ],
-    /*[
-		{
-			file: "dist/pixi-mc.d.ts",
-			format: "es"
-		}
-        {
-            banner,
-            freeze: false,
-            sourcemap,
-            format: "cjs",
-            file: "dist/pixi-mc.cjs.js",
-        },
-        {
-            banner,
-            freeze: false,
-            sourcemap,
-            format: "esm",
-            file: "dist/pixi-mc.esm.js",
-        },
-    ]*/
-    plugins,
-};
+        ],
+        plugins
+    });
+        /*[
+            {
+                file: pkg.types,
+                format: "es"
+            },
+        ]*/
+    return results;
+}
+
+
+export default main();

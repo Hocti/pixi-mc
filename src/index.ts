@@ -1,25 +1,25 @@
-//export * as MCStructure from './MC/model/MCStructure';
+/// <reference path="../global.d.ts" />
 
-export {MCEffect,ColorMatrixAction,ColorChange,EffectGroup,EffectGroupAction,TintType} from './MC/effect';
+export {MCEffect,ColorMatrixAction,ColorChange,type EffectGroup,EffectGroupAction,TintType} from './MC/effect';
 export {getTimer} from './utils/utils';
-export {FileList,fileInfo,folderInfo} from './utils/FileList';
+export {FileList,type fileInfo,type folderInfo} from './utils/FileList';
 export * as TMath from './utils/TMath';
 
 export {MCDisplayObject,ASI,MC,MCScene,MCSprite} from './MC/display';
 export {MCPlayer,MCTimeline} from './MC/player';
 export {MCLoader,MCLibrary,MCSymbolModel,MCModel,MCStructure} from './MC/model';
 
-//import Timeline from './MC/MCTimeline';
+//export * as MCStructure from './MC/model/MCStructure';
 //import MCSound from './MC/MCSound';
 
 //extra===============================
 
-import LabelMC,{LabelTimeline} from './extra/LabelMC';
+import LabelMC from './extra/LabelMC';
 import MCActor from './extra/MCActor';
 import MCEX from './extra/MCEX';
 import {MCReplacer} from './extra/MCReplacer';
 export {
-	LabelMC,LabelTimeline,
+	LabelMC,
 	MCEX,
 	MCActor,
 	MCReplacer
