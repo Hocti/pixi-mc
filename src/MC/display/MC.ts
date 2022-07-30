@@ -67,11 +67,11 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 
 	public removePasted:boolean=false;//remove children who not display on currentFrame
 
-	protected maskList:Dictionary<Container>={};
-	protected asiMaskList:Dictionary<ASI>={};
+	protected maskList:Record<string,Container>={};
+	protected asiMaskList:Record<string,ASI>={};
 	protected currShowingFrame:uint=0;
-	protected mcChildren:Dictionary<MCDisplayObject>={};
-	protected mcChildrenUsed:Dictionary<boolean>={};
+	protected mcChildren:Record<string,MCDisplayObject>={};
+	protected mcChildrenUsed:Record<string,boolean>={};
 	
 	//graphic
 	public firstFrame:uint=1;

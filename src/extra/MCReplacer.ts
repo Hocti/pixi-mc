@@ -220,7 +220,7 @@ export class MCReplacer extends EventEmitter implements Replacer{
 
     //use rule=================
 
-    private replaceCache:Dictionary<ReplacerResult>={};
+    private replaceCache:Record<string,ReplacerResult>={};
 
     public cleanCache():void{
         this.replaceCache={};

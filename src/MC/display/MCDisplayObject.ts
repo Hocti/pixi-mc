@@ -4,9 +4,9 @@ import {Matrix,Point} from '@pixi/math';
 import {MCEffect,type EffectGroup,EffectGroupAction} from '../effect';
 
 export default abstract class MCDisplayObject extends Sprite{
-	public filtercache:Dictionary<Filter>={};
+	public filtercache:Record<string,Filter>={};
 	public baseEffect:EffectGroup;
-	public extraEffects:Dictionary<EffectGroup>={};
+	public extraEffects:Record<string,EffectGroup>={};
 	public effectChanged:boolean=false;
 
 	//debug

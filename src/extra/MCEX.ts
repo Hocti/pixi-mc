@@ -69,7 +69,7 @@ export default class MCEX extends MC implements IreplacerDisplayObject{
 
     //layer effect=================
 
-	protected layerEffects:Dictionary<EffectGroup>={};
+	protected layerEffects:Record<string,EffectGroup>={};
 
     public addLayerEffect(layerName:string,eg:EffectGroup):void{
         this.layerEffects[layerName]=eg;

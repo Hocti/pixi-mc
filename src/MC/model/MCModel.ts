@@ -11,8 +11,8 @@ import MCLibrary from './MCLibrary';
 export default class MCModel{
 
 	public mainSymbolModel:MCSymbolModel;
-	public symbolList:Dictionary<MCSymbolModel>={};
-	public partList:Dictionary<AsiModel>={};
+	public symbolList:Record<string,MCSymbolModel>={};
+	public partList:Record<string,AsiModel>={};
 	public basepath:string;
 
 	public fps:float;
@@ -78,7 +78,7 @@ export default class MCModel{
 	}
 
 	public static processSpritemap(spritemap:spriteData[],basepath:string=''){
-		let partList:Dictionary<AsiModel>={}
+		let partList:Record<string,AsiModel>={}
 		for(let v of spritemap){
 			for(let s of v.ATLAS.SPRITES){
 				let part:AsiModel={

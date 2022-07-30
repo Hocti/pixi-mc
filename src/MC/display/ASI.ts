@@ -34,8 +34,8 @@ export default class ASI extends MCDisplayObject {
 		return false
 	}
 
-	private static textureCache:Dictionary<Texture>={};
-	private static baseTextureCache:Dictionary<BaseTexture>={};
+	private static textureCache:Record<string,Texture>={};
+	private static baseTextureCache:Record<string,BaseTexture>={};
 
 	public static makeTexture(_model:AsiModel):Texture{
 		if(!_model.texture){

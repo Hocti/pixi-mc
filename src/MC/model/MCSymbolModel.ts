@@ -128,9 +128,9 @@ export default class MCSymbolModel {
 	public soundRemarks:SoundRemark[][]=[];
 	public playRemarks:PlayRemark[]=[];
 	public visibleRemarks:boolean[]=[];
-	public scriptRemarks:Dictionary<ScriptRemark>={};
+	public scriptRemarks:Record<string,ScriptRemark>={};
 	public geomRemarks:GeomRemark[]=[];
-	public extraRemarks:Dictionary<ExtraRemark[]>={};
+	public extraRemarks:Record<string,ExtraRemark[]>={};
 
 	//default status
 	public defaultBlendMode:BLEND_MODES=BLEND_MODES.NORMAL;
@@ -205,7 +205,7 @@ export default class MCSymbolModel {
 
 	private frameDataCache:frameData[]=[]
 	private layerDataCache:layerData[]=[]
-	private childDataCache:Dictionary<childData>={};
+	private childDataCache:Record<string,childData>={};
 
 	public getFrame(frame:uint):frameData{
 		if(this.frameDataCache[frame]){

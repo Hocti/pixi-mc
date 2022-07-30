@@ -10,7 +10,7 @@ import {IreplacerDisplayObject,MCReplacer} from './MCReplacer';
 
 export type Action={
 	mcID:uint,
-	phases:Dictionary<ActionPhase>,//ActionPhase[],
+	phases:Record<string,ActionPhase>,//ActionPhase[],
 	phaseOrder:string[],//ActionPhase[],
 	name:string,
 	frame_begin:uint,
@@ -25,7 +25,7 @@ export type ActionPhase={
 
 export default class MCActor extends MCDisplayObject implements IreplacerDisplayObject,ImultiMC{
 
-	private actionList:Dictionary<Action>={};
+	private actionList:Record<string,Action>={};
 	private mcList:MCEX[]=[];
 
 	private currentMCID:int=-1;
@@ -63,7 +63,7 @@ export default class MCActor extends MCDisplayObject implements IreplacerDisplay
 					continue;
 				}
 				
-				const phases:Dictionary<ActionPhase>={};
+				const phases:Record<string,ActionPhase>={};
 				let phaseOrder:string[]=[];
 				for(const phase of symbolModel.extraRemarks['phase']){
 					if(phase.frame_begin>=action.frame_begin && phase.frame_begin<=action.frame_end){
@@ -149,7 +149,7 @@ export default class MCActor extends MCDisplayObject implements IreplacerDisplay
 		*/
 	}
 
-	public checkAction(actionAndPhase:Dictionary<string[]>):boolean{
+	public checkAction(actionAndPhase:Record<string,string[]>):boolean{
 		for(const action in actionAndPhase){
 			if(this.actionList[action]===undefined){
 				return false;

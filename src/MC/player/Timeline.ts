@@ -20,7 +20,7 @@ export enum timelineEventType{
     */
 }
 
-export type FrameLabels=Dictionary<uint>;
+export type FrameLabels=Record<string,uint>;
 
 export enum playStatus{
 	playing,

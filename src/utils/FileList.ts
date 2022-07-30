@@ -28,7 +28,7 @@ export class FileList {
 
 	//put
 
-	private allFiles:Dictionary<fileInfo>={};
+	private allFiles:Record<string,fileInfo>={};
 
 	private push_many(_farr:fileInfo[]) {
 		for(const f of _farr){
