@@ -5,8 +5,8 @@ import {Loader} from '@pixi/loaders';
 import {SoundType,SoundRemark} from './model/MCStructure';
 
 export default class MCSound{
-	static seVolume:float=1;
-	static bgmVolume:float=1;
+	static seVolume:number=1;
+	static bgmVolume:number=1;
 	static fileType=['.mp3','.wav'];
 
     static SoundType = SoundType;
@@ -14,8 +14,8 @@ export default class MCSound{
 	static seList:Sound[]=[];
 	static currBgm?:Sound;
 	static lastBgm?:Sound;
-	static bgmFadeAcc:float=1;
-	static bgmFadeTarget:float=1;
+	static bgmFadeAcc:number=1;
+	static bgmFadeTarget:number=1;
 
 	static play(_soundRemark:SoundRemark,_basepath:string=''){
 		for(const ft of MCSound.fileType){
@@ -31,10 +31,10 @@ export default class MCSound{
 		}
 	}
 
-	static reuseKey:int[]=[];
-	static clearTimer:float=0;
+	static reuseKey:uint[]=[];
+	static clearTimer:number=0;
 	static initTicker(ticker:Ticker){
-		ticker.add((delta:float)=>{
+		ticker.add((delta:number)=>{
 			MCSound.clearTimer+=delta
 			if(MCSound.clearTimer>60*5){
 				MCSound.destroyEnded()

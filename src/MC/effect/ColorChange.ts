@@ -12,24 +12,24 @@ export enum TintType{
 
 export default class ColorChange{
 	
-	private _brightness:float=0;
-	private _saturation:float=0;
-	private _hue:float=0;
-	private _contrast:float=0;
+	private _brightness:number=0;
+	private _saturation:number=0;
+	private _hue:number=0;
+	private _contrast:number=0;
 
 	private _tintColor:uint=0;
-	private _tintRate:float=0;
+	private _tintRate:number=0;
 	private _tintType:TintType=TintType.none;
 
 	public _colorMatrix:ColorMatrix;
 
 	constructor(
-			brightness:float=0,
-			hue:float=0,
-			saturation:float=0,
-			contrast:float=0,
+			brightness:number=0,
+			hue:number=0,
+			saturation:number=0,
+			contrast:number=0,
 			tintColor:uint=0,
-			tintRate:float=0,
+			tintRate:number=0,
 			tintType:TintType=TintType.none
 		){
 		this._brightness=brightness;
@@ -44,19 +44,19 @@ export default class ColorChange{
 		this._colorMatrix=this.renew();
 	}
 
-	public get brightness():float{
+	public get brightness():number{
 		return this._brightness;
 	}
 
-	public get hue():float{
+	public get hue():number{
 		return this._hue;
 	}
 
-	public get saturation():float{
+	public get saturation():number{
 		return this._saturation;
 	}
 
-	public get contrast():float{
+	public get contrast():number{
 		return this._contrast;
 	}
 
@@ -64,7 +64,7 @@ export default class ColorChange{
 		return this._tintColor;
 	}
 
-	public get tintRate():float{
+	public get tintRate():number{
 		return this._tintRate;
 	}
 
@@ -77,22 +77,22 @@ export default class ColorChange{
 	}
 
 
-	public set brightness(brightness:float){
+	public set brightness(brightness:number){
 		this._brightness=brightness;
 		this.renew();
 	}
 
-	public set hue(hue:float){
+	public set hue(hue:number){
 		this._hue=hue;
 		this.renew();
 	}
 
-	public set saturation(saturation:float){
+	public set saturation(saturation:number){
 		this._saturation=saturation;
 		this.renew();
 	}
 
-	public set contrast(contrast:float){
+	public set contrast(contrast:number){
 		this._contrast=contrast;
 		this.renew();
 	}
@@ -110,7 +110,7 @@ export default class ColorChange{
 		this.renew();
 	}
 
-	public set tintOver(_rate:float){
+	public set tintOver(_rate:number){
 		this._tintRate=_rate;
 		this._tintType=TintType.flash;
 		this.renew();

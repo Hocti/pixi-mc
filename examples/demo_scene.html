@@ -76,9 +76,11 @@
 		PIXIMC.FileList.getfolderInfoFromText('media/files.txt','media/', function (_data) {
 			var myFolderList = PIXIMC.FileList.getInstance().getFolderInfoFromPath(path);
 			console.log(path,myFolderList)
-			var myMcLoader = new PIXIMC.MCLoader(myFolderList, function (event) {
+
+			
+			PIXIMC.MCLoader.loadModel(myFolderList,function (model) {
 				
-				scenemc = (event.model).makeInstance();
+				scenemc = model.makeInstance();
 				app.stage.addChild(scenemc);
 				scenemc.x = mcrect.x;
 				scenemc.y = mcrect.y;
@@ -121,7 +123,7 @@
 						$("#input_f").val(scenemc.sceneTimeline.currentFrame);
 					}
 				});
-			}, false);
+			});
 		});
 		window.onkeydown = function (e) {
 			if (e.key == "ArrowRight") {

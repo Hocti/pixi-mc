@@ -7,11 +7,12 @@ export default class ASI extends MCDisplayObject {
 
 	public static MAX_SIDE:uint=2048;
 	public static totalASI:uint=0;
-	private _model:AsiModel;
 
-	constructor(_model:AsiModel) {
+	/*publicReadonly*/ public model:AsiModel;
+
+	constructor(model:AsiModel) {
 		super();
-		this._model=_model;
+		this.model=model;
 		if(this.model.texture!==undefined){
 			this.texture=<Texture>this.model.texture;
 		}else{
@@ -19,10 +20,6 @@ export default class ASI extends MCDisplayObject {
 			this.on('added',this.prepareTexture)
 		}
 		ASI.totalASI++;
-	}
-
-	public get model():AsiModel{
-		return this._model;
 	}
 
 	public prepareTexture():boolean{
@@ -37,28 +34,28 @@ export default class ASI extends MCDisplayObject {
 	private static textureCache:Record<string,Texture>={};
 	private static baseTextureCache:Record<string,BaseTexture>={};
 
-	public static makeTexture(_model:AsiModel):Texture{
-		if(!_model.texture){
-			if(_model.rect.width>ASI.MAX_SIDE || _model.rect.height>ASI.MAX_SIDE){
-				_model.texture=Texture.WHITE;
+	public static makeTexture(model:AsiModel):Texture{
+		if(!model.texture){
+			if(model.rect.width>ASI.MAX_SIDE || model.rect.height>ASI.MAX_SIDE){
+				model.texture=Texture.WHITE;
 			}else{
-				//console.log(_model.image)
-				if(!ASI.baseTextureCache[_model.image]){
-					ASI.baseTextureCache[_model.image]=new BaseTexture(_model.image)
+				//console.log(model.image)
+				if(!ASI.baseTextureCache[model.image]){
+					ASI.baseTextureCache[model.image]=new BaseTexture(model.image)
 				}
-				const cacheName=`${_model.image},${_model.rect.x},${_model.rect.y}`
+				const cacheName=`${model.image},${model.rect.x},${model.rect.y}`
 				if(!ASI.textureCache[cacheName]){
-					_model.texture=ASI.textureCache[cacheName]=new Texture(ASI.baseTextureCache[_model.image],_model.rect)
+					model.texture=ASI.textureCache[cacheName]=new Texture(ASI.baseTextureCache[model.image],model.rect)
 				}else{
-					_model.texture=ASI.textureCache[cacheName]
+					model.texture=ASI.textureCache[cacheName]
 				}
 				
-				//_model.texture=new Texture(new BaseTexture(_model.image),_model.rect)
+				//model.texture=new Texture(new BaseTexture(model.image),model.rect)
 			}
-			if(_model.rotated){
-				_model.texture.rotate=2;
+			if(model.rotated){
+				model.texture.rotate=2;
 			}
 		}
-		return _model.texture!;
+		return model.texture!;
 	}
 }

@@ -85,7 +85,7 @@ export class LabelTimeline extends MCTimeline{
             this.targetFrame=_target;
             this.targetLabel=this.getLabelFromFrame(_target);
         }else{
-            if(this.mc.symbolModel.containLabel(_target)){
+            if(this.mc.symbolModel.containFrameLabel(_target)){
                 this.targetLabel=_target;
                 this.targetFrame=this.labels[_target];
             }
@@ -145,7 +145,7 @@ export default class LabelMC extends MCEX{
     
 	constructor(model:MCSymbolModel, _startLabel:string = "",_player:MCPlayer=MCPlayer.getInstance()) {
 		super(model,{player:_player});
-        if(this.symbolModel.containLabel(_startLabel)){
+        if(this.symbolModel.containFrameLabel(_startLabel)){
             this.timeline.gotoAndStop(_startLabel)
         }
         this.type=MCType.MovieClip

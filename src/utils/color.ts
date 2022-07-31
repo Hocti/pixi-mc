@@ -3,7 +3,7 @@ export type rgb={
 	r:uint,
 	g:uint,
 	b:uint,
-	a:float
+	a:number
 }
 
 export function getRGB(num:uint):rgb{

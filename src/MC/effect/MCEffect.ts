@@ -33,7 +33,7 @@ export default class MCEffect {
 	//change MCDisplayObject's baseEffect only
 	public static setRawColorAndFilter(obj:MCDisplayObject,_cData?:colorData,_fData?:filterData,_prefix:string=''){
 		let currfilter:Filter[]=[];
-		let newAlpha:float=obj.baseEffect.alpha;
+		let newAlpha:number=obj.baseEffect.alpha;
 		if(_fData){
 			if(_fData.BLF){//blur
 				let b=<BlurFilter>(MCEffect.getFilterCache(obj,'BlurFilter',_prefix));
@@ -127,7 +127,7 @@ export default class MCEffect {
 		}
 	}
 
-	public static tint(obj:MCDisplayObject,colors:uint[],bw?:{black?:uint,white?:uint},epsilon:float=0.01):void{
+	public static tint(obj:MCDisplayObject,colors:uint[],bw?:{black?:uint,white?:uint},epsilon:number=0.01):void{
 		const tintArray:[Color, Color][]=[];
 		for(let i:uint=0,t:uint=Math.min(colors.length,6);i<t;i++){
 			tintArray.push([baseTintColors[i],colors[i]]);
@@ -165,7 +165,7 @@ export default class MCEffect {
 		}
 	}
 	
-	private static getFilterCache(obj:MCDisplayObject,_key:string,_prefix:string='',_option?:{quality:float,distance:float}):Filter{
+	private static getFilterCache(obj:MCDisplayObject,_key:string,_prefix:string='',_option?:{quality:number,distance:number}):Filter{
 		const cacheName=`${_prefix}${_key}`
 		if(!obj.filtercache[cacheName]){
 			if(_key==="ColorMatrixFilter"){

@@ -9,13 +9,13 @@ import {MCReplacer,IreplacerDisplayObject,ReplacerResult} from './MCReplacer';
 
 export default class MCEX extends MC implements IreplacerDisplayObject{
     
-    public showFloatFrame(_frame:float):void{
+    public showFloatFrame(_frame:number):void{
         if(Math.floor(_frame)===Math.ceil(_frame)){
             return
         }
         /*
 		const floorFrameData=this.symbolModel.getFrame(Math.floor(_frame));
-        const rate:float=_frame-Math.floor(_frame);
+        const rate:number=_frame-Math.floor(_frame);
 		const ceilFrameData=this.symbolModel.getFrame(Math.ceil(_frame));
         const newData:frameData=floorFrameData
 

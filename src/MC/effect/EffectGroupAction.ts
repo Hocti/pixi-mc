@@ -9,7 +9,7 @@ import MCEffect from './MCEffect';
 export type EffectGroup = {
 	visible:boolean,
 	filters:Filter[],
-	alpha:float,
+	alpha:number,
 	colorMatrix?:ColorMatrix,
 	blendMode:BLEND_MODES
 }

@@ -84,9 +84,9 @@ export default class Timeline extends EventEmitter{
 		this._active=_b;
 	}
 
-	public getLabelFromFrame(_frame:uint):string | undefined{
+	public getLabelFromFrame(frameNumber:uint):string | undefined{
 		for(let k in this.labels){
-			if(this.labels[k]===_frame){
+			if(this.labels[k]===frameNumber){
 				return k;
 			}
 		}

@@ -11,9 +11,10 @@ export default class MCScene extends MCDisplayObject implements ImultiMC{
 	private currSceneNum:number=1;
 	private currSceneMC!:MC;
 	private sceneMCList:MC[]=[];
-	private _sceneName:string[]=[];
 
-	public player:MCPlayer;
+	/*publicReadonly*/ public sceneName:string[]=[];
+
+	/*publicReadonly*/ public player:MCPlayer;
 	private max_scene:number=1;
 
 	constructor(model?:MCSymbolModel,_player:MCPlayer=MCPlayer.getInstance()){
@@ -31,9 +32,9 @@ export default class MCScene extends MCDisplayObject implements ImultiMC{
 					let scene_num=Number(nameArr[0].substring(5));
 					this.max_scene=Math.max(this.max_scene,scene_num);
 					if(nameArr[1]){
-						this._sceneName[scene_num]=nameArr[1]
+						this.sceneName[scene_num]=nameArr[1]
 					}else{
-						this._sceneName[scene_num]=nameArr[0];
+						this.sceneName[scene_num]=nameArr[0];
 					}
 					this.sceneMCList[scene_num]=(<MC>c);
 					(<MC>c).timeline.stop();
@@ -41,10 +42,10 @@ export default class MCScene extends MCDisplayObject implements ImultiMC{
 					(<MC>c).y=0;
 					(<MC>c).timeline.active=false;
 					(<MC>c).isScene=true;
-					//console.log('scene',scene_num,this._sceneName[scene_num])
+					//console.log('scene',scene_num,this.sceneName[scene_num])
 				}
 				for(let i=1;i<this.max_scene;i++){
-					if(!this._sceneName[i]){
+					if(!this.sceneName[i]){
 						console.error('not contain scene ',i,this.max_scene)
 						return
 					}
@@ -68,7 +69,7 @@ export default class MCScene extends MCDisplayObject implements ImultiMC{
 		scene.isScene=true;
 		this.sceneMCList[scene_num]=scene;
 		if(!sceneName && sm.name!=='')sceneName=sm.name;
-		this._sceneName[scene_num]=sceneName || `scene${scene_num}`;
+		this.sceneName[scene_num]=sceneName || `scene${scene_num}`;
 		if(this.max_scene===1){
 			this.changeScene(1);
 			this.sceneTimeline.play();
@@ -103,7 +104,7 @@ export default class MCScene extends MCDisplayObject implements ImultiMC{
 
 		this.emit(timelineEventType.sceneChange, {
 			scene:this.currSceneNum,
-			sceneName:this._sceneName[this.currSceneNum],
+			sceneName:this.sceneName[this.currSceneNum],
 			mc:this.currSceneMC
 		});
 		
@@ -128,10 +129,6 @@ export default class MCScene extends MCDisplayObject implements ImultiMC{
 
 	get sceneTimeline():MCTimeline{
 		return this.currSceneMC.timeline;
-	}
-
-	get sceneName():string[]{
-		return this._sceneName;
 	}
 
 	public gotoSceneAndPlay(_scene:string|number,_target:string|number):void{

@@ -7,13 +7,12 @@ import MCSound from '../MCSound';
 import * as TMath from '../../utils/TMath';
 
 export default class MCTimeline extends Timeline{
-	//public get only
-	public mc:MC;
-
-	public _halfFrame:boolean=false;
-	protected _speed:float=1;
-	protected _direction=playDirection.obverse;
-	protected _currentFrameFloat:float=0;
+	
+	/*publicReadonly*/ public mc:MC;
+	public halfFrame:boolean=false;
+	protected _speed:number=1;
+	/*publicReadonly*/ public direction=playDirection.obverse;
+	protected _currentFrameFloat:number=0;
 	
 	constructor(_mc:MC) {
 		super();
@@ -24,7 +23,7 @@ export default class MCTimeline extends Timeline{
 		this.mc.showFrame(1)
 	}
 
-	public onFrameChange(_oldFrame:uint=1){
+	protected onFrameChange(_oldFrame:uint=1){
 		this.remarkSound(this._currentFrame)
 		if(this.mc.type===MCType.MovieClip){
 			this.remarkPlay(this._currentFrame)
@@ -48,6 +47,7 @@ export default class MCTimeline extends Timeline{
 		}
 		return <uint>_target;
 	}
+
 	public addScript(_target:uint|string,_fn:Function):void{
 		let frame:uint=this.getFrame(_target);
 		if(!this.scriptList[frame]){
@@ -55,9 +55,11 @@ export default class MCTimeline extends Timeline{
 		}
 		this.scriptList[frame].push(_fn)
 	}
+
 	public clearScript(_target:uint):void{
 		this.scriptList[this.getFrame(_target)]=[];
 	}
+
 	private remarkScript(_f:uint):void{
 		if(this.scriptList[_f]){
 			for(const fn of this.scriptList[_f]){
@@ -103,9 +105,9 @@ export default class MCTimeline extends Timeline{
 
 
 
-	public processMC(){
+	protected processMC(){
 		if(this._playStatus===playStatus.playing){
-			this._currentFrameFloat+=this._speed*this._direction;
+			this._currentFrameFloat+=this._speed*this.direction;
 			let intFrame=Math.round(this._currentFrameFloat);
 			if(intFrame>this.totalFrames){
 				if(this.mc.stopAtEnd){//stopAtEnd
@@ -119,9 +121,9 @@ export default class MCTimeline extends Timeline{
 			}
 			/*rewind
 			else if(intFrame<1){
-				if(this._direction>0){
+				if(this.direction>0){
 					intFrame=this._currentFrameFloat=1;
-				}else if(this._direction<0){
+				}else if(this.direction<0){
 					intFrame=this._currentFrameFloat=this.totalFrames;
 				}
 			}
@@ -136,12 +138,12 @@ export default class MCTimeline extends Timeline{
 		}
 	}
 
-	public processB(){
+	protected processB(){
 		this._playStatus=playStatus.stop
 		this.goto(1)//*who cares button?
 	}
 	
-	public processG(){
+	protected processG(){
 		/*if(this.loop=LoopState.Stop){
 			this._currentFrame=this.mc.firstFrame;
 		}else if(this.loop=LoopState.Loop){
@@ -156,11 +158,11 @@ export default class MCTimeline extends Timeline{
 		}
 	}
 
-	get speed():float{
+	get speed():number{
 		return this._speed;
 	}
 
-	set speed(_n:float){
+	set speed(_n:number){
 		this._speed=TMath.clamp(Math.abs(_n),0.01,32)
 	}
 

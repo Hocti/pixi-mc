@@ -31,7 +31,7 @@ export type AsiModel={
 	rect:Rectangle,
 	image:string,
 	rotated:boolean,
-	zoom:float,
+	zoom:number,
 	matrix:Matrix,
 	texture?:Texture
 }
@@ -76,12 +76,12 @@ export type GeomRemark={
 	frame_begin:uint,
 	frame_end:uint,
 	args:string[],
-	x:float,
-	y:float,
-	w?:float,
-	h?:float,
-	r?:float,
-	rotate?:float
+	x:number,
+	y:number,
+	w?:number,
+	h?:number,
+	r?:number,
+	rotate?:number
 }
 
 //RAW spriteSheet JSON===========================
@@ -122,7 +122,7 @@ export type fullmodelData={
 		S:symbolModelData[]
 	}
 	MD:{
-		FRT:float//file fps
+		FRT:number//file fps
 	}
 };
 
@@ -165,8 +165,8 @@ export type rawInstenceData={
 	IN:string,//instance name
 	ST:MCType,
 	TRP:{//
-		x:float,
-		y:float
+		x:number,
+		y:number
 	},
 	FF?:uint,
 	LP?:LoopState,
@@ -183,7 +183,7 @@ export enum MCType{
 	Sprite='Sprite'//not in raw
 }
 
-export type m3d=[float, ...Array<float>] & {length: 16};
+export type m3d=[number, ...Array<number>] & {length: 16};
 
 export enum LoopState{
 	Loop='LP',
@@ -194,66 +194,66 @@ export enum LoopState{
 export type colorData={
 	M:'CA' | 'AD' | 'T' | 'CBRT',
 
-	BRT?:float,//brightness
+	BRT?:number,//brightness
 	TC?:string,//tint hex
-	TM?:float,//tint num
+	TM?:number,//tint num
 
-	RM:float,
-	GM:float,
-	BM:float,
-	AM:float,
-	RO:float,
-	GO:float,
-	BO:float,
-	AO:float
+	RM:number,
+	GM:number,
+	BM:number,
+	AM:number,
+	RO:number,
+	GO:number,
+	BO:number,
+	AO:number
 };
 
 export type filterData={
 	BLF?:{
-		BLX:float,
-		BLY:float,
+		BLX:number,
+		BLY:number,
 		Q:uint
 	},
 	GF?:{
-		BLX:float,
-		BLY:float,
+		BLX:number,
+		BLY:number,
 		Q:uint,
 		C:string,
-		STR:float,
+		STR:number,
 		KK:boolean,
 		IN:boolean,
 	},
 	DSF?: {
-		AL: float,
-		BLX: float,
-		BLY: float,
+		AL: number,
+		BLX: number,
+		BLY: number,
 		C: string,
-		A: float,
-		DST: float,
+		A: number,
+		DST: number,
 		HO: boolean,
 		IN: boolean,
 		KK: boolean,
 		Q: uint,
-		STR: float,
+		STR: number,
 	},
 	BF?: {
-		BLX: float,
-		BLY: float,
+		BLX: number,
+		BLY: number,
 		SC: string,
-		SA: float,
+		SA: number,
 		HC: string,
-		HA: float,
+		HA: number,
 		Q: uint,
-		STR: float,
+		STR: number,
 		KK: boolean,
-		AL: float,
-		DST: float,
+		AL: number,
+		DST: number,
 		//TP: "inner"
 	},
 	ACF?: {
-		BRT: float,
-		CT: float,
-		SAT: float,
-		H: float
+		BRT: number,
+		CT: number,
+		SAT: number,
+		H: number
 	}
 };

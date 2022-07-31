@@ -1,21 +1,21 @@
 import {Matrix} from '@pixi/math';
 
 
-export function m3dto2d(a:float[]):Matrix{
+export function m3dto2d(a:number[]):Matrix{
 	return new Matrix(a[0],a[1],a[4],a[5],a[12],a[13])
 }
-export function clamp(input:float,min:float,max:float):float{
+export function clamp(input:number,min:number,max:number):number{
 	return Math.min(Math.max(input,min),max)
 }
-export function cleanValue(p_val:float,p_limit:float):float {
+export function cleanValue(p_val:number,p_limit:number):number {
 	return clamp(p_val,-p_limit,p_limit);
 }
 
-export const degree:float = 180 / Math.PI;
-export const radian:float = Math.PI / 180;
+export const degree:number = 180 / Math.PI;
+export const radian:number = Math.PI / 180;
 
 
-export function makeMatrix(scaleX:float,scaleY?:float,rotate:float=0,x:float=0,y:float=0):Matrix{
+export function makeMatrix(scaleX:number,scaleY?:number,rotate:number=0,x:number=0,y:number=0):Matrix{
 	if(scaleY===undefined){
 		scaleY=Math.abs(scaleX)
 	}
@@ -25,11 +25,11 @@ export function makeMatrix(scaleX:float,scaleY?:float,rotate:float=0,x:float=0,y
 
 export function m2dDetail(m:Matrix){
 	
-	let scaleX:float = Math.sign(m.a)*Math.sqrt(m.a * m.a + m.b * m.b);
-	let scaleY:float = Math.sign(m.d)*Math.sqrt(m.c * m.c + m.d * m.d);
-	let rotation:float = Math.atan2(m.c,m.d);
-	//let skewX:float=0;
-	//let skewY:float=0;
+	let scaleX:number = Math.sign(m.a)*Math.sqrt(m.a * m.a + m.b * m.b);
+	let scaleY:number = Math.sign(m.d)*Math.sqrt(m.c * m.c + m.d * m.d);
+	let rotation:number = Math.atan2(m.c,m.d);
+	//let skewX:number=0;
+	//let skewY:number=0;
 
 	/*
 	const delta = m.a * m.d - m.b * m.c;

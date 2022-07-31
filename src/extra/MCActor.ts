@@ -107,7 +107,7 @@ export default class MCActor extends MCDisplayObject implements IreplacerDisplay
 		return mc
 	}
 
-	public showAction(actionName:string,phaseName?:string,progress:float=0):void{//,halfFrame:boolean=false
+	public showAction(actionName:string,phaseName?:string,progress:number=0):void{//,halfFrame:boolean=false
 		progress=TMath.clamp(progress,0,1);
 		const action=this.actionList[actionName];
 		if(!action){
@@ -121,7 +121,7 @@ export default class MCActor extends MCDisplayObject implements IreplacerDisplay
 			this.addChild(this.mcList[this.currentMCID]);
 		}
 
-		let targetFrameFloat:float=action.frame_begin;
+		let targetFrameFloat:number=action.frame_begin;
 		if(phaseName){
 			//for(const phase of action.phases){
 			for(const phaseKey in action.phases){

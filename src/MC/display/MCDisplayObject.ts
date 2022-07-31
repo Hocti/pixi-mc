@@ -14,8 +14,8 @@ export default abstract class MCDisplayObject extends Sprite{
 		m2d?:Matrix,
 		m2d2?:Matrix,
 		TRP?:{
-			x:float,
-			y:float
+			x:number,
+			y:number
 		}
 	}={}
 

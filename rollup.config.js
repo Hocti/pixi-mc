@@ -1,12 +1,13 @@
-import typescript from 'rollup-plugin-typescript2';
-import dtsBundle from 'rollup-plugin-dts-bundle';
+//import typescript from 'rollup-plugin-typescript2';
+import typescript from 'rollup-plugin-typescript';
+//import dtsBundle from 'rollup-plugin-dts-bundle';
 import sourcemaps from 'rollup-plugin-sourcemaps';
 import commonjs from "rollup-plugin-commonjs";
 import resolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 //import ts from "rollup-plugin-ts";
-//import dts from "rollup-plugin-dts";
-import minify  from "rollup-plugin-minify-es";
+import dts from "rollup-plugin-dts";
+//import minify  from "rollup-plugin-minify-es";
 
 import pkg from "./package.json";
 //import path from 'path';
@@ -24,7 +25,7 @@ const plugins = [
             name: 'PIXIMC',
             main: 'dist/index.d.ts',
             out: 'pixi-mc.d.ts',
-            //removeSource: true,
+            removeSource: true,
         }
     }),
     */
@@ -61,6 +62,7 @@ if (isProduction) {
 }
 
 const sourcemap = true;
+const freeze=false;
 const compiled = (new Date()).toUTCString().replace(/GMT/g, "UTC");
 
 const banner = `/*!
@@ -71,6 +73,8 @@ const banner = `/*!
  * ${pkg.name} is licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license
  */`;
+
+const globalD = require("fs").readFileSync("./types/global.d.ts", 'utf8')
 
 const globals={
     'pixi.js':'PIXI',
@@ -92,14 +96,13 @@ const globals={
     '@pixi/sound':'PIXI.sound',
     'pixi-filters':'PIXI.filters'
 }
-const freeze=false;
 
-const results=[];
 
 async function main() {
+    const results=[];
     results.push(
     {
-        input: ["src/index.ts"],
+        input: "src/index.ts",
         external: Object.keys(pkg.peerDependencies),
         output: [
             {
@@ -107,8 +110,8 @@ async function main() {
                 freeze,
                 sourcemap,
                 format: "iife",
-                name: "PIXIMC",
-                file: pkg.main,
+                name: pkg.namespace,
+                file: pkg.bundle,
                 globals
             },
             {
@@ -116,7 +119,7 @@ async function main() {
                 freeze,
                 sourcemap,
                 format: "esm",
-                file: "dist/pixi-mc.esm.js",
+                file: pkg.module,
                 globals
             },
             {
@@ -124,18 +127,28 @@ async function main() {
                 freeze,
                 sourcemap,
                 format: "cjs",
-                file: "dist/pixi-mc.cjs.js",
+                file: pkg.main,
                 globals
             }
         ],
         plugins
     });
-        /*[
+    
+    results.push(
+    {
+        input: "src/index.ts",
+        external: Object.keys(pkg.peerDependencies),
+        output: [
             {
+                banner:banner+globalD,
                 file: pkg.types,
-                format: "es"
-            },
-        ]*/
+                format: "es",
+                globals
+            }
+        ],
+        plugins:[...plugins,dts()]
+    });
+    
     return results;
 }
 

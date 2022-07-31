@@ -31,6 +31,7 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 		}
 		return t
 	}
+
 	public path():string{
 		let trees:string[]=[this.name];
 		let con:Container=this.parent;
@@ -45,27 +46,16 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 	//=================
 	
 	public static MAX_SAME:uint=100;
+	public static defaultRemovePasted:boolean=false;
 
-	protected _symbolModel:MCSymbolModel;
-	protected _timeline:MCTimeline;
-	protected _player:MCPlayer;
-
-	public get timeline():MCTimeline{
-		return this._timeline
-	}
-	
-	public get symbolModel():MCSymbolModel{
-		return this._symbolModel
-	}
-
-	public get player():MCPlayer{
-		return this._player
-	}
+	/*publicReadonly*/ public symbolModel:MCSymbolModel;
+	/*publicReadonly*/ public timeline:MCTimeline;
+	/*publicReadonly*/ public player:MCPlayer;
 
 	private _type:MCType=MCType.MovieClip;
 	//public trPoint:Point=new Point();
 
-	public removePasted:boolean=false;//remove children who not display on currentFrame
+	public removePasted:boolean;//remove children who not display on currentFrame
 
 	protected maskList:Record<string,Container>={};
 	protected asiMaskList:Record<string,ASI>={};
@@ -81,7 +71,7 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 	//movieclip
 	public stopAtEnd:boolean=false;
 	
-	public isScene:boolean=false;
+	/*publicReadonly*/ public isScene:boolean=false;
 
 	//inital and destory
 
@@ -89,8 +79,9 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 	constructor(symbolModel:MCSymbolModel,option?:MCOption) {
 		super();
 		//set status from model
-		this._symbolModel=symbolModel;
+		this.symbolModel=symbolModel;
 		this.stopAtEnd=symbolModel.defaultStopAtEnd;
+		this.removePasted=MC.defaultRemovePasted
 
 		if(symbolModel.defaultBlendMode!==BLEND_MODES.NORMAL || !symbolModel.defaultVisible){
 			this.baseEffect.blendMode=this.blendMode=symbolModel.defaultBlendMode;
@@ -99,9 +90,9 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 		}
 
 		//player,timeline
-		this._player=(option?.player)?option.player:MCPlayer.getInstance();
-		this._player.addMC(this);
-		this._timeline=this.initTimeline()
+		this.player=(option?.player)?option.player:MCPlayer.getInstance();
+		this.player.addMC(this);
+		this.timeline=this.initTimeline()
 		//
 		this.on('added',this.onAdded)
 
@@ -114,7 +105,7 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 	}
 
 	protected onAdded(_parent:Container){
-		this._timeline.onMCAdded();
+		this.timeline.onMCAdded();
 		this.showEffect();
 	}
 	

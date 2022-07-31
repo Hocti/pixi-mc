@@ -10,20 +10,20 @@ import MCLibrary from './MCLibrary';
 
 export default class MCModel{
 
-	public mainSymbolModel:MCSymbolModel;
-	public symbolList:Record<string,MCSymbolModel>={};
-	public partList:Record<string,AsiModel>={};
-	public basepath:string;
-
-	public fps:float;
-	public sceneList:string[]=[];
-	public withScene:boolean=false;
+	/*publicReadonly*/ public mainSymbolModel:MCSymbolModel;
+	/*publicReadonly*/ public symbolList:Record<string,MCSymbolModel>={};
+	/*publicReadonly*/ public partList:Record<string,AsiModel>={};
+	/*publicReadonly*/ public basepath:string;
+	/*publicReadonly*/ public fps:number;
+	/*publicReadonly*/ public sceneList:string[]=[];
+	/*publicReadonly*/ public withScene:boolean=false;
+	/*publicReadonly*/ public name:string;
 
 	public static preloadAllTexture:boolean=true;
 
 	constructor(animation:fullmodelData,spritemaps:spriteData[],basepath:string) {
 		this.fps=Number(animation.MD.FRT);
-		this._name=<string>animation.AN.N!;
+		this.name=<string>animation.AN.N!;
 
 		this.partList=MCModel.processSpritemap(spritemaps,basepath)
 		if(MCModel.preloadAllTexture){
@@ -71,13 +71,13 @@ export default class MCModel{
 		return new MC(this.mainSymbolModel);
 	}
 
-	public processAnimationData(data:symbolModelData):MCSymbolModel{
+	private processAnimationData(data:symbolModelData):MCSymbolModel{
 		let syb=new MCSymbolModel(data,this);
 		this.symbolList[syb.name]=syb
 		return syb;
 	}
 
-	public static processSpritemap(spritemap:spriteData[],basepath:string=''){
+	private static processSpritemap(spritemap:spriteData[],basepath:string=''){
 		let partList:Record<string,AsiModel>={}
 		for(let v of spritemap){
 			for(let s of v.ATLAS.SPRITES){
@@ -96,14 +96,6 @@ export default class MCModel{
 			}
 		}
 		return partList;
-	}
-
-	
-
-	protected _name:string;
-
-	get name():string{
-		return this._name;
 	}
 
 }

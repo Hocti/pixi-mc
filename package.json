@@ -1,13 +1,24 @@
 {
 	"name": "pixi-mc",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "read 'Texture Atlas' export from Adobe Animate, with MovieClip function in pixi.js",
-	"main": "dist/pixi-mc.js",
-	"module": "dist/pixi-mc.esm.js",
-	"bundle": "./dist/pixi-mc.umd.js",
-	"types": "types/pixi-mc.d.ts",
+	"main": "./dist/pixi-mc.cjs.js",
+	"module": "./dist/pixi-mc.esm.js",
+	"bundle": "./dist/pixi-mc.js",
+	"types": "./dist/pixi-mc.d.ts",
 	"namespace": "PIXIMC",
-	"bugs": "https://github.com/Hocti/PIXIMC/issues",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/pixi-mc.d.ts",
+				"default": "./dist/pixi-mc.esm.js"
+			},
+			"require": {
+				"types": "./dist/pixi-mc.d.ts",
+				"default": "./dist/pixi-mc.cjs.js"
+			}
+		}
+	},
 	"author": "hocti",
 	"license": "MIT",
 	"keywords": [
@@ -17,6 +28,7 @@
 		"adobe animate",
 		"Texture Atlas"
 	],
+	"bugs": "https://github.com/Hocti/PIXIMC/issues",
 	"scripts": {
 		"build": "rollup -c",
 		"watch": "rollup -c --environment DEV --watch",
@@ -30,7 +42,7 @@
 		"url": "https://github.com/Hocti/PIXIMC/"
 	},
 	"files": [
-		"dist/",
+		"./dist/",
 		"tools/",
 		"LICENSE",
 		"package.json",
@@ -62,6 +74,7 @@
 		"@pixi/sprite": "^6.4.2",
 		"@pixi/ticker": "^6.4.2",
 		"@pixi/utils": "^6.4.2",
+		"@types/node": "^18.6.3",
 		"cross-env": "^7.0.3",
 		"npm-run-all": "^4.1.5",
 		"pixi-filters": "^4.1.6",

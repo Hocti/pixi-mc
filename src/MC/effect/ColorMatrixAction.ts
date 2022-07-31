@@ -3,7 +3,7 @@ import { ColorMatrix} from '@pixi/filter-color-matrix';
 import * as Color from '../../utils/color';
 import * as TMath from '../../utils/TMath';
 
-const DELTA_INDEX:float[] = [
+const DELTA_INDEX:number[] = [
 	0,    0.01, 0.02, 0.04, 0.05, 0.06, 0.07, 0.08, 0.1,  0.11,
 	0.12, 0.14, 0.15, 0.16, 0.17, 0.18, 0.20, 0.21, 0.22, 0.24,
 	0.25, 0.27, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40, 0.42,
@@ -31,7 +31,7 @@ export default class ColorMatrixAction{
 	}
 	
 	public static clone(p1:ColorMatrix):ColorMatrix{
-		let newArr:float[]=[];
+		let newArr:number[]=[];
 		for(let i=0;i<=19;i++){
 			newArr[i]=p1[i];
 		}
@@ -39,18 +39,18 @@ export default class ColorMatrixAction{
 	}
 
 	public static multiply(_p1:ColorMatrix,_p2:ColorMatrix):ColorMatrix {
-		let p1:float[]=[..._p1,0, 0, 0, 0, 1]
-		let p2:float[]=[..._p2,0, 0, 0, 0, 1]
+		let p1:number[]=[..._p1,0, 0, 0, 0, 1]
+		let p2:number[]=[..._p2,0, 0, 0, 0, 1]
 
-		let col:float[] = [];
+		let col:number[] = [];
 		//let rem=ColorMatrixAction.clone(p1)
-		for (let i:float=0;i<5;i++) {
-			for (let j:float=0;j<5;j++) {
+		for (let i:number=0;i<5;i++) {
+			for (let j:number=0;j<5;j++) {
 				col[j] = p1[j+i*5];
 			}
-			for (let j:float=0;j<5;j++) {
-				let val:float=0;
-				for (let k:float=0;k<5;k++) {
+			for (let j:number=0;j<5;j++) {
+				let val:number=0;
+				for (let k:number=0;k<5;k++) {
 					val += p2[j+k*5]*col[k];
 				}
 				p1[j+i*5] = val;
@@ -72,7 +72,7 @@ export default class ColorMatrixAction{
 		return ColorMatrixAction.multiply(cmatrix,ColorMatrixAction.saturation(-100));
 	}
 
-	public static tint(_color:string | uint,m:float=1):ColorMatrix{
+	public static tint(_color:string | uint,m:number=1):ColorMatrix{
 		let rgb=Color.getRGB(Color.hashHexToNum(String(_color)));
 		let cmatrix:ColorMatrix=[
 			1-m, 0, 0, 0, rgb.r*m/255,
@@ -84,7 +84,7 @@ export default class ColorMatrixAction{
 		return cmatrix;
 	}
 	
-	public static flashBrightness(b:float):ColorMatrix{
+	public static flashBrightness(b:number):ColorMatrix{
 		if(!Number(b)){
 			return ColorMatrixAction.create();
 		}
@@ -106,7 +106,7 @@ export default class ColorMatrixAction{
 		];
 	}
 
-	public static set4(_brightness:float=0,_hue:float=0,_saturation:float=0,_contrast:float=0):ColorMatrix{
+	public static set4(_brightness:number=0,_hue:number=0,_saturation:number=0,_contrast:number=0):ColorMatrix{
 		let m=ColorMatrixAction.create();
 		if(_brightness!=0){
 			m=ColorMatrixAction.multiply(m,ColorMatrixAction.brightness(_brightness))
@@ -123,7 +123,7 @@ export default class ColorMatrixAction{
 		return m;
 	}
 
-	public static brightness(b:float):ColorMatrix{
+	public static brightness(b:number):ColorMatrix{
 		if(!Number(b)){
 			return ColorMatrixAction.create();
 		}
@@ -137,16 +137,16 @@ export default class ColorMatrixAction{
 		return cmatrix;
 	}
 
-	public static hue(p_val:float=1 ):ColorMatrix{
+	public static hue(p_val:number=1 ):ColorMatrix{
 		if(!Number(p_val)){
 			return ColorMatrixAction.create();
 		}
 		p_val = TMath.cleanValue(p_val,180)/180*Math.PI;
-		let cosVal:float = Math.cos(p_val);
-		let sinVal:float = Math.sin(p_val);
-		let lumR:float = 0.213;
-		let lumG:float = 0.715;
-		let lumB:float = 0.072;
+		let cosVal:number = Math.cos(p_val);
+		let sinVal:number = Math.sin(p_val);
+		let lumR:number = 0.213;
+		let lumG:number = 0.715;
+		let lumB:number = 0.072;
 		let cmatrix:ColorMatrix=[
 			lumR+cosVal*(1-lumR)+sinVal*(-lumR),lumG+cosVal*(-lumG)+sinVal*(-lumG),lumB+cosVal*(-lumB)+sinVal*(1-lumB),0,0,
 			lumR+cosVal*(-lumR)+sinVal*(0.143),lumG+cosVal*(1-lumG)+sinVal*(0.140),lumB+cosVal*(-lumB)+sinVal*(-0.283),0,0,
@@ -157,15 +157,15 @@ export default class ColorMatrixAction{
 		return cmatrix;
 	}
 
-	public static saturation(p_val:float=0):ColorMatrix{
+	public static saturation(p_val:number=0):ColorMatrix{
 		if(!Number(p_val)){
 			return ColorMatrixAction.create();
 		}
 		p_val = TMath.cleanValue(p_val,100)
-		let x:float = 1+((p_val > 0) ? 3*p_val/100 : p_val/100);
-		let lumR:float = 0.3086;
-		let lumG:float = 0.6094;
-		let lumB:float = 0.0820;
+		let x:number = 1+((p_val > 0) ? 3*p_val/100 : p_val/100);
+		let lumR:number = 0.3086;
+		let lumG:number = 0.6094;
+		let lumB:number = 0.0820;
 		let cmatrix:ColorMatrix=[
 			lumR*(1-x)+x,lumG*(1-x),lumB*(1-x),0,0,
 			lumR*(1-x),lumG*(1-x)+x,lumB*(1-x),0,0,
@@ -176,14 +176,14 @@ export default class ColorMatrixAction{
 		return cmatrix;
 	}
 
-	public static contrast(p_val:float=0):ColorMatrix{//-100~100
+	public static contrast(p_val:number=0):ColorMatrix{//-100~100
 		if(!Number(p_val)){
 			return ColorMatrixAction.create();
 		}
 
 		p_val = TMath.cleanValue(p_val,100)
 		
-		let x:float;
+		let x:number;
 		if (p_val<0) {
 			x = 50+p_val/100*50
 		} else {

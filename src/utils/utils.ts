@@ -12,3 +12,7 @@ export function checkArrayEqual<T>(arr1:T[],arr2:T[]):boolean{
 	}
 	return true;
 }
+
+export const isBrowser =typeof window !== "undefined" && typeof window.document !== "undefined";
+
+export const isNode = typeof process !== "undefined" && process.versions != null && process.versions.node != null;

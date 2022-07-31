@@ -34,11 +34,11 @@ export default class MCPlayer {
 
 	private currFrame:uint=1;
 
-	private realFloatFrame:float=1;
+	private realFloatFrame:number=1;
 
 	private mcList:MC[]=[];
 
-	private enterTick(delta:float) {//* delta=f in 60fps
+	private enterTick(delta:number) {//* delta=f in 60fps
 		/*
 		if(this.realFloatFrame<100){
 			console.log(MCPlayer.ticker.deltaMS,MCPlayer.ticker.elapsedMS,delta )
@@ -78,9 +78,7 @@ export default class MCPlayer {
 		}
 	}
 
-	//public
-
-	public fps:float=60;
+	public fps:number=60;
 
 	public addMC(mc:MC){
 		this.mcList.push(mc)

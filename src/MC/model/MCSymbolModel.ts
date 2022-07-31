@@ -24,12 +24,37 @@ export default class MCSymbolModel {
 
 	private _data:symbolModelData;
 
+	//public readonly start
+
 	public mcModel:MCModel;
 	public name:string='';
 	public layerNameList:string[]=[];
 	public LabelList:FrameLabels={};
 	public totalFrames:uint=1;
 	public isMaster:boolean=false;
+
+	//remarks
+	public soundRemarks:SoundRemark[][]=[];
+	public playRemarks:PlayRemark[]=[];
+	public visibleRemarks:boolean[]=[];
+	public scriptRemarks:Record<string,ScriptRemark>={};
+	public geomRemarks:GeomRemark[]=[];
+	public extraRemarks:Record<string,ExtraRemark[]>={};
+
+	//default status
+	public defaultBlendMode:BLEND_MODES=BLEND_MODES.NORMAL;
+	public defaultStopAtEnd:boolean=false;
+	public defaultVisible:boolean=true;
+	public defaultMatrix?:Matrix;
+
+	//sprite
+	//all child just contain one asi
+
+	public isMCSprite:boolean=false;
+	public spriteMatrix?:Matrix;
+	public spriteModel?:AsiModel;
+
+	//public readonly end
 
 	constructor(data:symbolModelData,_model:MCModel) {
 
@@ -123,20 +148,6 @@ export default class MCSymbolModel {
 			}
 		}
 	}
-
-	//remarks
-	public soundRemarks:SoundRemark[][]=[];
-	public playRemarks:PlayRemark[]=[];
-	public visibleRemarks:boolean[]=[];
-	public scriptRemarks:Record<string,ScriptRemark>={};
-	public geomRemarks:GeomRemark[]=[];
-	public extraRemarks:Record<string,ExtraRemark[]>={};
-
-	//default status
-	public defaultBlendMode:BLEND_MODES=BLEND_MODES.NORMAL;
-	public defaultStopAtEnd:boolean=false;
-	public defaultVisible:boolean=true;
-	public defaultMatrix?:Matrix;
 
 
 	private processRemark(type:string,args:string[],frame_begin:uint,frame_end:uint,frame_label?:string){
@@ -291,14 +302,6 @@ export default class MCSymbolModel {
 		return FrameData;
 	}
 
-	//sprite===========================
-	//all child just contain one asi
-
-	public isMCSprite:boolean=false;
-	public spriteMatrix?:Matrix;
-	
-	public spriteModel?:AsiModel;
-
 	//instance=============================
 
 	public makeInstance():IMCSprite{
@@ -310,7 +313,7 @@ export default class MCSymbolModel {
 
 	//read only=============================
     
-    public containLabel(_label:string):boolean
+    public containFrameLabel(_label:string):boolean
     {
         return this.LabelList[_label]!==undefined;
     }

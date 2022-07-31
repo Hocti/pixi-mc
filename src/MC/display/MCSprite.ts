@@ -11,39 +11,30 @@ import type IMCSprite from './IMCSprite';
 export default class MCSprite extends MCDisplayObject implements IMCSprite{
 
     /*
-    private _SN:string;
-    public get SN():string{
-        return this._SN;
-    }
+    public SN:string;
+    public spriteMatrix?:Matrix;
     */
 
-    private innerAsi:ASI;
-    public get asi():ASI{
-        return this.innerAsi;
-    }
+    /*publicReadonly*/ public asi:ASI;
+    /*publicReadonly*/ public symbolModel:MCSymbolModel;
+	/*publicReadonly*/ public type:MCType=MCType.Sprite;
 
-    public spriteMatrix?:Matrix;
 	
-    private _symbolModel:MCSymbolModel;
-	public get symbolModel():MCSymbolModel{
-		return this._symbolModel
-	}
 
-	public readonly type:MCType=MCType.Sprite;
 
     constructor(sm:MCSymbolModel){
         super();
-        this._symbolModel=sm;
+        this.symbolModel=sm;
 
-        this.innerAsi=new ASI(sm.spriteModel!);
-        this.innerAsi.transform.setFromMatrix(sm.spriteMatrix!.clone().append(sm.spriteModel!.matrix));
-        this.addChild(this.innerAsi);
+        this.asi=new ASI(sm.spriteModel!);
+        this.asi.transform.setFromMatrix(sm.spriteMatrix!.clone().append(sm.spriteModel!.matrix));
+        this.addChild(this.asi);
 
-        this.innerAsi.blendMode=sm.defaultBlendMode
+        this.asi.blendMode=sm.defaultBlendMode
     }
     
 	public showEffect():void{
 		super.showEffect();
-        this.innerAsi.blendMode=this.blendMode
+        this.asi.blendMode=this.blendMode
 	}
 }

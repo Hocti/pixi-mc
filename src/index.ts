@@ -1,4 +1,4 @@
-/// <reference path="../global.d.ts" />
+/// <reference path="../types/global.d.ts" />
 
 export {MCEffect,ColorMatrixAction,ColorChange,type EffectGroup,EffectGroupAction,TintType} from './MC/effect';
 export {getTimer} from './utils/utils';
@@ -10,7 +10,7 @@ export {MCPlayer,MCTimeline} from './MC/player';
 export {MCLoader,MCLibrary,MCSymbolModel,MCModel,MCStructure} from './MC/model';
 
 //export * as MCStructure from './MC/model/MCStructure';
-//import MCSound from './MC/MCSound';
+export {default as MCSound} from './MC/MCSound';
 
 //extra===============================
 

@@ -103,18 +103,18 @@ export default class MCLoader extends EventEmitter{
 
 	//Load Multi Model=============
 
-	public static async loadModelsAsync(_folderPaths:string[],_root:string=''):Promise<MCModel[]>{
+	public static async loadModelsAsync(_folderPaths:string[],_basePath:string=''):Promise<MCModel[]>{
 		const promiseList:Promise<MCModel>[]=[];
 		for(let folderPath of _folderPaths){
-			promiseList.push(MCLoader.loadModelAsync(FileList.getInstance().getFolderInfoFromPath(_root+folderPath)));
+			promiseList.push(MCLoader.loadModelAsync(FileList.getInstance().getFolderInfoFromPath(_basePath+folderPath)));
 		}
 		return Promise.all(promiseList);
 	}
 
-	public static loadModels(_folderPaths:string[],_root:string='',_loadcall?:{(args:MCModel[]):void}):void{
+	public static loadModels(_folderPaths:string[],_basePath:string='',_loadcall?:{(args:MCModel[]):void}):void{
 		const promiseList:Promise<MCModel>[]=[];
 		for(let folderPath of _folderPaths){
-			promiseList.push(MCLoader.loadModelAsync(FileList.getInstance().getFolderInfoFromPath(_root+folderPath)));
+			promiseList.push(MCLoader.loadModelAsync(FileList.getInstance().getFolderInfoFromPath(_basePath+folderPath)));
 		}
 		Promise.all(promiseList).then((results)=>{
 			if(_loadcall){
@@ -159,6 +159,7 @@ export default class MCLoader extends EventEmitter{
 		return container
 	}
 
+	/*
 	//unuse?=============
 
 	constructor(_mc_folder?:folderInfo | string[],_loadcall?:EventEmitter.ListenerFn) {
@@ -181,6 +182,7 @@ export default class MCLoader extends EventEmitter{
 			});
 		});
 	}
+	*/
 }
 
 /*
