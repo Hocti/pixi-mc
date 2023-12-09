@@ -1,7 +1,5 @@
 import {Matrix,Rectangle} from '@pixi/math';;
 import {Texture} from '@pixi/core';
-import { DisplayObject } from '@pixi/display';
-import MCModel from './MCModel'
 
 //MC processed data structure
 

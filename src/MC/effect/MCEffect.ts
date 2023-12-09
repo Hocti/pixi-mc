@@ -1,16 +1,13 @@
 import { Filter } from '@pixi/core';
+
 import { BlurFilter } from '@pixi/filter-blur';
 import { ColorMatrixFilter,ColorMatrix} from '@pixi/filter-color-matrix';
 import {BevelFilter,DropShadowFilter,GlowFilter,GlowFilterOptions,MultiColorReplaceFilter} from 'pixi-filters';
-import {BLEND_MODES} from '@pixi/constants';
 
 import * as Color from '../../utils/color';
-import * as TMath from '../../utils/TMath';
 import {checkArrayEqual} from '../../utils/utils'
 import {colorData,filterData} from '../model/MCStructure'
 import MCDisplayObject from '../display/MCDisplayObject';
-
-
 import ColorMatrixAction from './ColorMatrixAction';
 
 declare type Color = number;
@@ -60,9 +57,16 @@ export default class MCEffect {
 				f.alpha=_fData.DSF.STR;
 				f.blur=_fData.DSF.BLX/4; 
 				f.color=Color.hashHexToNum(_fData.DSF.C);
-				f.rotation=_fData.DSF.AL; 
+
+				//f.rotation=_fData.DSF.AL; 
+				//f.distance=_fData.DSF.DST; 
+				let radian = _fData.DSF.AL * Math.PI / 180;
+				f.offset={
+					x: _fData.DSF.DST * Math.cos(radian),
+					y:_fData.DSF.DST * Math.sin(radian)
+				}
+
 				f.shadowOnly=_fData.DSF.HO; 
-				f.distance=_fData.DSF.DST; 
 				f.quality=_fData.DSF.Q*3;
 				currfilter.push(f);
 			}

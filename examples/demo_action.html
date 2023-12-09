@@ -5,8 +5,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Document</title>
 	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-	<script src="/node_modules/pixi.js/dist/browser/pixi.min.js"></script>
-	<script src="/node_modules/pixi-filters/dist/pixi-filters.js"></script>
+	<script src="/node_modules/pixi.js/dist/pixi.min.js"></script>
+	<script src="/node_modules/pixi-filters/dist/browser/pixi-filters.js"></script>
 	<script src="/node_modules/@pixi/sound/dist/pixi-sound.js"></script>
 	<script src="../dist/pixi-mc.js"></script>
 </head>
@@ -20,9 +20,12 @@
 		<input type="button" value="prev">
 		<input type="button" value="next">
 		<input type="button" value="first_frame">
-
-		<input type="button" value="prev_action">
-		<input type="button" value="next_action">
+		<br/>
+		<select id="action_select"></select>
+		<input type="range" step ="0.001" max="0.1" min="0.001" id='action_speed'>
+		<input type="button" value="play_action">
+		<input type="button" value="stop_action">
+		<input type="button" value="actor_player">
 		<br/>
 		<input type="button" value="add rule" id="btn_rule">
 		<input type="button" value="add rule2" id="btn_rule2">
@@ -88,7 +91,6 @@
 		}
 	</style>
 	<script>
-		PIXI.utils.skipHello();
 		var mcrect = new PIXI.Rectangle(0, 0, 600, 600);
 
 		var app = new PIXI.Application({
@@ -96,12 +98,12 @@
 			width: mcrect.width,
 			height: mcrect.height,
 			backgroundColor: 0x000000,
-			transparent: true
+			backgroundAlpha: 0,
 		});
 
 
-		PIXIMC.MCPlayer.initTicker(app.ticker);
-		PIXIMC.MCPlayer.getInstance().fps = 60;
+		piximc.MCPlayer.initTicker(app.ticker);
+		piximc.MCPlayer.getInstance().fps = 60;
 
         let currMC,man_action,man_attack;
         const mc_list=['man_alt','man_attack','man_action'];
@@ -109,19 +111,26 @@
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
-			const hairE=PIXIMC.EffectGroupAction.create();
-			hairE.alpha=0.5
-			hairE.blendMode=7
-			const cc=new PIXIMC.ColorChange();
-			cc.brightness=0.5
-			hairE.colorMatrix=cc.colorMatrix;
+
+		const hairE=piximc.EffectGroupAction.create();
+		hairE.alpha=0.5
+		hairE.blendMode=7
+		const cc=new piximc.ColorChange();
+		cc.brightness=0.5
+		hairE.colorMatrix=cc.colorMatrix;
+
+		let atr,aplayer;
 
         (async()=>{
 
-            const re=await PIXIMC.FileList.getfolderInfoFromTextAsync('media/files.txt','media/')
-            await PIXIMC.MCLoader.loadModelsAsync(mc_list,'media/');
+            //const re=await piximc.FileList.getfolderInfoFromTextAsync('./media/files.txt','./media/')
+			//await Promise.all(mc_list.map((k)=>piximc.MCLoader.loadModelFolder('./media/'+k+'/')))
+
+			await piximc.MCLoader.loadModels(mc_list.map((k)=>'./media/'+k+'/'))
+
+            //await piximc.MCLoader.loadModelsAsync(mc_list,'./media/');
             
-            man_attack = new PIXIMC.MCEX(PIXIMC.MCLibrary.getSymbol('media/man_attack/'))
+            man_attack = new piximc.MCEX(piximc.MCLibrary.getSymbol('./media/man_attack/'))
             man_attack.x=100;
             man_attack.y=220;
             man_attack.timeline.gotoAndStop(13)
@@ -130,23 +139,23 @@
 			currMC=man_attack
 			
 
-			PIXIMC.MCLibrary.getSymbol('media/man_alt/','alt_part/face').defaultMatrix=PIXIMC.TMath.makeMatrix(1/2.2,undefined,0,-1,-0.5)
+			piximc.MCLibrary.getSymbol('./media/man_alt/','alt_part/face').defaultMatrix=piximc.TMath.compose2DMatrix(1/2.2,undefined,0,-1,-0.5)
 			/*
-			PIXIMC.MCReplacer.addDefaultRule({
+			piximc.MCReplacer.addDefaultRule({
 					type:'symbol',
 					target:'self',
 				matchType:'name',
-				matchModelKey:'media/man_alt/',
+				matchModelKey:'./media/man_alt/',
 				matchKey:'alt_part/face',
-				replaceMatrix:PIXIMC.TMath.makeMatrix(1/2.2,undefined,0,-1,-0.5)
+				replaceMatrix:piximc.TMath.compose2DMatrix(1/2.2,undefined,0,-1,-0.5)
 			})
 			*/
 
-			PIXIMC.MCReplacer.addRule({
+			piximc.MCReplacer.addRule({
 				matchType:'name',
-				matchModelKey:'media/man_alt/',
+				matchModelKey:'./media/man_alt/',
 				matchKey:'alt_part/hair*',
-				replaceMatrix:PIXIMC.TMath.makeMatrix(1,1.5)
+				replaceMatrix:piximc.TMath.compose2DMatrix(1,1.5)
 			})
 
 			/*
@@ -157,14 +166,14 @@
 				type:'symbol',
 				matchType:'name',
 				matchKey:'man_part/chest',
-				replaceSymbol:PIXIMC.MCLibrary.getSymbol('media/man_action/','man_part/chest')
+				replaceSymbol:piximc.MCLibrary.getSymbol('./media/man_action/','man_part/chest')
 			},{
 				target:'child',
 				matchType:'name',
 				matchKey:'man_part/*',
 				type:'symbol',
 
-				replaceModel:PIXIMC.MCLibrary.get('media/man_alt/'),
+				replaceModel:piximc.MCLibrary.get('./media/man_alt/'),
 				replaceKey:'alt_part/*'
 			}]
 			
@@ -197,7 +206,7 @@
 
 			//return
 
-            man_action = PIXIMC.MCLibrary.get('media/man_action/').makeInstance();
+            man_action = piximc.MCLibrary.get('./media/man_action/').makeInstance();
             man_action.x=300;
             man_action.y=250;
             app.stage.addChild(man_action);
@@ -212,7 +221,7 @@
             
             //currMC=man_action
 
-			const atr=new PIXIMC.MCActor();
+			atr=new piximc.MCActor();
 
 			
 			atr.replacer.addRules([{
@@ -221,23 +230,23 @@
 				matchType:'name',
 				matchKey:'man_part/*',
 				replaceKey:'man_part/*',
-				matchModelKey:'media/man_attack/',
-				replaceModel:PIXIMC.MCLibrary.get('media/man_action/'),
+				matchModelKey:'./media/man_attack/',
+				replaceModel:piximc.MCLibrary.get('./media/man_action/'),
 			},
 			{
 				target:'child',
 				type:'symbol',
 				matchType:'name',
 				matchKey:'man_part/chest',
-				//matchModelKey:'media/man_action/',
-				replaceSymbol:PIXIMC.MCLibrary.getSymbol('media/man_attack/','man_part/chest')
+				//matchModelKey:'./media/man_action/',
+				replaceSymbol:piximc.MCLibrary.getSymbol('./media/man_attack/','man_part/chest')
 			},{
 				target:'child',
 				matchType:'name',
 				matchKey:'man_part/*',
 				type:'symbol',
 
-				replaceModel:PIXIMC.MCLibrary.get('media/man_alt/'),
+				replaceModel:piximc.MCLibrary.get('./media/man_alt/'),
 				replaceKey:'alt_part/*'
 			},{
 				target:'both',
@@ -247,8 +256,8 @@
 				effect:hairE
 			}])
 
-			const atka=atr.addModel(PIXIMC.MCLibrary.getSymbol('media/man_attack/'))
-			atr.addModel(PIXIMC.MCLibrary.getSymbol('media/man_action/'))
+			const atka=atr.addModel(piximc.MCLibrary.getSymbol('./media/man_attack/'))
+			atr.addModel(piximc.MCLibrary.getSymbol('./media/man_action/'))
 
 			atka.replacer.addRules([{
 				target:'both',
@@ -261,42 +270,16 @@
 
 			atr.x=100;
 			atr.y=400;
+			for(let k in atr.actionList){
+				$("#action_select").append(`<option value="${k}">${k}</option>`)
+			}
 			atr.showAction('punch','hold',0.5);
 			app.stage.addChild(atr)
-
+			aplayer=new piximc.MCActorPlayer(atr)
 
             //currMC=atr
 			
         })()
-		
-        /*
-		PIXIMC.FileList.getfolderInfoFromText('media/files.txt','media/', async function (_data) {
-            console.log('loaded files2',_data)
-
-            /*
-            const mcModelList={};
-            for(let k of mc_list){
-                const folderInf=PIXIMC.FileList.getInstance().getFolderInfoFromPath('media/'+k)
-                mcModelList[k]=await PIXIMC.MCLoader.loadModelAsync(folderInf)
-            }
-            console.log('all done',mcModelList)
-
-
-            const mcModelList= await PIXIMC.MCLoader.loadModelsAsync(mc_list,'media/')
-            console.log('all done?',mcModelList)
-
-
-            const mcModelList= await PIXIMC.MCLoader.loadModels(mc_list,'media/',(results)=>{
-                console.log('all done',results)
-            })
-
-            await PIXIMC.MCLoader.loadModelsAsync(mc_list,'media/')
-            
-            
-
-		});
-*/
-
 
 		//player
 		window.onkeydown = function (e) {
@@ -321,7 +304,7 @@
 			}
 		});
 		$("input[value=fps]").click(function (e) {
-			PIXIMC.MCPlayer.getInstance().fps = Number($("#fps_ip").val());
+			piximc.MCPlayer.getInstance().fps = Number($("#fps_ip").val());
 		});
 		$("input[value=goto]").click(function (e) {
 			currMC.timeline.goto($("#jump_ip").val());
@@ -341,42 +324,65 @@
 		$("input[value=first_frame]").click(function (e) {
 			currMC.timeline.goto(1);
 		});
-		$("input[value=next_scene]").click(function (e) {
-			currMC.nextScene();
+		
+
+		let currAct=null;
+		let playAct=true;
+		let actionSpeed=0;
+		let currProgess=0;
+		$("#action_select").change(function (e) {
+			currAct=$(this).val()
+			currProgess=0;
+			atr.showAction(currAct,undefined,currProgess);
 		});
-		$("input[value=prev_scene]").click(function (e) {
-			currMC.prevScene();
+		$("input[value=play_action]").click(function (e) {
+			playAct=true;
 		});
-		$("input[value=stopAllSound]").click(function (e) {
-			PIXIMC.TSound.stopAllSE();
+		$("input[value=stop_action]").click(function (e) {
+			playAct=false;
+		});
+
+		$("#action_speed").change(function (e) {
+			actionSpeed=Number($(this).val())
+		});
+		app.ticker.add(function (delta) {
+			if(currAct && playAct && atr){
+				currProgess=(currProgess+actionSpeed)%1
+				atr.showAction(currAct,undefined,currProgess);
+			}
+		});
+
+		
+		$("input[value=actor_player]").click(function (e) {
+			aplayer.play([{action:'punch',time:3},{action:'start_walk',time:4},{action:'walk',time:4}])
 		});
 
 		//color change
 		$("#catable input").change(function (e) {
-			let m=PIXIMC.ColorMatrixAction.create();
+			let m=piximc.ColorMatrixAction.create();
 			$("#catable input").each((k,e)=>{
 				let n=$(e).attr('id').substr(6);
 				let v=Number($(e).val())
 				$(e).parent().parent().find('.v').html(v)
 
-				let newMatrix=PIXIMC.ColorMatrixAction[n](v);
+				let newMatrix=piximc.ColorMatrixAction[n](v);
 
-				m=PIXIMC.ColorMatrixAction.multiply(m,newMatrix)
+				m=piximc.ColorMatrixAction.multiply(m,newMatrix)
 			})
-			PIXIMC.MCEffect.setColorMatrix(currMC,m)
+			piximc.MCEffect.setColorMatrix(currMC,m)
 			
 		});
 		
 		$("#colortable input").change(function (e) {
 			let c=$("#favcolor").val();
 			let p=Number($("#input_color_p").val())
-			let m=PIXIMC.ColorMatrixAction.tint(c,p)
-			PIXIMC.MCEffect.setColorMatrix(currMC,m)
+			let m=piximc.ColorMatrixAction.tint(c,p)
+			piximc.MCEffect.setColorMatrix(currMC,m)
 		});
 		$("#color2").change(function (e) {
 			let c=$("#color2").val();
-			let m=PIXIMC.ColorMatrixAction.tintOver(c)
-			PIXIMC.MCEffect.setColorMatrix(currMC,m)
+			let m=piximc.ColorMatrixAction.tintOver(c)
+			piximc.MCEffect.setColorMatrix(currMC,m)
 		});
 
 	</script>

@@ -16,9 +16,10 @@ export default class MCLibrary {
 	}
 	*/
 
-	public static get(key:string):MCModel {
+	public static get(key:string):MCModel|undefined {
 		if(!this.mcList[key]){
-			throw `MC Model ${key} not find!`;
+			//throw `MC Model ${key} not find!`;
+			return undefined;
 		}
 		return this.mcList[key];
 	}

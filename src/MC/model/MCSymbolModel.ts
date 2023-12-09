@@ -1,5 +1,5 @@
 import {Matrix,Rectangle} from '@pixi/math';
-import {Texture,BufferResource} from '@pixi/core'
+import {Texture} from '@pixi/core'
 import {BLEND_MODES} from '@pixi/constants';
 
 
@@ -14,8 +14,6 @@ import {MCType,
 } from './MCStructure';//action,
 import {type FrameLabels} from '../player/Timeline';
 import MCModel from './MCModel';
-import ASI from '../display/ASI';
-import MCDisplayObject from '../display/MCDisplayObject';
 import IMCSprite from '../display/IMCSprite';
 
 import * as TMath from '../../utils/TMath';
@@ -152,6 +150,9 @@ export default class MCSymbolModel {
 
 	private processRemark(type:string,args:string[],frame_begin:uint,frame_end:uint,frame_label?:string){
 		if(type==="sound" || type==="stopAllSound"){
+			if(args.length<2){
+				return;
+			}
 			if(!this.soundRemarks[frame_begin]){
 				this.soundRemarks[frame_begin]=[]
 			}
@@ -192,7 +193,7 @@ export default class MCSymbolModel {
 	}
 
 	private processGeomRemark(type:string,args:string[],frame_begin:uint,frame_end:uint,m2d:Matrix){
-		const detail=TMath.m2dDetail(m2d);
+		const detail=TMath.decompose2DMatrix(m2d);
 		const gr:GeomRemark={type,frame_begin,frame_end,args:args,
 			x:detail.x,
 			y:detail.y
@@ -228,7 +229,7 @@ export default class MCSymbolModel {
 		for(let layer_num:uint=this._data.TL.L.length-1;layer_num>=0;layer_num--){
 			let layer_name=<string>this._data.TL.L[layer_num].LN;
 			if(layer_name.substring(7)==='remark_'){
-				//* remark special layer
+				//not display remark layer
 				continue
 			}
 			if(!this.layerDataCache[layer_num]){

@@ -20,6 +20,7 @@ export function hashHexToNum(_s:string):uint{
 	}
 	return Number('0x'+_s)
 }
+
 export function hashHexToUint8(_s:string):Uint8Array{
 	let arr=[0,0,0,0];
 	if(_s.length===6){
@@ -42,6 +43,7 @@ export function hashHexToUint8(_s:string):Uint8Array{
 	}
 	return Uint8Array.from(arr2);
 }
+
 export function hashHexToRGBA(_s:string):rgb{
 	let num=hashHexToNum(_s)
 	if(num>0xffffff){

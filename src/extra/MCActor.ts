@@ -22,7 +22,13 @@ export type ActionPhase={
 	frame_end:uint
 }
 
+/*
+adding multi MCEX with action,combine as one MCActor.
+MCActor won't play itself, but you can use showAction to jump to the progess of the action with phase support.
+you Game Engine have to control the progress of the action by showAction each frame.
 
+If you just want to play the animation with specific frame range, you can use LabelMC.
+*/
 export default class MCActor extends MCDisplayObject implements IreplacerDisplayObject,ImultiMC{
 
 	private actionList:Record<string,Action>={};
@@ -163,6 +169,21 @@ export default class MCActor extends MCDisplayObject implements IreplacerDisplay
 		return true;
 	}
 
+	public getActions():Record<string,string[]>{
+		const acts:Record<string,string[]>={}
+		for(const action in this.actionList){
+			acts[action]=this.actionList[action].phaseOrder;
+		}
+		return acts;
+	}
+
+	public getActionList():string[]{
+		return Object.keys(this.actionList);
+	}
+
+	public getActionPhase(actionName:string):string[]{
+		return this.actionList[actionName].phaseOrder;
+	}
 
 	protected destroyOption={
 		children:true,texture:false

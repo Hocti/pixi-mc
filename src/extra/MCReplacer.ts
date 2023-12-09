@@ -321,19 +321,3 @@ export class MCReplacer extends EventEmitter implements Replacer{
         }
     }
 }
-
-/*
-e.g.:
-
-find parent replace，
-	由top parent，一直replace到自己個層為止
-	& addChild/remove Child event
-
-全部 symbol，都優先找另一個model
-	係個chain，第一個無，找第二個，最後先用自己
-
-
-
-
-
-*/

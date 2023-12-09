@@ -98,9 +98,11 @@ export default class ColorChange{
 	}
 
 	public set tintColor(_color:uint | string){
-		if(Number(_color)!==NaN){
+		//check variable is number or string
+
+		if(typeof _color === 'number' && !isNaN(<number>_color)){
 			this._tintColor=<uint>_color;
-		}else{
+		}else if (typeof _color === 'string') {
 			this._tintColor=Color.hashHexToNum(<string>_color)
 		}
 		

@@ -1,138 +1,131 @@
 import {EventEmitter} from '@pixi/utils';
-import {Loader,LoaderResource} from '@pixi/loaders';
 import {Container} from '@pixi/display'
+import { Assets } from '@pixi/assets';
 
 import {spriteData} from './MCStructure';
-import {fileInfo,folderInfo,FileList} from '../../utils/FileList';
 import MCModel from './MCModel';
 import MC from '../display/MC';
 import MCLibrary from './MCLibrary';
 
-export enum MCEvent{
+export enum MCLoaderEvent{
 	LoadDone ='loadDone',
 	Error ='error',
-}
-
-
-type loadDoneEvent={
-	model:MCModel
 }
 
 export default class MCLoader extends EventEmitter{
 
 	//Load Model=============
+	
 
-	public static async loadModelAsync(_args:folderInfo | string[]):Promise<MCModel>{
-		const [rootPath,fileList]=FileList.getFilesFromFolder(_args);
-
-		const aniDataPath=rootPath+'Animation.json';
-		
-		if(fileList.indexOf(aniDataPath)===-1){
-			return Promise.reject(new Error(`${rootPath} not contain 'Animation.json'`))
+	public static async checkFileExists(fileUrl: string): Promise<boolean> {
+		try {
+			const response = await fetch(fileUrl, { method: 'HEAD' });
+			return response.ok;
+		} catch (error) {
+			return false;
 		}
-
-		const addList:string[]=[];
-		let sheet_count=0;
-		for(let v of fileList){
-			//if(v.type==='json' || v.type==='png' || v.type==='wav' || v.type==='mp3' || v.type==='jpg'){
-			if(!Loader.shared.resources[v]){
-				addList.push(v)
-			}
-
-			let fi=FileList.pathToInfo(v,rootPath);
-			if(fi.name.substring(0,9)==="spritemap" && fi.type==="json"){
-				//sheet_count=Math.max(sheet_count,Number(fi.name.substr(9,fi.name.length-9-5)));
-				sheet_count=Math.max(sheet_count,Number(fi.name.substring(9,fi.name.length-5)));
-			}
-		}
-
-		if(addList.length===0){
-			const modelFromLibrary=MCLibrary.get(rootPath)
-			if(modelFromLibrary){
-				return Promise.resolve(modelFromLibrary)
-			}
-		}
-
-		return new Promise((resolve, reject) => {
-			
-			let myloader=new Loader();
-			for(let v of addList){
-				myloader.add(v);
-			}
-			myloader.load((loader:Loader, resources: Partial<Record<string, LoaderResource>>)=>{//*to a new functiom, use bind?
-				
-				for(let k in resources){//cache in global
-					if(resources[k]!.error){
-						return reject(`load file error:${k}`);
-					}else if(!Loader.shared.resources[k]){
-						Loader.shared.resources[k]=resources[k]!; //* may be fail?
-					}
-				}
-
-				//check Animation.json
-				if(!Loader.shared.resources[aniDataPath]){
-					return reject(`${rootPath} not contain 'Animation.json' (files.txt contain file not exsit)`);
-				}
-				
-				//check spritemap.json and png
-				let spritemaps:spriteData[]=[];
-				for(let ss=1;ss<=sheet_count;ss++){
-					let d:spriteData=Loader.shared.resources[rootPath+'spritemap'+ss+'.json'].data as spriteData;
-					spritemaps.push(d)
-				}
-
-				myloader.destroy();
-				resolve(new MCModel(Loader.shared.resources[aniDataPath].data,spritemaps,rootPath));
-			});
-			/*
-			myloader.onComplete.add(() => {
-				//console.log('onComplete')
-				resolve(mainModel);
-			});
-		
-			myloader.onError.add(() => {
-				reject();
-			});
-			*/
-		  });
 	}
 
-	public static loadModel(_args:folderInfo | string[],_loadcall?:{(args:MCModel):void}) {
-		MCLoader.loadModelAsync(_args).then(_loadcall);
+	public static async loadModelFolder(_folder:string,_maxSpritemap:number=0,otherFiles:string[]=[],extenalFiles:string[]=[]):Promise<MCModel>{
+		const files:string[]=['Animation.json',...otherFiles];
+
+		
+		if(!await this.checkFileExists(_folder+'Animation.json')){
+			return Promise.reject(`Can't find Animation.json file in ${_folder}`);
+		}
+
+		if(_maxSpritemap===0){
+			let checking=2;
+			let confirmedMax=0;
+			let confirmedFail=1000;
+			do{
+				const result=await this.checkFileExists(_folder+'spritemap'+checking+'.json')
+				if(result){
+					confirmedMax=checking;
+					if(confirmedMax+1==confirmedFail){
+						break;
+					}
+					checking+=3;
+				}else{
+					confirmedFail=checking;
+					checking--;
+				}
+			}while(checking>0);
+			if(confirmedMax===0){
+				return Promise.reject(`Can't find spritemap json file in ${_folder}`);
+			}
+			_maxSpritemap=confirmedMax;
+		}
+		
+		for(let i=1;i<=_maxSpritemap;i++){
+			files.push('spritemap'+i+'.json');
+			files.push('spritemap'+i+'.png');
+		}
+		return MCLoader.loadModel(_folder,files,extenalFiles);
+	}
+
+	//Animation.json,spritemap1.json~spritemapX.json,mp3 or wav
+	public static async loadModel(_folder:string,_files:string[],extenalFiles:string[]=[]):Promise<MCModel>{
+		
+		const modelFromLibrary=MCLibrary.get(_folder)
+		if(modelFromLibrary){
+			return Promise.resolve(modelFromLibrary)
+		}
+
+		const filesRecord:Record<string,string>={}
+		for(const file of _files){
+			filesRecord[_folder+file]=_folder+file;
+		}
+		for(const file of extenalFiles){
+			filesRecord[file]=file;
+		}
+
+		return this.loadModelFiles(_folder,filesRecord);
+	}
+	
+	public static async loadModelFiles(name:string,filesRecord:Record<string,string>):Promise<MCModel>{
+		
+		Assets.addBundle(name,filesRecord)
+
+		const loadResult = await Assets.loadBundle(name).catch((e)=>{
+			return Promise.reject(e);
+		});
+
+		let spritemaps:spriteData[]=[];
+		let AniKey:string='';
+		for(const key in loadResult){
+			if(key.indexOf('spritemap')>=0 && key.indexOf('.json')>0){
+				spritemaps.push(loadResult[key]);
+			}
+			if(key.indexOf('Animation.json')>=0){
+				AniKey=key
+			}
+		}
+
+		return Promise.resolve(new MCModel(
+			loadResult[AniKey],
+			spritemaps,
+			name));
+		
 	}
 
 	//Load Multi Model=============
 
-	public static async loadModelsAsync(_folderPaths:string[],_basePath:string=''):Promise<MCModel[]>{
-		const promiseList:Promise<MCModel>[]=[];
-		for(let folderPath of _folderPaths){
-			promiseList.push(MCLoader.loadModelAsync(FileList.getInstance().getFolderInfoFromPath(_basePath+folderPath)));
-		}
-		return Promise.all(promiseList);
+	public static loadModels(_folderPaths:string[]):Promise<MCModel[]>{
+		return Promise.all(_folderPaths.map((p)=>this.loadModelFolder(p)))
 	}
 
-	public static loadModels(_folderPaths:string[],_basePath:string='',_loadcall?:{(args:MCModel[]):void}):void{
-		const promiseList:Promise<MCModel>[]=[];
-		for(let folderPath of _folderPaths){
-			promiseList.push(MCLoader.loadModelAsync(FileList.getInstance().getFolderInfoFromPath(_basePath+folderPath)));
-		}
-		Promise.all(promiseList).then((results)=>{
-			if(_loadcall){
-				_loadcall(results)
-			}
-		});
-	}
+	/*
 
 	//unLoad=============
 
 	public static unload(modelname:string):void {
-		/*TODO
+		TODO
 		remove all model,sub model instance
 		clean ASI base texture cache
 		clean ASI model cache
 
 		remove resuorces in Loader
-		*/
 	}
 
 	public static unloadMulti(modelnames:string[]):void {
@@ -141,48 +134,21 @@ export default class MCLoader extends EventEmitter{
 		}
 	}
 
+	*/
+
 	//Load Container=============
 
-	public static createLoaderContainer(_args:folderInfo | string[],_loadcall?:EventEmitter.ListenerFn):Container{
+	public static createLoaderContainer(_folder:string,_loadcall?:(loader:Container,content:MC)=>void):Container{
 		const container=new Container();
-		MCLoader.loadModel(_args,(model:MCModel)=>{
+		MCLoader.loadModelFolder(_folder).then((model:MCModel)=>{
 			const instance:MC=<MC>(model).makeInstance()
 			container.addChild(instance)
 			if(_loadcall){
-				_loadcall.call(this,{
-					type:MCEvent.LoadDone,
-					content:instance,
-					loader:container
-				})
+				_loadcall.call(this,container,instance);
 			}
 		});
 		return container
 	}
-
-	/*
-	//unuse?=============
-
-	constructor(_mc_folder?:folderInfo | string[],_loadcall?:EventEmitter.ListenerFn) {
-		super()
-		if(_mc_folder){
-			this.load(_mc_folder,_loadcall)
-		}
-	}
-
-	public load(_args:folderInfo | string[],_loadcall?:EventEmitter.ListenerFn) {//* in node: rootPath only, or zip
-		MCLoader.loadModelAsync(_args).then((model)=>{
-			const doneEvent:loadDoneEvent={
-				model
-			}
-			this.emit(MCEvent.LoadDone,doneEvent);
-			if(_loadcall)_loadcall(doneEvent)
-		}, (message)=>{
-			this.emit(MCEvent.Error,{
-				message
-			});
-		});
-	}
-	*/
 }
 
 /*

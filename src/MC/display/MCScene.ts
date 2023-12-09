@@ -25,7 +25,7 @@ export default class MCScene extends MCDisplayObject implements ImultiMC{
 				let allSceneMC=new MC(model,{player:_player});
 				allSceneMC.showFrame(1);
 				for(let c of allSceneMC.children ){
-					let nameArr=(<MC>c).name.split('$');
+					let nameArr=(<MC>c).name!.split('$');
 					if(nameArr[0].substring(0,5)!='scene'){
 						continue;
 					}
@@ -102,7 +102,8 @@ export default class MCScene extends MCDisplayObject implements ImultiMC{
 		this.sceneTimeline.goto(1)
 		this.currSceneMC.showFrame(1)
 
-		this.emit(timelineEventType.sceneChange, {
+		//can't emit custom event from self
+		this.sceneTimeline.emit(timelineEventType.sceneChange, {
 			scene:this.currSceneNum,
 			sceneName:this.sceneName[this.currSceneNum],
 			mc:this.currSceneMC

@@ -1,121 +1,107 @@
-# PixiJS MovieClip
 
-Play Adobe Animate(Flash) MovieClip in PIXI, using "generate texture atlas ..." file format.
 
-Here is the demo result, converted from my friend's flash animation from 2002:  
+# pixi-mc (PixiJS MovieClip)
+
+Play an Adobe Animate (Flash) MovieClip in PIXI using the "generate texture atlas" file format.
+
+Here's the demo result, a conversion of my friend's Flash animation from 2002:
 https://piximc.s3.amazonaws.com/demo/demo_scene.html  
-(Only scene 5 has sounds and scripts.)
+(Note: Only scene 5 includes sounds and scripts.)
 
-And Here is the original flash version (you need to allow display flash)  
+Below is the original Flash version (browser with Flash player required):
 https://piximc.s3.amazonaws.com/demo/demo_swf.html  
-It's a fan make animation of Hong Kong indie game "Little Fighter 2" (https://lf2.net)  
-(And we're from Hong Kong too)
+p.s. This is a fan-made animation of the Hong Kong indie game "Little Fighter 2" (https://lf2.net).
 
+Using PIXI's Sprite and Container implementation, you gain the ability to manipulate each child within the MovieClip as if it were a standard DisplayObject. Moreover, it's feasible to add scripts and sound to specific frames, switch scenes,  and set properties like alpha, tint, brightness, and filters in Adobe Animate before exporting to PIXI. Alternatively, you can use the original export file as a library, attaching the MovieClip's children to the stage manually.
 
-Using PIXI Sprite and Container implementation, you can control each child in the MovieClip as an ordinary DisplayObject.
-Also, you can add script and sound on designated frame, changing scene, change frame to change status, set the alpha, tint, brightness and filter in Adobe Animate, and export to pixi
-Or just Use the origin export file as a library, attach MC's children to stage manually.
+Adobe Animate allows for the creation of graphics and animations which can then be exported, with the addition of scripting in JavaScript.
+(Why not use Spine, you might ask? Spine lacks pencil and brush tools. I prefer to draw and animate in one integrated environment.)
 
-You can create graphics and animations in Adobe Animate and export them, adding script in javascript
-(So why don't use Spine? Because Spine doesn’t have pencil and brush. I like drawing and making animation at the same place, exspecially Stickman animation.)
+## installation
+
+[release](https://github.com/Hocti/PIXIMC/releases/)
+
+## v2.1
+
+Moves to PIXI.js v7.2+
+using '@pixi/assets' replace the '@pixi/loaders'
+updated some filters to PIXI v7 standard
+
+removed "FileList"
 
 ## Code example
 
-How to load texture atlas files and make a MC instance in pixi?
-- use 'MCLoader'(just like Loader in AS3) to load all texture atlas files
-- return a 'MCModel' (just like swf file in flash)
-	- contain multi 'MCSymbolModel' (just like Linkage MovieClip Class in AS3)
-	- one of them is the main Symbol (the MovieClip you exported)
-- make 'MC' instance from main Symbol Model
+To load texture atlas files and create a MovieClip (MC) instance in PIXI, follow these steps:
+
+1. **Use 'MCLoader':** This is analogous to the Loader in ActionScript 3 (AS3). Utilize 'MCLoader' to load all the texture atlas files. This process is similar to how you would load external resources in Flash.
+
+2. **Return a 'MCModel':** The 'MCModel' can be thought of as the equivalent of a SWF file in Flash. This model will contain multiple 'MCSymbolModel' instances, which are akin to the Linkage MovieClip Classes in AS3. 
+Among these, one will be designated as the main Symbol, which is the MovieClip that you have exported.
+
+3. **Create an 'MC' Instance from the 'mainSymbolModel' in 'MCModel':** Once you have the MCModel, you can instantiate your 'MC' (MovieClip) from it.
+
 
 ### Load the files and add to stage:
-
-	var myFolderList=['media/cat/Animation.json','media/cat/spritemap1.json','media/cat/spritemap1.png','media/cat/meow.mp3']
-	var myMcLoader = new PIXIMC.MCLoader(myFolderList, function (event) {
+	
+	piximc.MCLoader.loadModel('/media/cat/',['meow.mp3']).then( function (model) {
 
 		//make instance
-		var catMC = new PIXIMC.MC(event.model.mainSymbolModel);
-		var catMC2 = (event.model).makeInstance();//shortcut
+		var catMC = new piximc.MC(model.mainSymbolModel);
+		var catMC2 = model.makeInstance();//shortcut
 
 		app.stage.addChild(catMC);
 
 		//make instance from MC's child
-		var catHeadMC = new PIXIMC.MC(event.model.symbolList['cat_head']);
+		var catHeadMC = new piximc.MC(model.symbolList['cat_head']);
 		catHeadMC.x=100;
 		catMC.addChild(catHeadMC);//two head cat...
 
-		var catHeadMC2= event.model.makeInstance('cat_head')
+		var catHeadMC2= model.makeInstance('cat_head')
 		catHeadMC2.x=-100;
 		catMC.addChild(catHeadMC2);//three head cat...
 
 		//clone MC
-		var catHeadMC3= new PIXIMC.MC(catHeadMC.MCSymbolModel);
+		var catHeadMC3= new piximc.MC(catHeadMC.MCSymbolModel);
 		catHeadMC.addChild(catHeadMC3);//you can add a child inside same type of MC Model
 
 		//after you loaded a MC, you can find the model by it's folder path :
-		var catModel=MCLibrary.getInstance().get('media/cat/');
-		var catMC3 = new PIXIMC.MC(catModel);
+		var catModel=MCLibrary.getInstance().get('/media/cat/');
+		var catMC3 = new piximc.MC(catModel);
 	})
-
-You can use run '.\tools\tracefolder.js' with nodejs, to generate folder listing file of '.\media\':
-
-	node .\tools\tracefolder.js .\media\
-
-Then you will get a '.\media\files.txt', contains all files paths in the folder with file sizes:
-
-	dog/Animation.json	390872
-	dog/spritemap1.json	422
-	dog/spritemap1.png	111473
-	cat/Animation.json	390872
-	cat/spritemap1.json	422
-	cat/spritemap1.png	111473
-	cat/spritemap2.json	422
-	cat/spritemap2.png	111473
-	cat/meow.mp3		13958
-
-You can use MCLoader to load this file:
-
-	PIXIMC.FileList.getfolderInfoFromText('media/files.txt','media/', function (_data) { //textFilePath,targetFolder
-
-		// a "folderInfo" object contains all files info in 'media/dog/'
-		var myFolderList = PIXIMC.FileList.getInstance().getFolderInfoFromPath('media/dog/');
-		var myMcLoader = new PIXIMC.MCLoader(myFolderList, function (event) {
-			var dogMC = new PIXIMC.MC(event.model.mainSymbolModel);
-		}
-		
-		var myFolderList2 = PIXIMC.FileList.getInstance().getFolderInfoFromPath('media/cat/');
-		var myMcLoader2 = new PIXIMC.MCLoader(myFolderList2, function (event) {
-			var catMC = new PIXIMC.MC(event.model.mainSymbolModel);
-		}
-
-	}
-
-for every folders in '.\media\' , you can load all sub files by providing the folder path.
 
 Add to Stage before load done:
 
-	var myMcLoaderContainer = new PIXIMC.MCLoader.loadContainer(['media/FilterDemo/Animation.json','media/FilterDemo/spritemap1.json','media/FilterDemo/spritemap1.png'], function (event) {
-		//loadContainer is a PIXI.Container, after the MC loaded, with addChild to the loadContainer automaticlly, just like Loader in AS3.
+	var myMcLoaderContainer = piximc.MCLoader.createLoaderContainer('media/FilterDemo/', function (loader,content) {
+		//created a PIXI.Container, would addChild to the Container automaticlly after the MC loaded
 	});
 	myMcLoaderContainer.x=400;
 	app.stage.addChild(myMcLoaderContainer);
 
 ## Timeline
 
-All MC have a timeline. You can use myMC.timeline.stop(), myMC.timeline.gotoAndPlay(7) to play it like what AS3 does.
+Each MC possesses a timeline, similar to ActionScript 3 (AS3). You can control the timeline with commands akin to AS3's functionality. For instance:
 
-But before that you have to init 'MCPlayer' first:
+- To stop the timeline, use `myMC.timeline.stop()`.
+- To play the timeline from a specific frame, use `myMC.timeline.gotoAndPlay(7)`.
 
-	PIXIMC.MCPlayer.initTicker(app.ticker);		//inital MCPlayer
-	app.ticker.add(PIXIMC.TSound.soundTicker);	//optional
-	PIXIMC.TSound.initTicker(app.ticker);		//optional
-	PIXIMC.MCPlayer.getInstance().fps = 24;		//set to ftp to 12
 
-Every MC uses "PIXIMC.MCPlayer.getInstance()" as the default player, but you can change it manually.
+Before utilizing these timeline controls, it's crucial to initialize 'MCPlayer':
 
-Changing frame will remove the children not in the new frame, but doesn't affert the children you added to the MC manually (and they will always on top.)
+	//app is PIXI.Application
+	piximc.MCPlayer.initTicker(app.ticker);		//inital MCPlayer
+	piximc.MCPlayer.getInstance().fps = 24;		//set to ftp to 12
 
-Note: you can change the playing speed of every timeline, but the frame sound and script may not be triggered.
+	//optional if you need playing sound in piximc
+	piximc.TSound.initTicker(app.ticker);
+
+- Every MC employs `piximc.MCPlayer.getInstance()` as its default player. However, this can be manually altered if needed.
+
+Regarding frame changes and child elements:
+
+- Changing the frame will remove any children that are not present in the new frame. 
+- This does not affect children added manually to the MC; these manually added children will always remain on top.
+
+- While it's possible to alter the playing speed of each timeline, be aware that this may impact the triggering of frame-specific sounds and scripts. Adjusting the speed could lead to these elements not being activated as expected.
 
 	mc.timeline.speed=1.75
 
@@ -127,10 +113,10 @@ In Adobe Animate,open library, right click The MovieClipc you want to export , c
 
 ### Export setting:
 - **must tick "Optimize Animation.json file"**
-- **Resolution 1x only** - Adobe's bug. If you export some "bitmap" object but the resoultion is not 1x, bitmap still export at 1x.
-- Image dimensions more then 2048 pixels not recommended
-- 1px padding recommended
-- sometimes multi objects contained in single frame MC will group in one single bitmap, to avoid this , please extend timeline to two frames
+- **Resolution 1x only** - Due to an Adobe bug, all bitmap objects should be exported at a 1x resolution. Despite selecting higher resolutions, bitmaps are still exported at 1x, leading to quality inconsistencies.
+- **Image Dimension Limitations**: Avoid using images larger than 2048 pixels in dimension.
+- **1px Padding Recommended:** Including a 1px padding around your assets can prevent visual artifacts, such as bleeding or aliasing, when the images are rendered in PIXI. This padding creates a buffer zone around each asset.
+- **Single Bitmap Grouping in Multi-Object Frames**: When a single frame MovieClip contains multiple objects, they may be grouped into one bitmap. To prevent this and ensure individual export of each object, extend the timeline to two frames.
 
 ### Filter:
 Some fields in Adobe Animate filter not supported in pixi:
@@ -152,33 +138,39 @@ It works!
 
 ## using functions texture atlas not provided
 
-Here are some functions you can't export from Adobe Animate, but I have some replacement methods to impemtment them:
-- add timeline script
-- play sound on designated frame
-- change scene
-- blendmode
-- visible (tick the "Hide Object" in Animate CC's Properties panel)
+pixi-mc implementing features in PIXI that are not directly exportable from Adobe Animate involves a creative use of replacement methods and custom scripting:
+
+1. **Add Timeline Script:** You've developed a workaround for adding scripts to the timeline. This is crucial for interactivity and control over the animation sequence.
+
+2. **Play Sound on Designated Frame:** You've created a method to trigger sound playback at specific frames in the animation, replicating the timeline sound feature in Flash.
+
+3. **Change Scene:** You've implemented a technique for scene transitions, essential for animations with multiple scenes or stages.
+
+4. **Blend Mode:** You've found a way to mimic the blend mode effects available in Adobe Animate, which is important for achieving various visual effects.
+
+5. **Visible (Hide Object):** Your method allows for the toggling of visibility, similar to the "Hide Object" feature in Animate CC's Properties panel.
 
 
 ### Remark object:
+
 I made a "tools/remark.fla" containing some "remark object" in "_remark/" folder (don't change the folder name!), just put them in the timeline and you can get the result.
-- You can set the arguments in instance name.
-- The remark object will hide automatically in the runtime. (just like guide layer's object in Adobe Animate)
-- Most of remark objects will only be active in their first key frame.
-- If you place any object in layer's name started with "remark_", the timeline will be hidden too(just like Guide layer), but the remark object function still active. I suggest you to place all the remark objects on the layers named 'remark_script','remark_sound' etc.
+- **Argument Setting in Instance Name:** You allow for the configuration of these objects through their instance names
+- **Automatic Hiding in Runtime:** These objects are designed to be hidden during runtime, functioning like guide layer objects in Adobe Animate. 
+- **Activation Mostly in First Keyframe:** The remark objects are primarily active in their first keyframe
+- **Use of Special Layer Naming for Hiding:** Any object placed in a layer whose name starts with "remark_" will be hidden (like a Guide layer in Animate), but the remark object function remains active. This suggests organizing all remark objects in layers named 'remark_script', 'remark_sound', etc., for better organization and clarity.
 
 Arguments:
 |remark|instance name|equal to|
 |-|-|-|
-|remark_gotoAndPlay|$123|gotoAndPlay(123)|
+|remark_gotoAndPlay|$123|gotoAndPlay(123) <br /> It's not permissible to start an instance name with a number in this context. Therefore, the use of '$' as a prefix|
 |remark_gotoAndStop|$label_init|gotoAndStop('label_init')|
 |remark_blendMode|multiply|setting blend mode for the MC and all children in it (will auto change to uppercase in runtime, see pixi's blendmode.).  Don't care which frame you place them , active in full timeline|
 |remark_sound|se$047|play sound "047.mp3" in the exported MC folder(auto replace to .mp3 to .wav if mp3 file is missing)|
 |remark_sound|bgm$boss1|play sound "boss1.mp3" with looping, auto stop if start play another "bgm"|
-|remark_stopAllSound||don't have arguments |
-|remark_play||don't have arguments |
-|remark_stop||don't have arguments |
-|remark_stopAtEnd||Don't have arguments.  auto stop the parent MovieClip at the end of timeline.  don't care which frame you place them , active in full timeline|
+|remark_stopAllSound||Don't have arguments |
+|remark_play||Don't have arguments |
+|remark_stop||Don't have arguments |
+|remark_stopAtEnd||Don't have arguments.<br/>auto stop the parent MovieClip at the end of timeline.  don't care which frame you place them , active in full timeline|
 
 
 
@@ -190,28 +182,31 @@ There are three ways to add script on timeline.
 	myMC.timeline.addScript('meet_first_boss',(_mc)=>{...}) // call on frame label
 	myMC.timeline.addScript('meet_second_boss',(_mc)=>{...}) // call on with the first frame "remark_script" instance with instance name "meet_second_boss" appear
 
-### Scene:  
-if you export a MovieClip with:
-- just one frame
-- all children instance names are in the formats: 'scene1$sceneName','scene2'
+### Scene Management:  
+When exporting a MovieClip with the following characteristics:
 
-MCModel will detect it as "MCScene" instead of "MC" Object. All children will become a scene and is sorted by the number in the instance name, and auto play starting from scene1  
-(all scene objects positions will be moved to x:0,y:0)    
-You can use 'nextScene','gotoSceneAndStop' to change scene  
-MCScene doesn’t have timeline, but you can use 'MCScene.sceneTimeline' to access the current scene MC's timeline
+- Contains only one frame.
+- All child instances are named in formats like 'scene1$sceneName', 'scene2', etc.
 
-### Soild color box:  
-If a mc's symbol name is named "solidcolorbox_{hexColorCode}", eg "solidcolorbox_99191A",  
-The texture in them will convert to a 1x1 pixel texture with that color.
+The MCModel will recognize it as an "MCScene" object rather than a standard "MC" object. Each child instance becomes a scene, sorted numerically based on the number in its instance name. The MCScene will automatically start playing from 'scene1'.
+- All scene object positions are reset to coordinates x:0, y:0.
+- You can navigate between scenes using methods like 'nextScene' and 'gotoSceneAndStop'.
+- Unlike regular MC objects, MCScene doesn't have its own timeline. However, you can access the current scene MC's timeline through 'MCScene.sceneTimeline'.
 
-# Extra functions ~~(may be) coming soon~~ I did it
+### Solid Color Box Implementation:
+For creating a solid color box:
+- Name the MC's symbol as "solidcolorbox_{hexColorCode}". For example, "solidcolorbox_99191A".
+- The texture within these symbols will be converted to a 1x1 pixel texture, filled with the specified hex color code.
+This feature is particularly useful for creating color-specific graphics or backgrounds efficiently without the need for larger image files.
+
+# Extra functions ~~(may be) coming soon~~ I did it✌️
 
 ### EffectGroup
 grouped: visible,alpha,blendMode,filters,colorMatrix in one object
 
 ### MCEX
 extented for MC
-**addLayerEffect** can set EffectGroup in specify layer
+**setLayerEffect** can set EffectGroup in specify layer
 
 ### LabelMC:
 extented for MCEX

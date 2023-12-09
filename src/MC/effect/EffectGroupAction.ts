@@ -36,10 +36,26 @@ export class EffectGroupAction{
 		}
 	}
 
+	/*
 	public static equalSimple(_effect1:EffectGroup,_effect2:EffectGroup):boolean{
 		return _effect1.visible==_effect2.visible && 
 		_effect1.alpha==_effect2.alpha && 
 		_effect1.blendMode==_effect2.blendMode
+	}
+	*/
+
+	public static equalDeep(_effect1:EffectGroup,_effect2:EffectGroup):boolean{
+		return _effect1===_effect2 || (
+		_effect1.visible==_effect2.visible && 
+		_effect1.alpha==_effect2.alpha && 
+		_effect1.blendMode==_effect2.blendMode &&
+		(
+			(!_effect1.colorMatrix && !_effect2.colorMatrix) ||
+			(_effect1.colorMatrix!.toString()===_effect2.blendMode!.toString())
+		) &&
+		_effect1.filters.length==_effect2.filters.length &&
+		_effect1.filters.every((v,i)=>v==_effect2.filters[i])
+		)
 	}
 
 	public static merge(_effect1:EffectGroup,_effect2:EffectGroup):EffectGroup{

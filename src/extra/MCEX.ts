@@ -6,7 +6,9 @@ import {MCSymbolModel} from '../MC/model/';
 import type {EffectGroup} from '../MC/effect/';
 
 import {MCReplacer,IreplacerDisplayObject,ReplacerResult} from './MCReplacer';
+import "@pixi/mixin-cache-as-bitmap";
 
+//extended MC, with replacer child and layer effect
 export default class MCEX extends MC implements IreplacerDisplayObject{
     
     public showFloatFrame(_frame:number):void{
@@ -63,30 +65,35 @@ export default class MCEX extends MC implements IreplacerDisplayObject{
 
     public onRenew():void{
         //console.log('onRenew',this.symbolModel.name)
+        this.effectChanged=true;
         this.needRedraw=true;
         this.cacheAsBitmap=false;
+
+        //this.layerEffectUpdate=true;
     }
 
     //layer effect=================
 
 	protected layerEffects:Record<string,EffectGroup>={};
 
-    public addLayerEffect(layerName:string,eg:EffectGroup):void{
+    public setLayerEffect(layerName:string,eg:EffectGroup):void{
         this.layerEffects[layerName]=eg;
-        console.log(layerName,eg)
-        this.needRedraw=true;
+        this.onRenew();
+    }
+    
+    public hasLayerEffect(layerName:string):boolean{
+        return this.layerEffects[layerName]!==undefined;
     }
 
     public removeLayerEffect(layerName:string):void{
         delete this.layerEffects[layerName];
-        this.needRedraw=true;
+        this.onRenew();
     }
     
 	protected showChild(obj:childData,ly:layerData):MCDisplayObject{
         const mdo:MCDisplayObject=super.showChild(obj,ly);
-
         //layer effect
-        if(!mdo.extraEffects['layerEffect'] && this.layerEffects[ly.name]){
+        if(this.layerEffects[ly.name]){//(this.layerEffectUpdate || !mdo.extraEffects['layerEffect']) && 
             mdo.addEffect(this.layerEffects[ly.name],'layerEffect')
         }else if(mdo.extraEffects['layerEffect'] && !this.layerEffects[ly.name]){
             mdo.removeEffect('layerEffect')
@@ -94,4 +101,13 @@ export default class MCEX extends MC implements IreplacerDisplayObject{
 
         return mdo;
     }
+
+    /*
+    protected layerEffectUpdate:boolean=false;
+    
+	public showFrame(frame:uint):void{
+        super.showFrame(frame);
+        this.layerEffectUpdate=false;
+    }
+    */
 }

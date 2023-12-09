@@ -1,13 +1,14 @@
 import { sound,Sound } from '@pixi/sound';
 import {Ticker} from '@pixi/ticker';
-import {Loader} from '@pixi/loaders';
+import { Assets,Cache } from '@pixi/assets';
+//import {Loader} from '@pixi/loaders';
 
 import {SoundType,SoundRemark} from './model/MCStructure';
 
 export default class MCSound{
 	static seVolume:number=1;
 	static bgmVolume:number=1;
-	static fileType=['.mp3','.wav'];
+	static fileType=['','.mp3','.wav','.ogg','.webm'];
 
     static SoundType = SoundType;
 	
@@ -17,19 +18,26 @@ export default class MCSound{
 	static bgmFadeAcc:number=1;
 	static bgmFadeTarget:number=1;
 
-	static play(_soundRemark:SoundRemark,_basepath:string=''){
+	static play(_soundRemark:SoundRemark,_basepath:string=''):Sound{
 		for(const ft of MCSound.fileType){
 			let filepath=_basepath+_soundRemark.soundFile+ft;
-			if(Loader.shared.resources[filepath]){
+			if(Cache.has(filepath)){
+			//if(Loader.shared.resources[filepath]){
 				if(_soundRemark.type===SoundType.SoundEffect){
-					MCSound.playSE(filepath)
+					return MCSound.playSE(filepath)
 				}else if(_soundRemark.type===SoundType.BackgroundMusic){
-					MCSound.playBGM(filepath)
+					return MCSound.playBGM(filepath)
 				}
-				//*remove after played?
 			}
 		}
+		//
+		let filepath=_basepath+_soundRemark.soundFile;
+		if(_soundRemark.type===SoundType.BackgroundMusic){
+			return MCSound.playBGM(filepath);
+		}
+		return MCSound.playSE(filepath);
 	}
+
 
 	static reuseKey:uint[]=[];
 	static clearTimer:number=0;
@@ -49,12 +57,13 @@ export default class MCSound{
 
 	
 
-	static playBGM(filepath:string){
+	static playBGM(filepath:string):Sound{
 		MCSound.stopBGM()
 		MCSound.currBgm=Sound.from(filepath);
 		MCSound.currBgm.volume=MCSound.bgmVolume;
 		MCSound.currBgm.loop=true;
 		MCSound.currBgm.play()
+		return MCSound.currBgm;
 		//*fade in/out
 	}
 
@@ -75,8 +84,8 @@ export default class MCSound{
 		}else{
 			MCSound.seList.push(s);
 		}
-		s.play();
 		s.volume=MCSound.seVolume
+		s.play();
 		return s;
 	}
 

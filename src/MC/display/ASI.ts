@@ -1,12 +1,15 @@
 import {Texture,BaseTexture} from '@pixi/core'
 import {AsiModel} from '../model/MCStructure';
-import MCDisplayObject from './MCDisplayObject';
-//import { Sprite } from '@pixi/sprite';
+import MCDisplayObject from './MCDisplayObject'
 
+//a pixi Sprite with preload texture support, constructor from a asi data model
 export default class ASI extends MCDisplayObject {
 
 	public static MAX_SIDE:uint=2048;
 	public static totalASI:uint=0;
+
+	private static textureCache:Record<string,Texture>={};
+	private static baseTextureCache:Record<string,BaseTexture>={};
 
 	/*publicReadonly*/ public model:AsiModel;
 
@@ -30,9 +33,6 @@ export default class ASI extends MCDisplayObject {
 		}
 		return false
 	}
-
-	private static textureCache:Record<string,Texture>={};
-	private static baseTextureCache:Record<string,BaseTexture>={};
 
 	public static makeTexture(model:AsiModel):Texture{
 		if(!model.texture){

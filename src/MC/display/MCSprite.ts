@@ -1,13 +1,10 @@
-import {Matrix, Point} from '@pixi/math';
-import {BLEND_MODES} from '@pixi/constants';
-
 import ASI from './ASI';
 import MCDisplayObject from './MCDisplayObject';
-import {MCEffect,type EffectGroup,EffectGroupAction} from '../effect'
 import {MCType,AsiModel} from '../model/MCStructure';
 import MCSymbolModel from '../model/MCSymbolModel';
 import type IMCSprite from './IMCSprite';
 
+//a Sprite onlu contain one ASI,with effect and blendMode support
 export default class MCSprite extends MCDisplayObject implements IMCSprite{
 
     /*

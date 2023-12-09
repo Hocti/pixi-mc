@@ -60,6 +60,9 @@ export default class MCTimeline extends Timeline{
 		this.scriptList[this.getFrame(_target)]=[];
 	}
 
+	//Remark part================
+
+	//call script in the frame with remark
 	private remarkScript(_f:uint):void{
 		if(this.scriptList[_f]){
 			for(const fn of this.scriptList[_f]){
@@ -68,8 +71,7 @@ export default class MCTimeline extends Timeline{
 		}
 	}
 
-
-
+	//call play/stop/gotoAndPlay/gotoAndStop/goto in the frame with remark
 	private remarkPlay(_f:uint):void{
 		if(this.mc.symbolModel.playRemarks[_f]){
 			let type:string=this.mc.symbolModel.playRemarks[_f].type;
@@ -90,6 +92,7 @@ export default class MCTimeline extends Timeline{
 		}
 	}
 
+	//play sound in the frame with remark
 	private remarkSound(_f:uint):void{
 		if(this.mc.symbolModel.soundRemarks[_f]){
 			for(let s of this.mc.symbolModel.soundRemarks[_f]){
@@ -102,12 +105,13 @@ export default class MCTimeline extends Timeline{
 		}
 	}
 
-
+	//process part================
 
 
 	protected processMC(){
 		if(this._playStatus===playStatus.playing){
-			this._currentFrameFloat+=this._speed*this.direction;
+			const frameAdd=this._speed*this.direction;
+			this._currentFrameFloat+=frameAdd;
 			let intFrame=Math.round(this._currentFrameFloat);
 			if(intFrame>this.totalFrames){
 				if(this.mc.stopAtEnd){//stopAtEnd
@@ -132,6 +136,7 @@ export default class MCTimeline extends Timeline{
 			if(intFrame!=this._currentFrame){//confirm change frame
 				let old_frame=this._currentFrame;
 				this._currentFrame=intFrame;
+//				if(Math.abs(frameAdd)>1)
 				this.onFrameChange(old_frame)
 				//*bug? when speed more then 1, will skip script/sound?
 			}
@@ -140,7 +145,8 @@ export default class MCTimeline extends Timeline{
 
 	protected processB(){
 		this._playStatus=playStatus.stop
-		this.goto(1)//*who cares button?
+		this.goto(1)
+		//who cares button?
 	}
 	
 	protected processG(){
@@ -157,6 +163,8 @@ export default class MCTimeline extends Timeline{
 			this.onFrameChange(old_frame)
 		}
 	}
+
+	//speed part================
 
 	get speed():number{
 		return this._speed;

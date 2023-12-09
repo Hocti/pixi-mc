@@ -134,6 +134,7 @@ dist
 **/RECOVER_*.fla
 .DS_Store
 test/
+_bk/
 todo.txt
 
 package-lock.json

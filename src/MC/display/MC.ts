@@ -1,16 +1,17 @@
 import {Matrix,Point} from '@pixi/math';
 import { Container,IDestroyOptions } from '@pixi/display';
 import { Sprite } from '@pixi/sprite';
+import {BLEND_MODES} from '@pixi/constants';
+import '@pixi/events';
 
 import MCSymbolModel from '../model/MCSymbolModel';
 import MCTimeline from '../player/MCTimeline';
 import MCPlayer from '../player/MCPlayer';
-import {ColorMatrixAction,MCEffect,type EffectGroup,EffectGroupAction} from '../effect';
+import {MCEffect} from '../effect';
 import ASI from './ASI';
 import {MCType,childData, LoopState,layerData,rawInstenceData, rawAsiData, frameData} from '../model/MCStructure';
 import * as TMath from '../../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
-import {BLEND_MODES} from '@pixi/constants';
 import MCSprite from './MCSprite';
 import type IMCSprite from './IMCSprite';
 
@@ -33,10 +34,10 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 	}
 
 	public path():string{
-		let trees:string[]=[this.name];
+		let trees:string[]=[this.name!];
 		let con:Container=this.parent;
 		while(con instanceof MC){
-			trees.push(con.name)
+			trees.push(con.name!)
 			con=con.parent
 			if(!con)break;
 		}
@@ -132,10 +133,8 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 		if(this._type!=_type){
 			this._type=_type;
 			if(_type===MCType.Button){
-				this.buttonMode=true;
+				this.cursor = 'pointer';
 				this.interactive = true;
-			}else{
-				this.buttonMode=false;  
 			}
 		}
 	}
@@ -178,7 +177,7 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 		frame=TMath.clamp(frame,1,this.timeline.totalFrames)
 		if(this.needRedraw){
 			this.needRedraw=false;
-		}else if(this.currShowingFrame === frame)return;
+		}//else if(this.currShowingFrame === frame)return;
 		this.currShowingFrame = frame;
 		
 
@@ -291,7 +290,7 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 	protected showChild(obj:childData,ly:layerData):MCDisplayObject{
 		const m2d:Matrix=TMath.m3dto2d(obj.data!.M3D);
 		
-		//console.log((<rawInstenceData>obj.data).IN,TMath.m2dDetail(m2d))
+		//console.log((<rawInstenceData>obj.data).IN,TMath.decompose2DMatrix(m2d))
 
 		let name:string,child:MCDisplayObject,m2d2:Matrix;
 		const isMC:boolean=(<rawInstenceData>obj.data).SN !== undefined;
@@ -315,10 +314,6 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 		}else{
 			[name,child,m2d2]=this.showASI(obj.data! as rawAsiData,ly);
 		}
-
-
-		//(<MC>child).temp_matrix.m2d=m2d;
-		//(<MC>child).temp_matrix.m2d2=m2d2;
 		
 		
 		child.transform.setFromMatrix(m2d.append(m2d2));
