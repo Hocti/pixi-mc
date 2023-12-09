@@ -2,7 +2,7 @@
 
 # pixi-mc (PixiJS MovieClip)
 
-Play an Adobe Animate (Flash) MovieClip in PIXI using the "generate texture atlas" file format.
+Play an Adobe Animate (Flash) MovieClip in [PixiJS ](https://github.com/pixijs/pixijs), using the "generate texture atlas" file format.
 
 Here's the demo result, a conversion of my friend's Flash animation from 2002:
 https://piximc.s3.amazonaws.com/demo/demo_scene.html  
@@ -12,26 +12,36 @@ Below is the original Flash version (browser with Flash player required):
 https://piximc.s3.amazonaws.com/demo/demo_swf.html  
 p.s. This is a fan-made animation of the Hong Kong indie game "Little Fighter 2" (https://lf2.net).
 
-Using PIXI's Sprite and Container implementation, you gain the ability to manipulate each child within the MovieClip as if it were a standard DisplayObject. Moreover, it's feasible to add scripts and sound to specific frames, switch scenes,  and set properties like alpha, tint, brightness, and filters in Adobe Animate before exporting to PIXI. Alternatively, you can use the original export file as a library, attaching the MovieClip's children to the stage manually.
+Using PixiJS 's Sprite and Container implementation, you gain the ability to manipulate each child within the MovieClip as if it were a standard DisplayObject. Moreover, it's feasible to add scripts and sound to specific frames, switch scenes,  and set properties like alpha, tint, brightness, and filters in Adobe Animate before exporting to PixiJS . Alternatively, you can use the original export file as a library, attaching the MovieClip's children to the stage manually.
 
 Adobe Animate allows for the creation of graphics and animations which can then be exported, with the addition of scripting in JavaScript.
 (Why not use Spine, you might ask? Spine lacks pencil and brush tools. I prefer to draw and animate in one integrated environment.)
 
-## installation
+## Setup
 
-[release](https://github.com/Hocti/PIXIMC/releases/)
+download a prebuilt build:
+[release](https://github.com/Hocti/pixi-mc/releases/)
 
-## v2.1
+load [PixiJS](https://github.com/pixijs/pixijs, [PixiJS Filters](https://github.com/pixijs/filters, [PixiJS Sound](https://github.com/pixijs/sound) before using pixi-mc
 
-Moves to PIXI.js v7.2+
+## v2.1.0
+
+Moves to PixiJS  v7.2+
 using '@pixi/assets' replace the '@pixi/loaders'
-updated some filters to PIXI v7 standard
+updated some filters to PixiJS  v7.2+ standard
 
 removed "FileList"
 
+### Versions Compatibility
+
+| PixiJS | pixi-mc |
+|---|---|
+| v5.x - v6.x | v1.0 |
+| v7.x | v2.1 |
+
 ## Code example
 
-To load texture atlas files and create a MovieClip (MC) instance in PIXI, follow these steps:
+To load texture atlas files and create a MovieClip (MC) instance in PixiJS , follow these steps:
 
 1. **Use 'MCLoader':** This is analogous to the Loader in ActionScript 3 (AS3). Utilize 'MCLoader' to load all the texture atlas files. This process is similar to how you would load external resources in Flash.
 
@@ -42,40 +52,44 @@ Among these, one will be designated as the main Symbol, which is the MovieClip t
 
 
 ### Load the files and add to stage:
-	
-	piximc.MCLoader.loadModel('/media/cat/',['meow.mp3']).then( function (model) {
 
-		//make instance
-		var catMC = new piximc.MC(model.mainSymbolModel);
-		var catMC2 = model.makeInstance();//shortcut
+```js
+piximc.MCLoader.loadModel('/media/cat/',['meow.mp3']).then( function (model) {
 
-		app.stage.addChild(catMC);
+	//make instance
+	var catMC = new piximc.MC(model.mainSymbolModel);
+	var catMC2 = model.makeInstance();//shortcut
 
-		//make instance from MC's child
-		var catHeadMC = new piximc.MC(model.symbolList['cat_head']);
-		catHeadMC.x=100;
-		catMC.addChild(catHeadMC);//two head cat...
+	app.stage.addChild(catMC);
 
-		var catHeadMC2= model.makeInstance('cat_head')
-		catHeadMC2.x=-100;
-		catMC.addChild(catHeadMC2);//three head cat...
+	//make instance from MC's child
+	var catHeadMC = new piximc.MC(model.symbolList['cat_head']);
+	catHeadMC.x=100;
+	catMC.addChild(catHeadMC);//two head cat...
 
-		//clone MC
-		var catHeadMC3= new piximc.MC(catHeadMC.MCSymbolModel);
-		catHeadMC.addChild(catHeadMC3);//you can add a child inside same type of MC Model
+	var catHeadMC2= model.makeInstance('cat_head')
+	catHeadMC2.x=-100;
+	catMC.addChild(catHeadMC2);//three head cat...
 
-		//after you loaded a MC, you can find the model by it's folder path :
-		var catModel=MCLibrary.getInstance().get('/media/cat/');
-		var catMC3 = new piximc.MC(catModel);
-	})
+	//clone MC
+	var catHeadMC3= new piximc.MC(catHeadMC.MCSymbolModel);
+	catHeadMC.addChild(catHeadMC3);//you can add a child inside same type of MC Model
+
+	//after you loaded a MC, you can find the model by it's folder path :
+	var catModel=MCLibrary.getInstance().get('/media/cat/');
+	var catMC3 = new piximc.MC(catModel);
+})
+```
 
 Add to Stage before load done:
 
-	var myMcLoaderContainer = piximc.MCLoader.createLoaderContainer('media/FilterDemo/', function (loader,content) {
-		//created a PIXI.Container, would addChild to the Container automaticlly after the MC loaded
-	});
-	myMcLoaderContainer.x=400;
-	app.stage.addChild(myMcLoaderContainer);
+```js
+var myMcLoaderContainer = piximc.MCLoader.createLoaderContainer('media/FilterDemo/', function (loader,content) {
+	//created a PIXI.Container, would addChild to the Container automaticlly after the MC loaded
+});
+myMcLoaderContainer.x=400;
+app.stage.addChild(myMcLoaderContainer);
+```
 
 ## Timeline
 
@@ -87,12 +101,14 @@ Each MC possesses a timeline, similar to ActionScript 3 (AS3). You can control t
 
 Before utilizing these timeline controls, it's crucial to initialize 'MCPlayer':
 
-	//app is PIXI.Application
-	piximc.MCPlayer.initTicker(app.ticker);		//inital MCPlayer
-	piximc.MCPlayer.getInstance().fps = 24;		//set to ftp to 12
+```js
+//app is PIXI.Application
+piximc.MCPlayer.initTicker(app.ticker);		//inital MCPlayer
+piximc.MCPlayer.getInstance().fps = 24;		//set to ftp to 12
 
-	//optional if you need playing sound in piximc
-	piximc.TSound.initTicker(app.ticker);
+//optional if you need playing sound in piximc
+piximc.TSound.initTicker(app.ticker);
+```
 
 - Every MC employs `piximc.MCPlayer.getInstance()` as its default player. However, this can be manually altered if needed.
 
@@ -115,7 +131,7 @@ In Adobe Animate,open library, right click The MovieClipc you want to export , c
 - **must tick "Optimize Animation.json file"**
 - **Resolution 1x only** - Due to an Adobe bug, all bitmap objects should be exported at a 1x resolution. Despite selecting higher resolutions, bitmaps are still exported at 1x, leading to quality inconsistencies.
 - **Image Dimension Limitations**: Avoid using images larger than 2048 pixels in dimension.
-- **1px Padding Recommended:** Including a 1px padding around your assets can prevent visual artifacts, such as bleeding or aliasing, when the images are rendered in PIXI. This padding creates a buffer zone around each asset.
+- **1px Padding Recommended:** Including a 1px padding around your assets can prevent visual artifacts, such as bleeding or aliasing, when the images are rendered in PixiJS . This padding creates a buffer zone around each asset.
 - **Single Bitmap Grouping in Multi-Object Frames**: When a single frame MovieClip contains multiple objects, they may be grouped into one bitmap. To prevent this and ensure individual export of each object, extend the timeline to two frames.
 
 ### Filter:
@@ -138,7 +154,7 @@ It works!
 
 ## using functions texture atlas not provided
 
-pixi-mc implementing features in PIXI that are not directly exportable from Adobe Animate involves a creative use of replacement methods and custom scripting:
+pixi-mc implementing features in PixiJS  that are not directly exportable from Adobe Animate involves a creative use of replacement methods and custom scripting:
 
 1. **Add Timeline Script:** You've developed a workaround for adding scripts to the timeline. This is crucial for interactivity and control over the animation sequence.
 
@@ -178,9 +194,11 @@ Arguments:
 ### Timeline script:  
 There are three ways to add script on timeline.
 
-	myMC.timeline.addScript(7,(_mc)=>{...}) // call on frame 7
-	myMC.timeline.addScript('meet_first_boss',(_mc)=>{...}) // call on frame label
-	myMC.timeline.addScript('meet_second_boss',(_mc)=>{...}) // call on with the first frame "remark_script" instance with instance name "meet_second_boss" appear
+```js
+myMC.timeline.addScript(7,(_mc)=>{...}) // call on frame 7
+myMC.timeline.addScript('meet_first_boss',(_mc)=>{...}) // call on frame label
+myMC.timeline.addScript('meet_second_boss',(_mc)=>{...}) // call on with the first frame "remark_script" instance with instance name "meet_second_boss" appear
+```
 
 ### Scene Management:  
 When exporting a MovieClip with the following characteristics:
@@ -208,16 +226,19 @@ grouped: visible,alpha,blendMode,filters,colorMatrix in one object
 extented for MC
 **setLayerEffect** can set EffectGroup in specify layer
 
-### LabelMC:
-extented for MCEX
-With LabelTimeline, you to "playTo" a frame label/number (not jump to) from current frame, it would choose play obverse or reverse automatically
-
 ### MCReplacer:
 You can set some rule for specify Symbol, and replace to another Symbol in MCEX (just like Spine's slot)
 Also you can change the EffectGroup or special Symbol for specify **Layer**
 
+### LabelMC:
+extented for MCEX
+With LabelTimeline, you to "playTo" a frame label/number (not jump to) from current frame, it would choose play obverse or reverse automatically
+
 ### MCActor, with remark [action,phase,geom]:
 You can add multi **MCSymbolModel** (with adding **action/phase remark** in fla file) in a **MCActor**, then choose which action & phase to show by **showAction**, the MCActor would show the correct MCEX and frame
+
+### MCActorplayer:
+Play MCActor with List of Steps
 
 
 # License

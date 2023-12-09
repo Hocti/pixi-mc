@@ -83,11 +83,11 @@ export default class MCLoader extends EventEmitter{
 		return this.loadModelFiles(_folder,filesRecord);
 	}
 	
-	public static async loadModelFiles(name:string,filesRecord:Record<string,string>):Promise<MCModel>{
+	public static async loadModelFiles(_folder:string,filesRecord:Record<string,string>):Promise<MCModel>{
 		
-		Assets.addBundle(name,filesRecord)
+		Assets.addBundle(_folder,filesRecord)
 
-		const loadResult = await Assets.loadBundle(name).catch((e)=>{
+		const loadResult = await Assets.loadBundle(_folder).catch((e)=>{
 			return Promise.reject(e);
 		});
 
@@ -105,7 +105,7 @@ export default class MCLoader extends EventEmitter{
 		return Promise.resolve(new MCModel(
 			loadResult[AniKey],
 			spritemaps,
-			name));
+			_folder));
 		
 	}
 
