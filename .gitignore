@@ -130,7 +130,7 @@ dist
 .pnp.*
 
 
-
+desktop.ini
 **/RECOVER_*.fla
 .DS_Store
 test/
