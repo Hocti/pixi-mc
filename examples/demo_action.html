@@ -102,7 +102,7 @@
 		});
 
 
-		piximc.MCPlayer.initTicker(app.ticker);
+		//piximc.MCPlayer.initTicker(app.ticker);
 		piximc.MCPlayer.getInstance().fps = 60;
 
         let currMC,man_action,man_attack;
@@ -124,7 +124,7 @@
         (async()=>{
 
             //const re=await piximc.FileList.getfolderInfoFromTextAsync('./media/files.txt','./media/')
-			//await Promise.all(mc_list.map((k)=>piximc.MCLoader.loadModelFolder('./media/'+k+'/')))
+			//await Promise.all(mc_list.map((k)=>piximc.MCLoader.autoLoadModel('./media/'+k+'/')))
 
 			await piximc.MCLoader.loadModels(mc_list.map((k)=>'./media/'+k+'/'))
 

@@ -17,7 +17,11 @@ export default class MCPlayer {
 
 	static getInstance(): MCPlayer {
 		if (!MCPlayer.instance) {
+			if(!MCPlayer.ticker){
+				MCPlayer.initTicker();
+			}
 			MCPlayer.instance = new MCPlayer();
+			MCPlayer.instance.fps=MCPlayer.ticker.FPS;
 		}
 		return MCPlayer.instance;
 	}
@@ -26,8 +30,11 @@ export default class MCPlayer {
 
 	static ticker:Ticker;
 
-	public static initTicker(_ticker:Ticker){
-		MCPlayer.ticker=_ticker;
+	public static initTicker(ticker?:Ticker){
+		if(!ticker){
+			ticker = Ticker.shared;
+		}
+		MCPlayer.ticker=ticker;
 	}
 
 	//private
@@ -39,12 +46,6 @@ export default class MCPlayer {
 	private mcList:MC[]=[];
 
 	private enterTick(delta:number) {//* delta=f in 60fps
-		/*
-		if(this.realFloatFrame<100){
-			console.log(MCPlayer.ticker.deltaMS,MCPlayer.ticker.elapsedMS,delta )
-			
-		}
-		*/
 		
 		this.realFloatFrame+=delta*this.fps*(1/MCPlayer.ticker.FPS )
 		const realIntFrame:uint=Math.round(this.realFloatFrame);
@@ -78,7 +79,7 @@ export default class MCPlayer {
 		}
 	}
 
-	public fps:number=60;
+	public fps:number=0;
 
 	public addMC(mc:MC){
 		this.mcList.push(mc)

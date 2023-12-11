@@ -74,7 +74,7 @@ export default class MCActorPlayer extends EventEmitter{
                 this.emit('finish');
             }
         }
-        this.currentPassedTime+=delta/60;
+        this.currentPassedTime+=delta/MCPlayer.ticker.FPS;
     }
 
     protected nextStep(){

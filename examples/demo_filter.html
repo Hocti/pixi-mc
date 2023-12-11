@@ -42,7 +42,7 @@
 		let fmc
 
 		const path='media/FilterDemo';
-		var myMcLoader = piximc.MCLoader.loadModelFolder('./'+path+'/').then( function (model) {
+		var myMcLoader = piximc.MCLoader.autoLoadModel('./'+path+'/').then( function (model) {
 			fmc = model.makeInstance();
 			
 			fmc.showFrame(1);

@@ -26,7 +26,7 @@ export default class MCLoader extends EventEmitter{
 		}
 	}
 
-	public static async loadModelFolder(_folder:string,_maxSpritemap:number=0,otherFiles:string[]=[],extenalFiles:string[]=[]):Promise<MCModel>{
+	public static async autoLoadModel(_folder:string,_maxSpritemap:number=0,otherFiles:string[]=[],extenalFiles:string[]=[]):Promise<MCModel>{
 		const files:string[]=['Animation.json',...otherFiles];
 
 		
@@ -112,7 +112,7 @@ export default class MCLoader extends EventEmitter{
 	//Load Multi Model=============
 
 	public static loadModels(_folderPaths:string[]):Promise<MCModel[]>{
-		return Promise.all(_folderPaths.map((p)=>this.loadModelFolder(p)))
+		return Promise.all(_folderPaths.map((p)=>this.autoLoadModel(p)))
 	}
 
 	/*
@@ -140,7 +140,7 @@ export default class MCLoader extends EventEmitter{
 
 	public static createLoaderContainer(_folder:string,_loadcall?:(loader:Container,content:MC)=>void):Container{
 		const container=new Container();
-		MCLoader.loadModelFolder(_folder).then((model:MCModel)=>{
+		MCLoader.autoLoadModel(_folder).then((model:MCModel)=>{
 			const instance:MC=<MC>(model).makeInstance()
 			container.addChild(instance)
 			if(_loadcall){

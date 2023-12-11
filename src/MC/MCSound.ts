@@ -39,18 +39,23 @@ export default class MCSound{
 	}
 
 
+	static tickerAdded:boolean=false;
 	static reuseKey:uint[]=[];
 	static clearTimer:number=0;
-	static initTicker(ticker:Ticker){
+	static initTicker(ticker?:Ticker){
+		if(!ticker){
+			ticker = Ticker.shared;
+		}
 		ticker.add((delta:number)=>{
 			MCSound.clearTimer+=delta
-			if(MCSound.clearTimer>60*5){
+			if(MCSound.clearTimer>ticker!.FPS*5){
 				MCSound.destroyEnded()
 				MCSound.clearTimer=0;
 			}
 			//*fadein/out sound
 			//bgmFadeAcc
 		})
+		MCSound.tickerAdded=true;
 	}
 
 	//bgm

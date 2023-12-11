@@ -9,7 +9,7 @@
 
 # MCLoader
 ## static method
-    loadModelFolder(_folder:string,_maxSpritemap:number=0,otherFiles:string[]=[],extenalFiles:string[]=[]):Promise<MCModel>
+    autoLoadModel(_folder:string,_maxSpritemap:number=0,otherFiles:string[]=[],extenalFiles:string[]=[]):Promise<MCModel>
     loadModel(_folder:string,_files:string[],extenalFiles:string[]=[]):Promise<MCModel>
     loadModelFiles(_folder:string,filesRecord:Record<string,string>):Promise<MCModel>
     loadModels(_folderPaths:string[]):Promise<MCModel[]>

@@ -67,10 +67,11 @@
 			height: mcrect.height,
 			//backgroundColor: 0x000000,
 			//transparent: true,
-			sharedTicker:true,
+			//sharedTicker:true,
 		});
-		piximc.MCPlayer.initTicker(app.ticker);
-		piximc.MCSound.initTicker(app.ticker);
+		
+		//piximc.MCPlayer.initTicker(app.ticker);
+		//piximc.MCSound.initTicker(app.ticker);
 		piximc.MCPlayer.getInstance().fps = 12;
 
 		var scenemc;
@@ -78,7 +79,7 @@
 
 		const arr=['031.wav','047.wav','ball_break.wav','bat_break.wav','bat_fly.wav','bat_laser.wav','bgm.wav','big.wav','boss1.mp3','burning.wav','guard.wav','ha.wav','little_attack.wav']//.map((v)=>`./${path}/${v}`)	
 
-		var myMcLoader = piximc.MCLoader.loadModelFolder('./'+path+'/',1,arr).then( function (model) {
+		var myMcLoader = piximc.MCLoader.autoLoadModel('./'+path+'/',1,arr).then( function (model) {
 			
 			scenemc = model.makeInstance();
 			app.stage.addChild(scenemc);

@@ -2,6 +2,9 @@
 
 # pixi-mc (PixiJS MovieClip)
 
+[![npm version](https://badge.fury.io/js/pixi-mc.svg)](https://www.npmjs.com/package/pixi-mc)
+
+
 Play an Adobe Animate (Flash) MovieClip in [PixiJS ](https://github.com/pixijs/pixijs), using the "generate texture atlas" file format.
 
 Here's the demo result, a conversion of my friend's Flash animation from 2002:
@@ -19,10 +22,26 @@ Adobe Animate allows for the creation of graphics and animations which can then 
 
 ## Setup
 
-download a prebuilt build:
+
+load [PixiJS](https://github.com/pixijs/pixijs), [PixiJS Filters](https://github.com/pixijs/filters), [PixiJS Sound](https://github.com/pixijs/sound) before using pixi-mc
+
+#### NPM Install
+```sh
+	npm install pixi-mc
+```
+
+#### CDN Install
+
+Via jsDelivr:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/pixi-mc/dist/pixi-mc.min.js"></script>
+```
+
+
+#### download a prebuilt build:
 [release](https://github.com/Hocti/pixi-mc/releases/)
 
-load [PixiJS](https://github.com/pixijs/pixijs, [PixiJS Filters](https://github.com/pixijs/filters, [PixiJS Sound](https://github.com/pixijs/sound) before using pixi-mc
 
 ## v2.1.0
 
@@ -54,13 +73,17 @@ Among these, one will be designated as the main Symbol, which is the MovieClip t
 ### Load the files and add to stage:
 
 ```js
-piximc.MCLoader.loadModel('/media/cat/',['meow.mp3']).then( function (model) {
+piximc.MCLoader.autoLoadModel('/media/cat/',['meow.mp3']).then( function (model) {
 
 	//make instance
 	var catMC = new piximc.MC(model.mainSymbolModel);
 	var catMC2 = model.makeInstance();//shortcut
 
 	app.stage.addChild(catMC);
+	//after added to stage, MC would auto showing frame1, and add Children at frame 1
+
+	catMC.timeline.gotoAndStop(5);
+	//auto add/remnove children in/not at that frame
 
 	//make instance from MC's child
 	var catHeadMC = new piximc.MC(model.symbolList['cat_head']);
@@ -104,7 +127,7 @@ Before utilizing these timeline controls, it's crucial to initialize 'MCPlayer':
 ```js
 //app is PIXI.Application
 piximc.MCPlayer.initTicker(app.ticker);		//inital MCPlayer
-piximc.MCPlayer.getInstance().fps = 24;		//set to ftp to 12
+piximc.MCPlayer.getInstance().fps = 24;		//set to ftp to 12,default is 60
 
 //optional if you need playing sound in piximc
 piximc.TSound.initTicker(app.ticker);
