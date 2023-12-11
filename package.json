@@ -29,7 +29,7 @@
 		"Texture Atlas"
 	],
 	"readme": "README.md",
-	"bugs": "https://github.com/Hocti/PIXIMC/issues",
+	"bugs": "https://github.com/Hocti/piximc/issues",
 	"scripts": {
 		"build": "rollup -c",
 		"watch": "cross-env NODE_ENV=DEV rollup -c --watch",
@@ -37,7 +37,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Hocti/PIXIMC/"
+		"url": "https://github.com/Hocti/piximc/"
 	},
 	"files": [
 		"./dist/",
