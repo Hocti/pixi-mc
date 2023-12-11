@@ -1,6 +1,6 @@
 {
 	"name": "pixi-mc",
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"description": "read 'Texture Atlas' export from Adobe Animate, with MovieClip function in pixi.js",
 	"main": "./dist/pixi-mc.cjs.js",
 	"module": "./dist/pixi-mc.esm.js",
