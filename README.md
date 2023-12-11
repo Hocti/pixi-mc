@@ -43,7 +43,7 @@ Via jsDelivr:
 [release](https://github.com/Hocti/pixi-mc/releases/)
 
 
-## v2.1.0
+## v2.1.1
 
 Moves to PixiJS  v7.2+
 using '@pixi/assets' replace the '@pixi/loaders'
