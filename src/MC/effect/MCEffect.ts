@@ -1,7 +1,7 @@
-import { Filter } from '@pixi/core';
+import { Filter } from 'pixi.js';
 
-import { BlurFilter } from '@pixi/filter-blur';
-import { ColorMatrixFilter,ColorMatrix} from '@pixi/filter-color-matrix';
+import { BlurFilter } from 'pixi.js';
+import { ColorMatrixFilter,ColorMatrix} from 'pixi.js';
 import {BevelFilter,DropShadowFilter,GlowFilter,GlowFilterOptions,MultiColorReplaceFilter} from 'pixi-filters';
 
 import * as Color from '../../utils/color';
@@ -22,8 +22,9 @@ export default class MCEffect {
 		if(!obj.filters){
 			obj.filters=[];
 		}
-		if(obj.filters && obj.filters.indexOf(filter)<0){
-			obj.filters.push(filter);
+		if(obj.filters && (obj.filters as Filter[]).indexOf(filter)<0){
+			obj.filters=[...(obj.filters as Filter[]),filter]
+			//(obj.filters as Filter[]).push(filter);
 		}
 	}
 
@@ -151,8 +152,11 @@ export default class MCEffect {
 			(<MultiColorReplaceFilter>obj.filtercache['multiTint']).replacements=tintArray;
 			(<MultiColorReplaceFilter>obj.filtercache['multiTint']).epsilon=epsilon;
 		}
-		if(obj.filters?.indexOf(obj.filtercache['multiTint'])===-1){
-			obj.filters?.push(obj.filtercache['multiTint'])
+
+		
+		if((obj.filters as Filter[]).indexOf(obj.filtercache['multiTint'])===-1){
+			//(obj.filters as Filter[]).push(obj.filtercache['multiTint'])
+			obj.filters=[...(obj.filters as Filter[]),obj.filtercache['multiTint']];
 		}
 		//console.log(obj.filters,obj.filtercache)
 		//obj.cacheAsBitmap=true;
@@ -160,9 +164,9 @@ export default class MCEffect {
 
 	public static removeTint(obj:MCDisplayObject):void{
 		if(obj.filtercache['multiTint']){
-			const fid:int=obj.filters!.indexOf(obj.filtercache['multiTint'])
+			const fid:int=(obj.filters as Filter[]).indexOf(obj.filtercache['multiTint'])
 			if(fid>=0){
-				obj.filters!.splice(fid, 1);
+				(obj.filters as Filter[]).splice(fid, 1);
 			}
 			//obj.filtercache['multiTint'].destroy();
 			console.log(obj.filters,obj.filtercache)

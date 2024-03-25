@@ -1,6 +1,6 @@
-import {EventEmitter} from '@pixi/utils';
-import {Container} from '@pixi/display'
-import { Assets } from '@pixi/assets';
+import {EventEmitter} from 'pixi.js';
+import {Container} from 'pixi.js'
+import { Assets } from 'pixi.js';
 
 import {spriteData} from './MCStructure';
 import MCModel from './MCModel';

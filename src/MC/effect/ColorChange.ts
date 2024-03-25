@@ -1,4 +1,4 @@
-import { ColorMatrix} from '@pixi/filter-color-matrix';
+import { ColorMatrix} from 'pixi.js';
 
 import * as Color from '../../utils/color';
 

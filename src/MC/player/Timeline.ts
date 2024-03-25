@@ -1,4 +1,4 @@
-import {EventEmitter} from '@pixi/utils';//eventemitter3
+import {EventEmitter} from 'pixi.js';
 
 import {playTarget} from '../model/MCStructure';
 import * as TMath from '../../utils/TMath';

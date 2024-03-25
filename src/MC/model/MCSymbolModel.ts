@@ -1,6 +1,6 @@
-import {Matrix,Rectangle} from '@pixi/math';
-import {Texture} from '@pixi/core'
-import {BLEND_MODES} from '@pixi/constants';
+import {Matrix,Rectangle} from 'pixi.js';
+import {Texture} from 'pixi.js'
+import {BLEND_MODES} from 'pixi.js';
 
 
 import MC from '../display/MC';
@@ -17,6 +17,20 @@ import MCModel from './MCModel';
 import IMCSprite from '../display/IMCSprite';
 
 import * as TMath from '../../utils/TMath';
+import {BLEND_MODES_NORMAL} from '../../utils/blendmode';
+
+
+function createSingleColorCanvas(color: string): HTMLCanvasElement {
+    const canvas = document.createElement('canvas');
+    canvas.width = 16;
+    canvas.height = 16;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+        ctx.fillStyle = '#'+color;
+        ctx.fillRect(0, 0, 16, 16);
+    }
+    return canvas;
+}
 
 export default class MCSymbolModel {
 
@@ -40,7 +54,7 @@ export default class MCSymbolModel {
 	public extraRemarks:Record<string,ExtraRemark[]>={};
 
 	//default status
-	public defaultBlendMode:BLEND_MODES=BLEND_MODES.NORMAL;
+	public defaultBlendMode:BLEND_MODES=BLEND_MODES_NORMAL;
 	public defaultStopAtEnd:boolean=false;
 	public defaultVisible:boolean=true;
 	public defaultMatrix?:Matrix;
@@ -119,7 +133,9 @@ export default class MCSymbolModel {
 			//change to solid color box asi
 			if(data.SN.substring(0,14)==='solidcolorbox_'){
 				const colorHexStr=data.SN.substring(14)
-				const texture=Texture.fromBuffer(hashHexToUint8(colorHexStr),16,16);
+
+				//const texture=Texture.fromBuffer(hashHexToUint8(colorHexStr),16,16);
+				const texture=Texture.from(createSingleColorCanvas(colorHexStr));//*pixiv8
 
 				this.spriteModel=<AsiModel>{
 					rect:new Rectangle(0,0,16,16),
@@ -170,12 +186,14 @@ export default class MCSymbolModel {
 			this.scriptRemarks[scriptName!]={frame:frame_begin,args:args};
 		}else if(type==='blendMode'){
 			const bName:string=(args[0].toUpperCase());
-			
-			if(bName in BLEND_MODES){
-				this.defaultBlendMode=Object.values(BLEND_MODES).indexOf(bName)
+			this.defaultBlendMode=bName as BLEND_MODES;//*pixiv8
+			/*
+			if(bName in allBlendModes){
+				this.defaultBlendMode=Object.values(allBlendModes).indexOf(bName)
 				//console.log(2,type,args,this.defaultBlendMode)
 				//BLEND_MODES[bName]
 			}
+			*/
 		}else if(type==='stopAtEnd'){
 			this.defaultStopAtEnd=true;
 		}else if(type==='hideAtStart'){

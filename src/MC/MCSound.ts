@@ -1,7 +1,6 @@
 import { sound,Sound } from '@pixi/sound';
-import {Ticker} from '@pixi/ticker';
-import { Assets,Cache } from '@pixi/assets';
-//import {Loader} from '@pixi/loaders';
+import {Ticker} from 'pixi.js';
+import { Cache } from 'pixi.js';
 
 import {SoundType,SoundRemark} from './model/MCStructure';
 
@@ -46,7 +45,9 @@ export default class MCSound{
 		if(!ticker){
 			ticker = Ticker.shared;
 		}
-		ticker.add((delta:number)=>{
+		//ticker.add((delta:number)=>{
+		ticker.add((ticker:Ticker)=>{
+			const delta:number=ticker.deltaTime; //number
 			MCSound.clearTimer+=delta
 			if(MCSound.clearTimer>ticker!.FPS*5){
 				MCSound.destroyEnded()

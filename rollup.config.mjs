@@ -31,9 +31,7 @@ const plugins = [
         preferBuiltins: false,
     }),
     json(),
-    /*
     commonjs(),
-    */
 ];
 
 const sourcemap = true;//!isProduction;
@@ -55,8 +53,8 @@ const banner = `/*!
  }
 
 const globals={
+    /*
     'pixi.js':'PIXI',
-
     '@pixi/core': 'PIXI',
     '@pixi/constants': 'PIXI',
     '@pixi/settings': 'PIXI',
@@ -71,6 +69,11 @@ const globals={
     
     '@pixi/filter-blur':'PIXI',
     '@pixi/filter-color-matrix':'PIXI',
+
+    
+    'eventemitter3':'eventemitter3',
+    */
+    'pixi.js':'PIXI',
 
     '@pixi/sound':'PIXI.sound',
     'pixi-filters':'PIXI.filters'

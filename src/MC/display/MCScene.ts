@@ -24,8 +24,9 @@ export default class MCScene extends MCDisplayObject implements ImultiMC{
 			if(model.mcModel.withScene && model.mcModel.mainSymbolModel===model){
 				let allSceneMC=new MC(model,{player:_player});
 				allSceneMC.showFrame(1);
-				for(let c of allSceneMC.children ){
-					let nameArr=(<MC>c).name!.split('$');
+				for(let cc of allSceneMC.children ){
+					const c:MC=cc as MC;
+					let nameArr=c.name!.split('$');
 					if(nameArr[0].substring(0,5)!='scene'){
 						continue;
 					}
@@ -36,12 +37,12 @@ export default class MCScene extends MCDisplayObject implements ImultiMC{
 					}else{
 						this.sceneName[scene_num]=nameArr[0];
 					}
-					this.sceneMCList[scene_num]=(<MC>c);
-					(<MC>c).timeline.stop();
-					(<MC>c).x=0;
-					(<MC>c).y=0;
-					(<MC>c).timeline.active=false;
-					(<MC>c).isScene=true;
+					this.sceneMCList[scene_num]=c;
+					c.timeline.stop();
+					c.x=0;
+					c.y=0;
+					c.timeline.active=false;
+					c.isScene=true;
 					//console.log('scene',scene_num,this.sceneName[scene_num])
 				}
 				for(let i=1;i<this.max_scene;i++){

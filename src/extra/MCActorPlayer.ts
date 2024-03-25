@@ -1,7 +1,7 @@
-
-import {EventEmitter} from '@pixi/utils';
+import {EventEmitter} from 'pixi.js';
 import MCActor from "./MCActor";
 import MCPlayer from "../MC/player/MCPlayer";
+import {Ticker} from "pixi.js";
 
 export type ActorStep={
     action:string,
@@ -52,7 +52,10 @@ export default class MCActorPlayer extends EventEmitter{
         this.playing=true;
     }
 
-    protected update(delta:number):void{
+    protected update(ticker: Ticker):void{
+        const delta:number=ticker.deltaTime; //number
+        //delta:number
+
         if(!this.playing){
             return;
         }

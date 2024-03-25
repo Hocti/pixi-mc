@@ -1,4 +1,4 @@
-import {Ticker} from '@pixi/ticker';
+import {Ticker} from 'pixi.js';
 import {MC} from '../display';
 
 export default class MCPlayer {
@@ -45,8 +45,8 @@ export default class MCPlayer {
 
 	private mcList:MC[]=[];
 
-	private enterTick(delta:number) {//* delta=f in 60fps
-		
+	private enterTick(ticker:Ticker) {//* delta=f in 60fps
+		const delta:number=ticker.deltaTime; //number
 		this.realFloatFrame+=delta*this.fps*(1/MCPlayer.ticker.FPS )
 		const realIntFrame:uint=Math.round(this.realFloatFrame);
 		if(realIntFrame===this.currFrame){
@@ -67,7 +67,7 @@ export default class MCPlayer {
 			//*remove from list
 
 			if(!mc.timeline.active)continue
-			if(!mc.worldVisible )continue
+			//if(!mc.worldVisible )continue
 			mc.timeline.processFrame();
 			if(!mc.parent)continue
 			mc.showFrame(mc.timeline.currentFrame);

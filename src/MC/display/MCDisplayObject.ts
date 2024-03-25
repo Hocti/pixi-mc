@@ -1,7 +1,7 @@
-import { Filter } from '@pixi/core';
-import { Sprite } from '@pixi/sprite';
+import { Filter } from 'pixi.js';
+import { Sprite } from 'pixi.js';
 import {MCEffect,type EffectGroup,EffectGroupAction} from '../effect';
-import '@pixi/mixin-get-child-by-name';
+//import '@pixi/mixin-get-child-by-name';
 
 export default abstract class MCDisplayObject extends Sprite{
 	public filtercache:Record<string,Filter>={};
@@ -30,7 +30,7 @@ export default abstract class MCDisplayObject extends Sprite{
 	}
 
 
-	public addEffect(effect:EffectGroup,name:string):void{
+	public addMCEffect(effect:EffectGroup,name:string):void{
 
 		if(this.extraEffects[name] && EffectGroupAction.equalDeep(this.extraEffects[name],effect)){
 			return
@@ -39,11 +39,11 @@ export default abstract class MCDisplayObject extends Sprite{
 		this.effectChanged=true;
 	}
 
-	public hasEffect(name:string):boolean{
+	public hasMCEffect(name:string):boolean{
 		return this.extraEffects[name]===undefined;
 	}
 
-	public removeEffect(name:string):void{
+	public removeMCEffect(name:string):void{
 		delete this.extraEffects[name];
 		this.effectChanged=true;
 	}

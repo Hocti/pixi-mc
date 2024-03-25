@@ -1,5 +1,5 @@
-import {Matrix,Rectangle} from '@pixi/math';;
-import {Texture} from '@pixi/core';
+import {Matrix,Rectangle} from 'pixi.js';;
+import {Texture} from 'pixi.js';
 
 //MC processed data structure
 

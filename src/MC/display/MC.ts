@@ -1,8 +1,7 @@
-import {Matrix,Point} from '@pixi/math';
-import { Container,IDestroyOptions } from '@pixi/display';
-import { Sprite } from '@pixi/sprite';
-import {BLEND_MODES} from '@pixi/constants';
-import '@pixi/events';
+import {Matrix,Point} from 'pixi.js';
+import { Container,DestroyOptions } from 'pixi.js';
+import { Sprite } from 'pixi.js';
+//import '@pixi/events';
 
 import MCSymbolModel from '../model/MCSymbolModel';
 import MCTimeline from '../player/MCTimeline';
@@ -14,6 +13,7 @@ import * as TMath from '../../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
 import MCSprite from './MCSprite';
 import type IMCSprite from './IMCSprite';
+import {BLEND_MODES_NORMAL} from '../../utils/blendmode';
 
 
 export type MCOption={
@@ -84,7 +84,7 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 		this.stopAtEnd=symbolModel.defaultStopAtEnd;
 		this.removePasted=MC.defaultRemovePasted
 
-		if(symbolModel.defaultBlendMode!==BLEND_MODES.NORMAL || !symbolModel.defaultVisible){
+		if(symbolModel.defaultBlendMode!==BLEND_MODES_NORMAL || !symbolModel.defaultVisible){
 			this.baseEffect.blendMode=this.blendMode=symbolModel.defaultBlendMode;
 			this.baseEffect.visible=symbolModel.defaultVisible;
 			this.effectChanged=true;
@@ -114,7 +114,7 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 		children:true,texture:false
 	}
 
-	public destroy(options?: IDestroyOptions | boolean){
+	public destroy(options?: DestroyOptions | boolean){
 		for(const k in this.asiMaskList){
 			this.asiMaskList[k].destroy(this.destroyOption)
 		}
@@ -316,9 +316,10 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 		}
 		
 		
-		child.transform.setFromMatrix(m2d.append(m2d2));
+		//child.transform.setFromMatrix(m2d.append(m2d2));
+		child.setFromMatrix(m2d.append(m2d2));//*pixiv8
 
-		if(this.baseEffect.blendMode!==BLEND_MODES.NORMAL && child.baseEffect.blendMode!==this.baseEffect.blendMode){
+		if(this.baseEffect.blendMode!==BLEND_MODES_NORMAL && child.baseEffect.blendMode!==this.baseEffect.blendMode){
 			child.baseEffect.blendMode=this.baseEffect.blendMode;
 			child.effectChanged=true;
 		}

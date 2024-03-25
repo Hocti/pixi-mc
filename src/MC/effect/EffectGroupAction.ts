@@ -1,10 +1,11 @@
-import {BLEND_MODES} from '@pixi/constants';
-import { Filter } from '@pixi/core';
-import { ColorMatrix} from '@pixi/filter-color-matrix';
+import {BLEND_MODES} from 'pixi.js';
+import { Filter } from 'pixi.js';
+import { ColorMatrix} from 'pixi.js';
 
 import MCDisplayObject from '../display/MCDisplayObject';
 import ColorMatrixAction from './ColorMatrixAction';
 import MCEffect from './MCEffect';
+import {BLEND_MODES_NORMAL} from '../../utils/blendmode';
 
 export type EffectGroup = {
 	visible:boolean,
@@ -22,7 +23,7 @@ export class EffectGroupAction{
 			filters:[],
 			alpha:1,
 			//colorMatrix:ColorMatrixAction.create(),
-			blendMode:BLEND_MODES.NORMAL
+			blendMode:BLEND_MODES_NORMAL
 		}
 	}
 
@@ -65,7 +66,7 @@ export class EffectGroupAction{
 			filters:[..._effect1.filters,..._effect2.filters],//unique?
 			alpha:_effect1.alpha*_effect2.alpha,
 			colorMatrix:_effect1.colorMatrix&&_effect2.colorMatrix?ColorMatrixAction.multiply(_effect1.colorMatrix,_effect2.colorMatrix):(_effect1.colorMatrix?_effect1.colorMatrix:(_effect2.colorMatrix?_effect2.colorMatrix:undefined)),
-			blendMode:(_effect1.blendMode!==BLEND_MODES.NORMAL?_effect1.blendMode:_effect2.blendMode)
+			blendMode:(_effect1.blendMode!==BLEND_MODES_NORMAL?_effect1.blendMode:_effect2.blendMode)
 		}
 	}
 

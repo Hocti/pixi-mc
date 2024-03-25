@@ -1,6 +1,6 @@
-import {Matrix,Point} from '@pixi/math';
-import { Container,IDestroyOptions } from '@pixi/display';
-import {EventEmitter} from '@pixi/utils';
+import {Matrix,Point} from 'pixi.js';
+import { Container } from 'pixi.js';
+import {EventEmitter} from 'pixi.js';
 
 import {ColorMatrixAction,MCEffect,type EffectGroup,EffectGroupAction,ColorChange} from '../MC/effect';
 import {MCModel,MCLibrary,MCSymbolModel} from '../MC/model/';

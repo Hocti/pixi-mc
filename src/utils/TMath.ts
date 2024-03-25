@@ -1,4 +1,4 @@
-import {Matrix} from '@pixi/math';
+import {Matrix} from 'pixi.js';
 
 
 export function clamp(input:number,min:number,max:number):number{

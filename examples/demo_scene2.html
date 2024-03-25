@@ -58,7 +58,7 @@
 	<script>
 	//PIXI.utils.skipHello()
 
-	var path = 'media/FirenScene';
+	var path = 'media/testFrame';
 	var mcrect = new PIXI.Rectangle(550 / 2, 250 / 2, 550, 250);
 	var scenemc;
 	var app;
@@ -85,7 +85,7 @@
 		piximc.MCPlayer.getInstance().fps = 12;
 		
 
-		const arr=['031.wav','047.wav','ball_break.wav','bat_break.wav','bat_fly.wav','bat_laser.wav','bgm.wav','big.wav','boss1.mp3','burning.wav','guard.wav','ha.wav','little_attack.wav']//.map((v)=>`./${path}/${v}`)	
+		const arr=[];//'031.wav','047.wav','ball_break.wav','bat_break.wav','bat_fly.wav','bat_laser.wav','bgm.wav','big.wav','boss1.mp3','burning.wav','guard.wav','ha.wav','little_attack.wav']//.map((v)=>`./${path}/${v}`)	
 
 		var myMcLoader = piximc.MCLoader.autoLoadModel('./'+path+'/',1,arr).then( function (model) {
 			
@@ -94,26 +94,6 @@
 			scenemc.x = mcrect.x;
 			scenemc.y = mcrect.y;
 
-			//click to play
-			scenemc.getChildByName('scene1$init').getChildByName('btn_play').on('mousedown', ()=>{
-				scenemc.gotoSceneAndPlay(2,1)
-			});
-			scenemc.getChildByName('scene1$init').getChildByName('btn_play').on('touchstart', ()=>{
-				scenemc.gotoSceneAndPlay(2,1)
-			});
-
-			//add script
-			scenemc.getScene(5).timeline.addScript(5,function(){//frame number
-				console.log('at 5',this.timeline.currentFrame)
-			})
-
-			scenemc.getScene(5).timeline.addScript('supercombo',function(){//frame label
-				console.log('at supercombo',this.timeline.currentFrame)
-			})
-			scenemc.getScene(5).timeline.addScript('bomb',function(){//script remark
-				console.log('at bomb',this.timeline.currentFrame)
-				//scenemc.gotoSceneAndPlay(2,1)
-			})
 
 			//list scene
 			for(var k in scenemc.sceneName){
@@ -126,13 +106,13 @@
 			
 			PIXI.Ticker.shared.add(function (delta) {
 				$("#text").html(`
-					frame:${scenemc.sceneTimeline.currentFrame}
+					frame:${scenemc.timeline.currentFrame}
 					objc:${piximc.MC.totalMC }  objs:${piximc.ASI.totalASI}   remove:${piximc.MC.REMOVEMC}
-					countChildren:${piximc.MC.countChildren(scenemc)}	children:${scenemc.currSceneMC.children.length}
+					countChildren:${piximc.MC.countChildren(scenemc)}	children:${scenemc.children.length}
 					fps:${PIXI.Ticker.shared.FPS.toFixed(2)}`);
-				if (scenemc.sceneTimeline.isPlaying) {
-					$("#input_f").attr("max", scenemc.sceneTimeline.totalFrames);
-					$("#input_f").val(scenemc.sceneTimeline.currentFrame);
+				if (scenemc.timeline.isPlaying) {
+					$("#input_f").attr("max", scenemc.timeline.totalFrames);
+					$("#input_f").val(scenemc.timeline.currentFrame);
 				}
 
 				renderer.render(stage);
@@ -142,23 +122,23 @@
 
 		window.onkeydown = function (e) {
 			if (e.key == "ArrowRight") {
-				scenemc.sceneTimeline.nextFrame();
+				scenemc.timeline.nextFrame();
 			}
 			else if (e.key == "ArrowLeft") {
-				scenemc.sceneTimeline.prevFrame();
+				scenemc.timeline.prevFrame();
 			}
 		};
 		var whendown = false;
 		$("#input_f").change(function (e) {
-			scenemc.sceneTimeline.goto(Number($(this).val()));
+			scenemc.timeline.goto(Number($(this).val()));
 		});
 		$("#input_f").mousedown(function (e) {
-			whendown = scenemc.sceneTimeline.isPlaying;
-			scenemc.sceneTimeline.stop();
+			whendown = scenemc.timeline.isPlaying;
+			scenemc.timeline.stop();
 		});
 		$("#input_f").mouseup(function (e) {
 			if (whendown) {
-				scenemc.sceneTimeline.play();
+				scenemc.timeline.play();
 			}
 		});
 		$("input[value=fps]").click(function (e) {
@@ -166,19 +146,19 @@
 			console.log(piximc.MCPlayer.getInstance().fps)
 		});
 		$("input[value=goto]").click(function (e) {
-			scenemc.sceneTimeline.goto($("#jump_ip").val());
+			scenemc.timeline.goto($("#jump_ip").val());
 		});
 		$("input[value=play]").click(function (e) {
-			scenemc.sceneTimeline.play();
+			scenemc.timeline.play();
 		});
 		$("input[value=stop]").click(function (e) {
-			scenemc.sceneTimeline.stop();
+			scenemc.timeline.stop();
 		});
 		$("input[value=next]").click(function (e) {
-			scenemc.sceneTimeline.nextFrame();
+			scenemc.timeline.nextFrame();
 		});
 		$("input[value=prev]").click(function (e) {
-			scenemc.sceneTimeline.prevFrame();
+			scenemc.timeline.prevFrame();
 		});
 		$("input[value=next_scene]").click(function (e) {
 			scenemc.nextScene();

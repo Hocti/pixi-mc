@@ -24,7 +24,10 @@ export default class MCSprite extends MCDisplayObject implements IMCSprite{
         this.symbolModel=sm;
 
         this.asi=new ASI(sm.spriteModel!);
-        this.asi.transform.setFromMatrix(sm.spriteMatrix!.clone().append(sm.spriteModel!.matrix));
+        //this.asi.transform.setFromMatrix(sm.spriteMatrix!.clone().append(sm.spriteModel!.matrix));
+        const newMatrix=sm.spriteMatrix!.clone().append(sm.spriteModel!.matrix);
+        this.asi.setFromMatrix(newMatrix);
+        
         this.addChild(this.asi);
 
         this.asi.blendMode=sm.defaultBlendMode

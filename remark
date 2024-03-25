@@ -1,0 +1,43 @@
+	@pixi/mixin-get-child-by-name
+	@pixi/mixin-cache-as-bitmap
+	@pixi/events
+
+
+	localTransform
+
+
+cacheAsBitmap
+worldVisible
+
+
+
+ASI makeTexture
+
+
+	allBlendModes,BLEND_MODES_NORMAL
+
+
+
+
+	obj.filters=[...(obj.filters as Filter[]),filter]
+			//(obj.filters as Filter[]).push(filter);
+
+
+
+	Texture.fromBuffer
+
+
+
+
+
+
+
+
+
+
+
+
+
+***
+demo_scene.html,`final` scene,frame 13~16,firen disappear
+scenemc.children[0].children[1].visible=true

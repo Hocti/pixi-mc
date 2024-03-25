@@ -51,12 +51,17 @@ updated some filters to PixiJS  v7.2+ standard
 
 removed "FileList"
 
+## v3.0.0
+
+Moves to PixiJS  v8
+
 ### Versions Compatibility
 
 | PixiJS | pixi-mc |
 |---|---|
 | v5.x - v6.x | v1.0 |
 | v7.x | v2.1 |
+| v8.x | v3.0 |
 
 ## Code example
 

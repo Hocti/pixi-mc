@@ -1,4 +1,4 @@
-import {Matrix} from '@pixi/math';
+import {Matrix} from 'pixi.js';
 
 import {MC,MCOption,MCDisplayObject,IMCSprite} from '../MC/display/';
 import {layerData,rawInstenceData,childData} from '../MC/model/MCStructure';
@@ -6,7 +6,7 @@ import {MCSymbolModel} from '../MC/model/';
 import type {EffectGroup} from '../MC/effect/';
 
 import {MCReplacer,IreplacerDisplayObject,ReplacerResult} from './MCReplacer';
-import "@pixi/mixin-cache-as-bitmap";
+//import '@pixi/mixin-cache-as-bitmap';
 
 //extended MC, with replacer child and layer effect
 export default class MCEX extends MC implements IreplacerDisplayObject{
@@ -53,9 +53,9 @@ export default class MCEX extends MC implements IreplacerDisplayObject{
         
         //replace effect
         if(effect){
-            child.addEffect(effect,'replace');
+            child.addMCEffect(effect,'replace');
         }else{
-            child.removeEffect('replace')
+            child.removeMCEffect('replace')
         }
 
 		return [name,child,matrix];
@@ -67,7 +67,7 @@ export default class MCEX extends MC implements IreplacerDisplayObject{
         //console.log('onRenew',this.symbolModel.name)
         this.effectChanged=true;
         this.needRedraw=true;
-        this.cacheAsBitmap=false;
+        //this.cacheAsBitmap=false;
 
         //this.layerEffectUpdate=true;
     }
@@ -94,9 +94,9 @@ export default class MCEX extends MC implements IreplacerDisplayObject{
         const mdo:MCDisplayObject=super.showChild(obj,ly);
         //layer effect
         if(this.layerEffects[ly.name]){//(this.layerEffectUpdate || !mdo.extraEffects['layerEffect']) && 
-            mdo.addEffect(this.layerEffects[ly.name],'layerEffect')
+            mdo.addMCEffect(this.layerEffects[ly.name],'layerEffect')
         }else if(mdo.extraEffects['layerEffect'] && !this.layerEffects[ly.name]){
-            mdo.removeEffect('layerEffect')
+            mdo.removeMCEffect('layerEffect')
         }
 
         return mdo;

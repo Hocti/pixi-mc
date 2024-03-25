@@ -1,4 +1,4 @@
-import { Matrix } from "@pixi/math";
+import { Matrix } from 'pixi.js';
 
 import {ImultiMC,MCDisplayObject} from "../MC/display/";
 
@@ -101,7 +101,7 @@ export default class MCActor extends MCDisplayObject implements IreplacerDisplay
 
 		if(option){
 			if(option.matrix){
-				mc.transform.setFromMatrix(option.matrix);
+				mc.setFromMatrix(option.matrix);//*pixiv8
 			}
 		}
 
