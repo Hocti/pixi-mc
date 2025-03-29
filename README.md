@@ -268,6 +268,12 @@ You can add multi **MCSymbolModel** (with adding **action/phase remark** in fla 
 ### MCActorplayer:
 Play MCActor with List of Steps
 
+### MCSheet
+`MCSheet` is a wrapped `pixi.js` `AnimatedSprite`, used to load SpriteSheets generated from Adobe Animate, and added `timeline` function and `MCEffect` extended from `MC`. (MCSheet will sync playback timing with the global `MCPlayer`.)
+piximc can load `Sparrow v2`'s XML or `JSON` formats. Using `Sparrow v2` can retain the `pivot` position; otherwise, when using the JSON format, you need to include an empty frame somewhere in the timeline to provide the `pivot`.  
+1) Use `piximc.loadSpritesheet({json or xml path})` to load and return a `pixi.js SpriteSheet` object.  
+2) Use `new MCSheet({SpriteSheet Object})` to create a new `MCSheet`.  
+3) you can using `piximc.getSheet({json}).sheet` tp get the SpriteSheet Object cache which loaded in step 1
 
 # License
 

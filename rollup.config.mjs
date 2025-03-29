@@ -8,7 +8,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import esbuild from 'rollup-plugin-esbuild';
 import { dts } from "rollup-plugin-dts";
 
-import repo from "./package.json" assert { type: 'json' };
+import repo from "./package.json" with { type: "json" };
 
 const isProduction = process.env.NODE_ENV === 'production';
 

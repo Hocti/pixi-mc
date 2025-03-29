@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+	<script src="/node_modules/pixi.js/dist/pixi.min.js"></script>
+	<script src="/node_modules/pixi-filters/dist/pixi-filters.js"></script>
+	<script src="/node_modules/@pixi/sound/dist/pixi-sound.js"></script>
+	<script src="../dist/pixi-mc.js"></script>
+</head>
+<body>
+	<canvas id="maincanvas"></canvas>
+	<div id="box">
+		<div id="text"></div>
+		<input type="range" max="1" min="1" id='input_f'><br/>
+		<input type="button" value="play">
+		<input type="button" value="stop">
+		<input type="button" value="prev">
+		<input type="button" value="next">
+		<input type="button" value="first_frame">
+		<br/>
+		<select id="action_select"></select>
+		<input type="range" step ="0.001" max="0.1" min="0.001" id='action_speed'>
+		<input type="button" value="play_action">
+		<input type="button" value="stop_action">
+		<input type="button" value="actor_player">
+		<br/>
+		<input type="button" value="add rule" id="btn_rule">
+		<input type="button" value="add rule2" id="btn_rule2">
+
+		<input type="button" value="remove rule" id="btn_rule3">
+		<input type="button" value="remove rule2" id="btn_rule4">
+		<br/>
+		<input type="text" id="fps_ip" value="10"><input type="button" value="fps">
+		<br/>
+		<table id='catable'>
+			<tr>
+				<td>contrast</td>
+				<td><input type="range" value='0' step ="10" max="100" min="-100" id='input_contrast'></td>
+				<td class='v'></td>
+			</tr>
+			<tr>
+				<td>hue</td>
+				<td><input type="range" step ="10" max="180" min="-180" id='input_hue'></td>
+				<td class='v'></td>
+			</tr>
+			<tr>
+				<td>saturation</td>
+				<td><input type="range" step ="10" max="100" min="-100" id='input_saturation'></td>
+				<td class='v'></td>
+			</tr>
+			<tr>
+				<td>brightness</td>
+				<td><input type="range" step ="0.1" max="1" min="-1" id='input_brightness'></td>
+				<td class='v'></td>
+			</tr>
+		</table>
+		<table id='colortable'>
+			<tr>
+				<td>color</td>
+				<td><input type="color" id="favcolor" value="#ff0000"></td>
+				<td><input type="range" step ="0.1" max="1" min="0" id='input_color_p'></td>
+			</tr>
+		</table>
+		<td><input type="color" id="color2" value="#ff0000"></td>
+		
+	</div>
+	<style>
+		html,body{
+			margin: 0;padding: 0;
+			position: relative;
+			background-color: #ddd;
+		}
+		#box,#maincanvas{
+			position: absolute;
+		}
+		#maincanvas{
+			top: 0;
+		}
+		#box{
+			top: 600px;
+			color: red;
+		}
+		#input_f{
+			width: 450px;
+		}
+		input[type="text"]{
+			width: 50px;
+		}
+	</style>
+	<script>
+	var mcrect = new PIXI.Rectangle(0, 0, 600, 600);
+		let atr,aplayer;
+        let currMC,man_action,man_attack;
+
+
+	(async () => {
+		var app = new PIXI.Application();
+		globalThis.__PIXI_APP__ = app;
+		await app.init({
+			view: document.getElementById('maincanvas'),
+			width: mcrect.width,
+			height: mcrect.height,
+			backgroundColor: 0x000000,
+			backgroundAlpha: 0,
+		});
+
+
+		//piximc.MCPlayer.initTicker(app.ticker);
+		piximc.MCPlayer.getInstance().fps = 60;
+
+        const mc_list=['man_alt','man_attack','man_action'];
+        const ss_list=['jump'];
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+		const hairE=piximc.EffectGroupAction.create();
+		hairE.alpha=0.5
+		hairE.blendMode=7
+		const cc=new piximc.ColorChange();
+		cc.brightness=0.5
+		hairE.colorMatrix=cc.colorMatrix;
+
+
+			await piximc.MCLoader.loadModels(mc_list.map((k)=>'./media/'+k+'/'))
+			await piximc.MCLoader.autoLoadModel('./media/jump_mc/')
+			
+
+			//const spritesheet=await piximc.MCLoader.loadSpritesheet('./media/jump/star2.xml')
+			const spritesheet=await piximc.MCLoader.loadSpritesheet('./media/jump/jump.json','./media/jump/jump_mcData.json')
+// Generate all the Textures asynchronously
+
+//const ss1=new PIXI.Sprite(spritesheet.textures[0])
+
+
+
+console.log(spritesheet)
+//const ss1 = new piximc.MCSheet(spritesheet)
+const ss1 = new piximc.MCSheet(piximc.MCLibrary.getSheet('./media/jump/jump').sheet)
+
+
+app.stage.addChild(ss1);
+ss1.x=200
+ss1.y=300
+let robf=0
+
+$("input[value=next]").click(function (e) {
+	//console.log(ss1)
+	ss1.timeline.gotoAndStop(Math.min(ss1.timeline.currentFrame+1,ss1.timeline.totalFrames-1))
+	//ss1.nextFrame()
+});
+$("input[value=prev]").click(function (e) {
+	ss1.timeline.gotoAndStop(Math.max(0,ss1.timeline.currentFrame-1));
+});
+
+            
+            man_attack = new piximc.MCEX(piximc.MCLibrary.getSymbol('./media/man_attack/'))
+            man_attack.x=100;
+            man_attack.y=220;
+            man_attack.timeline.gotoAndStop(13)
+            //man_attack.timeline.stop()
+            app.stage.addChild(man_attack);
+			currMC=man_attack
+			
+
+			piximc.MCLibrary.getSymbol('./media/man_alt/','alt_part/face').defaultMatrix=piximc.TMath.compose2DMatrix(1/2.2,undefined,0,-1,-0.5)
+			/*
+			piximc.MCReplacer.addDefaultRule({
+					type:'symbol',
+					target:'self',
+				matchType:'name',
+				matchModelKey:'./media/man_alt/',
+				matchKey:'alt_part/face',
+				replaceMatrix:piximc.TMath.compose2DMatrix(1/2.2,undefined,0,-1,-0.5)
+			})
+			*/
+
+			piximc.MCReplacer.addRule({
+				matchType:'name',
+				matchModelKey:'./media/man_alt/',
+				matchKey:'alt_part/hair*',
+				replaceMatrix:piximc.TMath.compose2DMatrix(1,1.5)
+			})
+
+			/*
+			*/	
+			const rule12=[
+			{
+				target:'self',
+				type:'symbol',
+				matchType:'name',
+				matchKey:'man_part/chest',
+				replaceSymbol:piximc.MCLibrary.getSymbol('./media/man_action/','man_part/chest')
+			},{
+				target:'child',
+				matchType:'name',
+				matchKey:'man_part/*',
+				type:'symbol',
+
+				replaceModel:piximc.MCLibrary.get('./media/man_alt/'),
+				replaceKey:'alt_part/*'
+			}]
+			
+			const rule34=[{
+				target:'both',
+				matchType:'name',
+				matchKey:'left_*',
+				type:'layer',
+				effect:hairE
+			},{
+				target:'both',
+				matchType:'name',
+				matchKey:'man_part/right_fist',
+				type:'symbol',
+				replaceKey:'man_part/head'
+			}];
+		$("#btn_rule").click(function (e) {
+			man_attack.replacer.addRules(rule12)
+		})
+		$("#btn_rule2").click(function (e) {
+			man_attack.replacer.addRules(rule34)
+		})
+		$("#btn_rule3").click(function (e) {
+			man_attack.replacer.removeRules(rule12)
+		})
+		$("#btn_rule4").click(function (e) {
+			man_attack.replacer.removeRules(rule34)
+		})
+
+
+			//return
+
+            man_action = piximc.MCLibrary.get('./media/man_action/').makeInstance();
+            man_action.x=300;
+            man_action.y=250;
+            app.stage.addChild(man_action);
+            man_action.timeline.stop();
+			man_action.timeline.gotoAndStop(8)
+			/*
+            setTimeout(()=>{
+                const arm=app.stage.children[1].children[1]
+                console.log(arm.x,arm.y)
+            },1000)
+			*/
+            
+            //currMC=man_action
+
+			atr=new piximc.MCActor();
+
+			
+			atr.replacer.addRules([{
+				target:'child',
+				type:'symbol',
+				matchType:'name',
+				matchKey:'man_part/*',
+				replaceKey:'man_part/*',
+				matchModelKey:'./media/man_attack/',
+				replaceModel:piximc.MCLibrary.get('./media/man_action/'),
+			},
+			{
+				target:'child',
+				type:'symbol',
+				matchType:'name',
+				matchKey:'man_part/chest',
+				//matchModelKey:'./media/man_action/',
+				replaceSymbol:piximc.MCLibrary.getSymbol('./media/man_attack/','man_part/chest')
+			},{
+				target:'child',
+				matchType:'name',
+				matchKey:'man_part/*',
+				type:'symbol',
+
+				replaceModel:piximc.MCLibrary.get('./media/man_alt/'),
+				replaceKey:'alt_part/*'
+			},{
+				target:'both',
+				matchType:'name',
+				matchKey:'left_*',
+				type:'layer',
+				effect:hairE
+			}])
+
+			const atka=atr.addModel(piximc.MCLibrary.getSymbol('./media/man_attack/'))
+			atr.addModel(piximc.MCLibrary.getSymbol('./media/man_action/'))
+
+			atr.addSpritesheetByKey('./media/jump/jump')
+			atr.addModelByKey('./media/jump_mc/')
+
+			atka.replacer.addRules([{
+				target:'both',
+				matchType:'name',
+				matchKey:'man_part/right_fist',
+				type:'symbol',
+				replaceKey:'man_part/head'
+			}])
+
+
+			atr.x=100;
+			atr.y=400;
+			for(let k in atr.actionList){
+				$("#action_select").append(`<option value="${k}">${k}</option>`)
+			}
+			atr.showAction('punch','hold',0.5);
+			app.stage.addChild(atr)
+			aplayer=new piximc.MCActorPlayer(atr)
+
+            //currMC=atr
+			app.ticker.add(function (delta) {
+				if(currAct && playAct && atr){
+					currProgess=(currProgess+actionSpeed)%1
+					if(currAct==='jump'){
+
+						atr.showAction(currAct,'jump_front',currProgess);
+					}else{
+
+						atr.showAction(currAct,undefined,currProgess);
+					}
+				}
+			});
+			
+        })()
+
+		//player
+		window.onkeydown = function (e) {
+			if (e.key == ".") {
+				currMC.timeline.nextFrame();
+			}
+			else if (e.key == ",") {
+				currMC.timeline.prevFrame();
+			}
+		};
+		var whendown = false;
+		$("#input_f").change(function (e) {
+			currMC.timeline.goto(Number($(this).val()));
+		});
+		$("#input_f").mousedown(function (e) {
+			currMC.timeline.isPlaying;
+			currMC.timeline.stop();
+		});
+		$("#input_f").mouseup(function (e) {
+			if (whendown) {
+				currMC.timeline.play();
+			}
+		});
+		$("input[value=fps]").click(function (e) {
+			piximc.MCPlayer.getInstance().fps = Number($("#fps_ip").val());
+		});
+		$("input[value=goto]").click(function (e) {
+			currMC.timeline.goto($("#jump_ip").val());
+		});
+		$("input[value=play]").click(function (e) {
+			currMC.timeline.play();
+		});
+		$("input[value=stop]").click(function (e) {
+			currMC.timeline.stop();
+		});
+		/*
+		$("input[value=next]").click(function (e) {
+			currMC.timeline.nextFrame();
+		});
+		$("input[value=prev]").click(function (e) {
+			currMC.timeline.prevFrame();
+		});
+		*/
+		$("input[value=first_frame]").click(function (e) {
+			currMC.timeline.goto(1);
+		});
+		
+
+		let currAct=null;
+		let playAct=true;
+		let actionSpeed=0;
+		let currProgess=0;
+		$("#action_select").change(function (e) {
+			currAct=$(this).val()
+			currProgess=0;
+			atr.showAction(currAct,undefined,currProgess);
+		});
+		$("input[value=play_action]").click(function (e) {
+			playAct=true;
+		});
+		$("input[value=stop_action]").click(function (e) {
+			playAct=false;
+		});
+
+		$("#action_speed").change(function (e) {
+			actionSpeed=Number($(this).val())
+		});
+
+		
+		$("input[value=actor_player]").click(function (e) {
+			aplayer.play([{action:'punch',time:3},{action:'start_walk',time:4},{action:'walk',time:4}])
+		});
+
+		//color change
+		$("#catable input").change(function (e) {
+			let m=piximc.ColorMatrixAction.create();
+			$("#catable input").each((k,e)=>{
+				let n=$(e).attr('id').substr(6);
+				let v=Number($(e).val())
+				$(e).parent().parent().find('.v').html(v)
+
+				let newMatrix=piximc.ColorMatrixAction[n](v);
+
+				m=piximc.ColorMatrixAction.multiply(m,newMatrix)
+			})
+			piximc.MCEffect.setColorMatrix(currMC,m)
+			
+		});
+		
+		$("#colortable input").change(function (e) {
+			let c=$("#favcolor").val();
+			let p=Number($("#input_color_p").val())
+			let m=piximc.ColorMatrixAction.tint(c,p)
+			piximc.MCEffect.setColorMatrix(currMC,m)
+		});
+		$("#color2").change(function (e) {
+			let c=$("#color2").val();
+			let m=piximc.ColorMatrixAction.tintOver(c)
+			piximc.MCEffect.setColorMatrix(currMC,m)
+		});
+
+	</script>
+</body>
+</html>

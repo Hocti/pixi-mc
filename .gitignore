@@ -139,3 +139,5 @@ todo.txt
 
 package-lock.json
 yarn.lock
+examples/media/jump/*
+examples/media/jump_mc/*

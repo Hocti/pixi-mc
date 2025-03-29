@@ -18,6 +18,23 @@ FirenScene/ha.wav	13958	1657742375
 FirenScene/little_attack.wav	23694	1657742375
 FirenScene/spritemap1.json	29602	1658555582
 FirenScene/spritemap1.png	3069447	1658555582
+jump/actions.json	1014	1722409729
+jump/Animation.json	6704	1723475162
+jump/jump.json	9150	1723224670
+jump/jump.png	202654	1722412568
+jump/jump2.json	9226	1723447743
+jump/jump_json.json	999	1723449842
+jump/jump_json.png	22675	1723449271
+jump/jump_mcData - Copy.json	1014	1722409729
+jump/jump_mcData.json	1014	1722409729
+jump/spritemap1.json	3357	1723475162
+jump/spritemap1.png	215554	1723475162
+jump/star2.png	217727	1723197428
+jump/star2.xml	6167	1723197428
+jump_mc/actions.json	1014	1722409729
+jump_mc/Animation.json	6704	1723475162
+jump_mc/spritemap1.json	3357	1723475162
+jump_mc/spritemap1.png	215554	1723475162
 man_action/Animation.json	224530	1658555582
 man_action/spritemap1.json	4721	1658555582
 man_action/spritemap1.png	128519	1658555582
@@ -28,6 +45,6 @@ man_attack/Animation.json	116157	1658555582
 man_attack/spritemap1.json	2416	1658555582
 man_attack/spritemap1.png	35940	1658555582
 spritemap1.json	29602	1702097944
-testFrame/Animation.json	2563	1710265613
-testFrame/spritemap1.json	494	1710265613
-testFrame/spritemap1.png	68578	1710265613
+testFrame/Animation.json	6439	1711346288
+testFrame/spritemap1.json	570	1711346288
+testFrame/spritemap1.png	75677	1711346288

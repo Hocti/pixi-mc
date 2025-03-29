@@ -36,7 +36,6 @@ export default class MCActorPlayer extends EventEmitter{
         this.nextStep();
     }
 
-
     public stop(){
         this.storedSteps=[];
         this.currentStep=undefined;
