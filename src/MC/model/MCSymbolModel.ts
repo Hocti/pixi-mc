@@ -187,13 +187,6 @@ export default class MCSymbolModel {
 		}else if(type==='blendMode'){
 			const bName:string=(args[0].toUpperCase());
 			this.defaultBlendMode=bName as BLEND_MODES;//*pixiv8
-			/*
-			if(bName in allBlendModes){
-				this.defaultBlendMode=Object.values(allBlendModes).indexOf(bName)
-				//console.log(2,type,args,this.defaultBlendMode)
-				//BLEND_MODES[bName]
-			}
-			*/
 		}else if(type==='stopAtEnd'){
 			this.defaultStopAtEnd=true;
 		}else if(type==='hideAtStart'){

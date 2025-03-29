@@ -5,7 +5,7 @@ export {MCEffect,ColorMatrixAction,ColorChange,type EffectGroup,EffectGroupActio
 
 export * as TMath from './utils/TMath';
 
-export {MCDisplayObject,ASI,MC,MCScene,MCSprite} from './MC/display';
+export {MCDisplayObject,ASI,MC,MCScene,MCSprite,MCSheet} from './MC/display';
 export {MCPlayer,MCTimeline} from './MC/player';
 export {MCLoader,MCLibrary,MCSymbolModel,MCModel,MCStructure} from './MC/model';
 

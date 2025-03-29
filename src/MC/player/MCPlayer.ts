@@ -1,5 +1,6 @@
 import {Ticker} from 'pixi.js';
-import {MC} from '../display';
+//import {MC} from '../display';
+import type IMCwithTimeline from '../display/IMCwithTimeline';
 
 export default class MCPlayer {
 
@@ -43,7 +44,7 @@ export default class MCPlayer {
 
 	private realFloatFrame:number=1;
 
-	private mcList:MC[]=[];
+	private mcList:IMCwithTimeline[]=[];
 
 	private enterTick(ticker:Ticker) {//* delta=f in 60fps
 		const delta:number=ticker.deltaTime; //number
@@ -81,7 +82,7 @@ export default class MCPlayer {
 
 	public fps:number=0;
 
-	public addMC(mc:MC){
+	public addMC(mc:IMCwithTimeline){
 		this.mcList.push(mc)
 	}
 }

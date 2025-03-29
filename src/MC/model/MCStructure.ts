@@ -178,7 +178,8 @@ export enum MCType{
 	Button='B',
 	Graphic='G',
 	ASI='asi',//not in raw
-	Sprite='Sprite'//not in raw
+	Sprite='Sprite',//not in raw
+	SpriteSheet='SpriteSheet'//not in raw
 }
 
 export type m3d=[number, ...Array<number>] & {length: 16};
@@ -255,3 +256,55 @@ export type filterData={
 		H: number
 	}
 };
+
+//sprite and action===================
+
+export type SpriteSheetData={
+	frames: Record<string,{
+		filename?:string,
+		frame: {
+			x:number,
+			y:number,
+			w:number,
+			h:number
+		},
+		spriteSourceSize: {
+			x:number,
+			y:number,
+			w:number,
+			h:number
+		},
+		rotated: boolean,
+		trimmed: boolean,
+		sourceSize: {
+			w:number,
+			h:number
+		},
+		anchor?:{
+			x:number,
+			y:number
+		}
+	}>,//[],
+	meta: {
+		image: string,
+		format?: string,
+		size?: {w:number,h:number},
+		scale: number|string
+	},
+	animation?:Record<string,string[]>,
+	actions?:Record<string,ActionDetail>
+}
+type frameRange={
+	startFrame:number,
+	endFrame:number,
+	loop?:boolean
+}
+/*
+type ActionDetail=frameRange & {
+	phase?:Record<string,frameRange>,
+}
+	*/
+export type ActionDetail={
+	phase?:Record<string,frameRange>,
+	range:frameRange
+}

@@ -130,8 +130,8 @@
 			await piximc.MCLoader.autoLoadModel('./media/jump_mc/')
 			
 
-			//const spritesheet=await piximc.MCLoader.loadSpritesheet('./media/jump/star2.xml')
-			const spritesheet=await piximc.MCLoader.loadSpritesheet('./media/jump/jump.json','./media/jump/jump_mcData.json')
+			//const spritesheet=await piximc.MCLoader.loadSpriteSheet('./media/jump/star2.xml')
+			const spritesheet=await piximc.MCLoader.loadSpriteSheet('./media/jump/jump.json','./media/jump/jump_mcData.json')
 // Generate all the Textures asynchronously
 
 //const ss1=new PIXI.Sprite(spritesheet.textures[0])
@@ -287,7 +287,7 @@ $("input[value=prev]").click(function (e) {
 			const atka=atr.addModel(piximc.MCLibrary.getSymbol('./media/man_attack/'))
 			atr.addModel(piximc.MCLibrary.getSymbol('./media/man_action/'))
 
-			atr.addSpritesheetByKey('./media/jump/jump')
+			atr.addSpriteSheetByKey('./media/jump/jump')
 			atr.addModelByKey('./media/jump_mc/')
 
 			atka.replacer.addRules([{

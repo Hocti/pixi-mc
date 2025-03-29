@@ -1,12 +1,19 @@
-import { Matrix } from 'pixi.js';
+import { Matrix , SpriteSheet } from 'pixi.js';
 
 import {ImultiMC,MCDisplayObject} from "../MC/display/";
 
 import MCSymbolModel from '../MC/model/MCSymbolModel';
 import * as TMath from '../utils/TMath';
 
+import type IMCwithTimeline from '../MC/display/IMCwithTimeline';
 import MCEX from './MCEX';
 import {IreplacerDisplayObject,MCReplacer} from './MCReplacer';
+
+
+import {ActionDetail} from '../MC/model/MCStructure';
+import MCLibrary from '../MC/model/MCLibrary';
+import MCSheet from '../MC/display/MCSheet';
+
 
 export type Action={
 	mcID:uint,
@@ -22,6 +29,14 @@ export type ActionPhase={
 	frame_end:uint
 }
 
+type addActionOption={
+	replaceSame?:boolean,
+	matrix?:Matrix,
+	includeActions?:string[],
+	excludeActions?:string[],
+	prefix?:string
+}
+
 /*
 adding multi MCEX with action,combine as one MCActor.
 MCActor won't play itself, but you can use showAction to jump to the progess of the action with phase support.
@@ -29,27 +44,78 @@ you Game Engine have to control the progress of the action by showAction each fr
 
 If you just want to play the animation with specific frame range, you can use LabelMC.
 */
-export default class MCActor extends MCDisplayObject implements IreplacerDisplayObject,ImultiMC{
+export default class MCActor extends MCDisplayObject implements IreplacerDisplayObject{
 
 	private actionList:Record<string,Action>={};
-	private mcList:MCEX[]=[];
+	private mcList:IMCwithTimeline[]=[];
+	private isMcexType:boolean[]=[];
 
 	private currentMCID:int=-1;
 
-	public get currentMC():MCEX | undefined{
-		return this.mcList[this.currentMCID];
+	public get currentMC():IMCwithTimeline | undefined{
+		return this.mcList[this.currentMCID]
 	}
 
-	public addModel(symbolModel:MCSymbolModel,option?:{
-			replaceSame?:boolean,
-			matrix?:Matrix,
-			includeActions?:string[],
-			excludeActions?:string[],
-			prefix?:string
-		}):MCEX{
+	protected actionsToList(mcID:uint,actions:Record<string,ActionDetail>):void{
+		for(const actionName in actions){
+			let action=actions[actionName];
+			let phases:Record<string,ActionPhase>={}
+			let phaseOrder:string[]=[]
+			if(action.phase){
+				for(const phaseName in action.phase){
+					const phase=action.phase[phaseName];
+					phases[phaseName]={
+						name:phaseName,
+						frame_begin:phase.startFrame+1,
+						frame_end:phase.endFrame
+					}
+					phaseOrder.push(phaseName)
+				}
+			}
+			this.actionList[actionName]={
+				mcID,
+				name:actionName,
+				phases,
+				phaseOrder,
+				frame_begin:action.range.startFrame+1,
+				frame_end:action.range.endFrame
+			}
+		}
+	}
+
+	public addSpriteSheetByKey(key:string){
+		const {sheet,actions}=MCLibrary.getSheet(key,true);
+		this.addSpriteSheet(sheet,actions!);
+	}
+
+	public addSpriteSheet(sheet:SpriteSheet,actions:Record<string,ActionDetail>){
+		const mc:MCSheet=new MCSheet(sheet);
+		const mcID:uint=this.mcList.length;
+		this.mcList.push(mc);
+		this.isMcexType.push(false);
+		this.actionsToList(mcID,actions);
+		return mc;
+	}
+
+	public addModelByKey(key:string){
+		const {symModel,actions}=MCLibrary.getSymbolWithAction(key);
+		this.addModelWithActions(symModel,actions!);
+	}
+
+	public addModelWithActions(symbolModel:MCSymbolModel,actions:Record<string,ActionDetail>){
 		const mc:MCEX=new MCEX(symbolModel);
 		const mcID:uint=this.mcList.length;
 		this.mcList.push(mc);
+		this.isMcexType[mcID]=false;
+		this.actionsToList(mcID,actions);
+		return mc;
+	}
+
+	public addModel(symbolModel:MCSymbolModel,option?:addActionOption):MCEX{
+		const mc:MCEX=new MCEX(symbolModel);
+		const mcID:uint=this.mcList.length;
+		this.mcList.push(mc);
+		this.isMcexType.push(true);
 		
 		let firstAction:string | null | undefined;
 		if(symbolModel.extraRemarks['action']){
@@ -113,6 +179,13 @@ export default class MCActor extends MCDisplayObject implements IreplacerDisplay
 		return mc
 	}
 
+	/*
+	public addAction(actionName:string,phaseName?:string,progress:number=0):void{//,halfFrame:boolean=false
+		this.actionList[actionName]={}
+		
+	}
+	*/
+
 	public showAction(actionName:string,phaseName?:string,progress:number=0):void{//,halfFrame:boolean=false
 		progress=TMath.clamp(progress,0,1);
 		const action=this.actionList[actionName];
@@ -146,8 +219,10 @@ export default class MCActor extends MCDisplayObject implements IreplacerDisplay
 		}
 
 		this.mcList[this.currentMCID].timeline.gotoAndStop(Math.round(targetFrameFloat));
-		
 		/*
+		if(actionName==='jump'){
+			console.log(Math.round(targetFrameFloat))
+		}
 		if(halfFrame){
 			//TODO
 			//this.mcList[this.currentMCID].showFloatFrame(targetFrameFloat);
@@ -201,6 +276,8 @@ export default class MCActor extends MCDisplayObject implements IreplacerDisplay
     public replacer:MCReplacer=new MCReplacer(this);
 
     public onRenew():void{
-		this.currentMC?.onRenew();
+		if(this.currentMC && this.isMcexType[this.currentMCID]){
+			(this.currentMC as MCEX).onRenew();
+		}
     }
 }

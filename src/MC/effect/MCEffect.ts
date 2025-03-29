@@ -2,7 +2,7 @@ import { Filter } from 'pixi.js';
 
 import { BlurFilter } from 'pixi.js';
 import { ColorMatrixFilter,ColorMatrix} from 'pixi.js';
-import {BevelFilter,DropShadowFilter,GlowFilter,GlowFilterOptions,MultiColorReplaceFilter} from 'pixi-filters';
+import {BevelFilter,DropShadowFilter,GlowFilter,GlowFilterOptions,MultiColorReplaceFilter,MultiColorReplaceFilterOptions} from 'pixi-filters';
 
 import * as Color from '../../utils/color';
 import {checkArrayEqual} from '../../utils/utils'
@@ -147,7 +147,11 @@ export default class MCEffect {
 		}
 		//console.log(tintArray)
 		if(!obj.filtercache['multiTint']){
-			obj.filtercache['multiTint']=new MultiColorReplaceFilter(tintArray,epsilon,tintArray.length);
+			//obj.filtercache['multiTint']=new MultiColorReplaceFilter(tintArray,epsilon,tintArray.length);
+			obj.filtercache['multiTint']=new MultiColorReplaceFilter({
+				replacements:tintArray,
+				tolerance:epsilon,
+				maxColor:tintArray.length} as MultiColorReplaceFilterOptions);
 		}else{
 			(<MultiColorReplaceFilter>obj.filtercache['multiTint']).replacements=tintArray;
 			(<MultiColorReplaceFilter>obj.filtercache['multiTint']).epsilon=epsilon;

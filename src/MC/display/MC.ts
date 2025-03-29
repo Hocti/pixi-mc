@@ -13,6 +13,7 @@ import * as TMath from '../../utils/TMath';
 import MCDisplayObject from './MCDisplayObject';
 import MCSprite from './MCSprite';
 import type IMCSprite from './IMCSprite';
+import type IMCwithTimeline from './IMCwithTimeline';
 import {BLEND_MODES_NORMAL} from '../../utils/blendmode';
 
 
@@ -20,7 +21,7 @@ export type MCOption={
 	player?:MCPlayer
 }
 
-export default class MC extends MCDisplayObject implements IMCSprite{
+export default class MC extends MCDisplayObject implements IMCSprite,IMCwithTimeline{
 
 	//for debug
 	public static totalMC:uint=0;
@@ -164,21 +165,30 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 			}
 		}
 	}
+	public getTotalFrames():uint{
+		return this.symbolModel.totalFrames;
+	}
 	*/
 
 	//show frame
 
-	protected needRedraw:boolean=false;
+	protected needRedraw:boolean=true;
+
 
 	public showFrame(frame:uint):void{
 		this.showEffect();
 		
 		//only update contain when frame changed
 		frame=TMath.clamp(frame,1,this.timeline.totalFrames)
+		if(this.timeline.totalFrames===1 && !this.needRedraw){
+			return;
+		}
 		if(this.needRedraw){
 			this.needRedraw=false;
 		}//else if(this.currShowingFrame === frame)return;
 		this.currShowingFrame = frame;
+
+
 		
 
 		const currFrameData:frameData=this.symbolModel.getFrame(this.currShowingFrame);
@@ -402,4 +412,35 @@ export default class MC extends MCDisplayObject implements IMCSprite{
 		}
 		return undefined;
 	}
+
+	//timeline shortt cut
+
+	public play():void{
+		this.timeline.play();
+	}
+	public stop():void{
+		this.timeline.stop();
+	}
+	public gotoAndPlay(frame:uint):void{
+		this.timeline.gotoAndPlay(frame);
+	}
+	public gotoAndStop(frame:uint):void{
+		this.timeline.gotoAndStop(frame);
+	}
+	public nextFrame():void{
+		this.timeline.nextFrame();
+	}
+	public prevFrame():void{
+		this.timeline.prevFrame();
+	}
+	public get currentFrame():uint{
+		return this.timeline.currentFrame;
+	}
+	public get totalFrames():uint{
+		return this.timeline.totalFrames;
+	}
+	public get isPlaying():boolean{
+		return this.timeline.isPlaying;
+	}
+
 }
